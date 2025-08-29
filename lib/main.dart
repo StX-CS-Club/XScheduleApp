@@ -38,7 +38,7 @@ Future<void> init() async {
   ScheduleDirectory.readStoredSchedule();
 
   // Reads the various data from local json files asynchronously
-  GitHub.loadGithubJson();
+  //GitHub.loadGithubJson();
   Credits.loadCreditsJson();
   await RSS.loadRSSJson();
 

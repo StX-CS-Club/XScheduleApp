@@ -52,16 +52,18 @@ class RSS {
         // RegExp used for decoding schedule
         final RegExp regexp = RegExp(
           r"""(?:""" // Establishes an OR condition
-          r"""_\s*([A-Za-z0-9\- ]*?[A-Za-z0-9])\s*_""" // Group 1: Portion of any length containing and ending with only alphanumeric characters, surrounded with line skips, or...
+          r"""_\s*([A-Za-z0-9\- *]*?[A-Za-z0-9])\s*_""" // Group 1: allows '*', still ends with alnum
           r"""|\s*""" // Portion of preceding white space.
-          r"""([A-Za-z0-9\- ]*?[A-Za-z0-9])""" // Group 2: Portion of any length containing and ending with only alphanumeric characters (i.e. A, HR, Flex 1)
+          r"""([A-Za-z0-9\- *]*?[A-Za-z0-9])""" // Group 2: allows '*', still ends with alnum (i.e. A, HR, Flex 1, *Cafeteria Open)
           r"""[\s\-–—−:]*""" // Portion of white space, dashes, and/or colons.
-          r"""(\d{1,2}:\d{2})""" // Group 3: Portion of text in following formats : H:MM or HH:MM (i.e. 7:30, 3:05)
+          r"""(\d{1,2}:\d{2})""" // Group 3: H:MM or HH:MM (i.e. 7:30, 3:05)
           r"""[\s\-–—−:]*""" // Portion of white space, dashes, and/or colons.
-          r"""(\d{1,2}:\d{2})?""" // Group 4: Optional portion of text in following formats : H:MM or HH:MM (i.e. 7:30, 3:05)
+          r"""(\d{1,2}:\d{2})?""" // Group 4: Optional H:MM or HH:MM
           r""")""",
           multiLine: true,
         );
+
+
 
         // Gets the calendar data as a list from the iCalendar
         final List<Map<String, dynamic>> calSchedules = iCalendar.data;
@@ -90,13 +92,15 @@ class RSS {
             for (RegExpMatch match in regexp.allMatches(rawSchedule)) {
               // Title of bell
               String title = match.group(1) ?? match.group(2)!;
-              // If title is int, specify as Flex bell
-              if (int.tryParse(title) != null) {
-                title = 'FLEX $title';
+              if(!title.contains("*")){
+                // If title is int, specify as Flex bell
+                if (int.tryParse(title) != null) {
+                  title = 'FLEX $title';
+                }
+                titles.add(title);
+                starts.add(match.group(3));
+                ends.add(match.group(4));
               }
-              titles.add(title);
-              starts.add(match.group(3));
-              ends.add(match.group(4));
             }
             if (titles.isNotEmpty) {
               starts[0] ??= "8:00";

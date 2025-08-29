@@ -84,9 +84,7 @@ flutter:
     - assets/images/xschedule_small.png
     - assets/images/x_building.jpg
     - assets/data/credits.json
-    - assets/data/github.json
     - assets/data/rss.json
-    - assets/data/supabase.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
