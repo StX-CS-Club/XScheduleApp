@@ -1,11 +1,13 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:xschedule/global/static_content/extensions/build_context_extension.dart';
 import 'package:xschedule/global/static_content/extensions/widget_extension.dart';
 
 import '../../../global/dynamic_content/backend/schedule_directory.dart';
 import '../../../global/dynamic_content/clock.dart';
-import '../../schedule.dart';
 import '../../../global/static_content/extensions/color_extension.dart';
+import '../../schedule.dart';
 import '../schedule_display.dart';
 import 'bell_info.dart';
 
@@ -14,11 +16,13 @@ class BellTile extends StatelessWidget {
       {super.key,
       required this.date,
       required this.bell,
-      required this.minuteHeight});
+      required this.minuteHeight,
+      this.index});
 
   final DateTime date;
   final String bell;
   final double minuteHeight;
+  final int? index;
 
   // Provides the tutorial ID of a given bell of a given date
   static String _tutorial(final DateTime date, final String bell) {
@@ -75,6 +79,7 @@ class BellTile extends StatelessWidget {
     // Height of bell base don start and end times
     final double height =
         minuteHeight * times['end']!.difference(times['start']!).abs();
+    final double radius = min(height * 3 / 7 - 5, mediaQuery.size.width / 6);
     // Margin from top of schedule based on start time
     final double margin =
         times['start']!.difference(Clock(hours: 8)).abs() * minuteHeight;
@@ -91,7 +96,8 @@ class BellTile extends StatelessWidget {
         height: height,
         margin: EdgeInsets.only(top: margin),
         // Transparent background matching vanity color
-        color: color.withAlpha(40),
+        color:
+            (index ?? 1) % 2 == 0 ? color.withAlpha(64) : color.withAlpha(40),
         // Tile contents wrapped in Showcase
         child: InkWell(
           // When Tile is tapped, will display popup with more info
@@ -114,19 +120,18 @@ class BellTile extends StatelessWidget {
                 if (!veryDense)
                   CircleAvatar(
                     backgroundColor: Colors.black.withValues(alpha: .2),
-                    radius: height * 3 / 7 - 5,
+                    radius: radius,
                     child: Text(
                       // If no emoji set in settings, displays default book emoji
                       vanity['emoji'] ?? '📚',
                       style: TextStyle(
-                          fontSize: height * 3 / 7,
-                          color: colorScheme.onSurface),
+                          fontSize: radius + 10, color: colorScheme.onSurface),
                     ).fit(),
                   ),
                 // Text (with line skips) wrapped in FittedBox
                 Container(
                   margin: const EdgeInsets.only(left: 8),
-                  width: mediaQuery.size.width - 136 - (height * 6 / 7 - 10),
+                  width: mediaQuery.size.width - 136 - radius * 2,
                   alignment: Alignment.centerLeft,
                   // Column of expanded components (name and time range)
                   child: Column(
@@ -136,7 +141,8 @@ class BellTile extends StatelessWidget {
                       Expanded(
                           child: Container(
                         // Forces close to second row
-                        alignment: dense ? Alignment.centerLeft : Alignment.bottomLeft,
+                        alignment:
+                            dense ? Alignment.centerLeft : Alignment.bottomLeft,
                         child: Text(
                           // If there won't be room for time range line, include it in this line
                           '${(vanity['name'] ?? bell) ?? ''}$suffix${dense ? ':     $timeRange' : ''}',

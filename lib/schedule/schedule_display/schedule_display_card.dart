@@ -91,7 +91,8 @@ class ScheduleDisplayCard extends StatelessWidget {
                           return BellTile(
                               date: date,
                               bell: key,
-                              minuteHeight: minuteHeight);
+                              minuteHeight: minuteHeight,
+                          index: i);
                         }),
                       ),
                     )),

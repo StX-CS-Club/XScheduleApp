@@ -2,6 +2,8 @@
   * schedule_info_display.dart *
   StatelessWidget of a popup which displays the daily information of a given date from the database.
 */
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:xschedule/global/dynamic_content/backend/rss.dart';
 import 'package:xschedule/global/dynamic_content/backend/schedule_directory.dart';
@@ -41,7 +43,7 @@ class ScheduleInfoDisplay extends StatelessWidget {
     // Returns dailyInfo popup
     return PopupMenu(
         child: SizedBox(
-      width: mediaQuery.size.width * .9,
+      width: min(mediaQuery.size.width * .9, 500),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

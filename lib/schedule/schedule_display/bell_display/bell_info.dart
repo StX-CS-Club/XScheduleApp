@@ -135,6 +135,7 @@ class BellInfo extends StatelessWidget {
                       //Bottom 'Row'; Displays bell name and time range
                       Container(
                           height: 40,
+                          width: width * 4 / 5 - 40,
                           padding: const EdgeInsets.only(left: 12.5),
                           alignment: Alignment.centerLeft,
                           child: Text(
