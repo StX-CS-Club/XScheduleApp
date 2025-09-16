@@ -104,7 +104,7 @@ class _ScheduleDisplayState extends State<ScheduleDisplay> {
             break;
           }
           if (ScheduleDirectory.readSchedule(
-              ScheduleDisplay.initialDate.addDay(-index))
+                  ScheduleDisplay.initialDate.addDay(-index))
               .containsClasses(tutorial: true)) {
             index = -index;
             break;
@@ -120,7 +120,8 @@ class _ScheduleDisplayState extends State<ScheduleDisplay> {
           });
         }
       } else {
-        int index = ScheduleDisplay.tutorialDate!.day - ScheduleDisplay.initialDate.day;
+        int index =
+            ScheduleDisplay.tutorialDate!.day - ScheduleDisplay.initialDate.day;
         // if animation needs to occur, run it and end
         if (index != ScheduleDisplay.pageIndex) {
           // Set pageIndex to determined index, then animate page
@@ -440,12 +441,14 @@ class _ScheduleDisplayState extends State<ScheduleDisplay> {
     context.pushPopup(
         CalendarNavigation(
             initialDate: ScheduleDisplay.initialDate,
-            currentDate: ScheduleDisplay.initialDate.addDay(ScheduleDisplay.pageIndex),
+            currentDate:
+                ScheduleDisplay.initialDate.addDay(ScheduleDisplay.pageIndex),
             onSelect: (date) {
               final int change = ScheduleDisplay.initialDate
                   .addDay(ScheduleDisplay.pageIndex)
                   .difference(date)
                   .inDays;
+              ScheduleDisplay.pageIndex -= change;
 
               _controller.animateToPage(_controller.page!.round() - change,
                   duration:

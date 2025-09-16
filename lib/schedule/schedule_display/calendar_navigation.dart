@@ -23,12 +23,13 @@ class CalendarNavigation extends StatefulWidget {
 class _CalendarNavigationState extends State<CalendarNavigation> {
   late int monthIndex;
 
-  final PageController _controller = PageController(initialPage: 18);
+  late PageController _controller;
 
   @override
   void initState() {
     super.initState();
     monthIndex = widget.currentDate.monthDiff(widget.initialDate);
+    _controller = PageController(initialPage: 18+monthIndex);
   }
 
   void _setPage(int page) {
@@ -51,6 +52,7 @@ class _CalendarNavigationState extends State<CalendarNavigation> {
     final double height = mediaQuery.size.width * 24 / 35;
     final double width = mediaQuery.size.width * 4 / 5;
 
+    print(monthIndex);
     DateTime newMonth = DateTime(
         widget.initialDate.year, widget.initialDate.month + monthIndex);
     // Popup of fixed size card aligned at center
@@ -190,6 +192,7 @@ class _CalendarNavigationState extends State<CalendarNavigation> {
               // Pops popup and animates schedule to selected date
                 onTap: () {
                   Navigator.pop(context);
+                  print(dotDate.toString());
                   widget.onSelect(dotDate);
                 },
                 // Date Dot
