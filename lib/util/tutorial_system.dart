@@ -4,98 +4,145 @@ import 'package:localstorage/localstorage.dart';
 import 'package:showcaseview/showcaseview.dart';
 import 'package:xschedule/materials/styled_button.dart';
 
+/// Manages a set of sequential [Showcase] tutorial steps for a given screen or feature.
+///
+/// Responsibilities:
+/// - Generating and managing [GlobalKey]s for each tutorial step
+/// - Building [Showcase] widgets with consistent styling and tap-progression behaviour
+/// - Persisting and querying tutorial completion state via [localStorage]
+/// - Starting, refreshing, and resetting the tutorial sequence
+/// - Simulating screen taps to advance the showcase programmatically
 class TutorialSystem {
-  // Constructor
+  /// Creates a [TutorialSystem] for the given [tutorials] map.
+  ///
+  /// Generates a [GlobalKey] for each tutorial ID on construction.
+  /// Sets [finished] to `true` immediately if [tutorials] is empty.
+  ///
+  /// Parameters:
+  /// - [tutorials]: A map of tutorial ID to description text; required
   TutorialSystem(this.tutorials) {
-    // Generates GlobalKeys for each tutorial key
+    // Generates a GlobalKey for each tutorial ID into the [keys] map
     generateKeys(tutorials.keys.toSet(), reference: keys);
-    // If no tutorial exists, mark as finished
+    // If no tutorials were provided, mark the system as already finished
     finished = keys.isEmpty;
   }
 
-  /// Map of tutorials provided (&lt;id, text>)
+  /// The tutorial steps managed by this system, keyed by tutorial ID.
+  ///
+  /// Each value is the description text displayed in the [Showcase] tooltip.
+  /// The value type is `Map<id, description text>`.
   final Map<String, String> tutorials;
 
-  /// Map of GlobalKeys per id (&lt;id, GlobalKey>)
+  /// The [GlobalKey] assigned to each tutorial step, keyed by tutorial ID.
+  ///
+  /// Keys are generated in [generateKeys] and consumed by [Showcase] widgets
+  /// to identify their target widgets in the tree.
+  /// The value type is `Map<id, GlobalKey>`.
   final Map<String, GlobalKey> keys = {};
 
-  /// If the system is marked as finished (tutorial complete)
+  /// Whether this tutorial system has been marked as complete.
+  ///
+  /// Set to `true` when [keys] is empty (no remaining steps) or when [finish] is called.
+  /// Set back to `false` when [set] is called with new tutorials.
   bool finished = false;
 
-  /// Re-generates GlobalKeys for each tutorial event
+  /// Generates a fresh [GlobalKey] for each tutorial ID in [tutorials], storing results
+  /// in [reference].
+  ///
+  /// Parameters:
+  /// - [tutorials]: The set of tutorial IDs to generate keys for
+  /// - [reference]: An optional existing map to write keys into;
+  ///   a new map is created and returned if `null`
+  ///
+  /// Returns: The [reference] map populated with a new [GlobalKey] per tutorial ID
   static Map<String, GlobalKey> generateKeys(Set<String> tutorials,
       {Map<String, GlobalKey>? reference}) {
-    // Reference as hashmap to alter
     reference ??= {};
-    // Generates new key for each tutorial id
+    // Assigns a fresh GlobalKey to each tutorial ID, replacing any existing key
     for (String key in tutorials) {
       reference[key] = GlobalKey();
     }
-    // Returns altered hashmap
     return reference;
   }
 
-  /// Creates a Showcase widget to fit within the tutorialSystem
-  /// [required BuildContext context]: The BuildContext of the ShowcaseView the widget is created it <p>
-  /// [required String tutorial]: The tutorial ID of the Showcase <p>
-  /// [required Widget child]: The child widget to highlight during the tutorial <p>
-  /// [bool dense = false]: If the tutorial display should be condensed <p>
-  /// [bool uniqueNull = false]: If a non-existent id's placeholder should be unique <p>
-  /// [bool circular = false]: If the target during the tutorial should have a circular border <p>
-  /// [EdgeInsets? targetPadding]: Padding of the target from its border in the tutorial <p>
-  /// [voud Function()? onTap]: Method to run on tapped to progress
+  /// Builds a [Showcase] widget for the given [tutorial] ID, styled to match this system.
+  ///
+  /// This method:
+  /// - Resolves the [GlobalKey] for [tutorial] via [key]
+  /// - Attaches barrier and target tap handlers that optionally invoke [onTap],
+  ///   then advance to the next showcase step after a brief delay
+  /// - Renders a "Next" [StyledButton] in the tooltip action area
+  /// - Applies dense or standard sizing based on [dense]
+  /// - Applies circular or rounded-rectangle target border based on [circular]
+  ///
+  /// Parameters:
+  /// - [context]: The [BuildContext] of the enclosing [ShowCaseWidget]; required
+  /// - [tutorial]: The ID of the tutorial step to build; required
+  /// - [child]: The widget to highlight during this tutorial step; required
+  /// - [dense]: When `true`, reduces font size and tooltip slide distance for compact layouts;
+  ///   defaults to `false`
+  /// - [uniqueNull]: When `true`, returns a one-off [GlobalKey] for unrecognised IDs
+  ///   rather than storing it; defaults to `false`
+  /// - [circular]: When `true`, applies a [CircleBorder] to the target highlight;
+  ///   defaults to `false` (rounded rectangle)
+  /// - [targetPadding]: Padding between the target widget and its highlight border;
+  ///   defaults to [EdgeInsets.zero]
+  /// - [onTap]: Optional async callback invoked before advancing on barrier tap;
+  ///   defaults to a no-op
   Showcase showcase(
       {required BuildContext context,
-      required String tutorial,
-      required Widget child,
-      bool dense = false,
-      bool uniqueNull = false,
-      bool circular = false,
-      EdgeInsets? targetPadding,
-      Future<void> Function()? onTap}) {
+        required String tutorial,
+        required Widget child,
+        bool dense = false,
+        bool uniqueNull = false,
+        bool circular = false,
+        EdgeInsets? targetPadding,
+        Future<void> Function()? onTap}) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     onTap ??= () async {};
 
-    // Returns Showcase widget w/ settings matching system
     return Showcase(
         key: key(tutorial, uniqueNull: uniqueNull),
         description: tutorials[tutorial],
         onToolTipClick: simulateTap,
+        // Dense mode reduces the tooltip slide distance for compact layouts
         toolTipSlideEndDistance: dense ? 3 : 7,
         targetPadding: targetPadding ?? EdgeInsets.zero,
-        // Simulates tap on shaded region
+        // Barrier tap: runs onTap callback, waits briefly, then advances to the next step
         onBarrierClick: () async {
-          // Brief delay to make tap appear more natural
+          // Brief delay to make the tap feel more natural before advancing
           await onTap!();
           await Future.delayed(const Duration(milliseconds: 100));
+          // Only advances if this is not the last tutorial step and the context is still mounted
           if (tutorial != tutorials.keys.lastOrNull && context.mounted) {
             ShowCaseWidget.of(context).next();
           }
         },
-        // Simulates tap on shaded region
+        // Target tap: waits briefly then simulates a barrier tap to advance
         onTargetClick: () async {
-          // Brief delay to make tap appear more natural
           await Future.delayed(const Duration(milliseconds: 100));
           simulateTap();
         },
+        // disposeOnTap false keeps the Showcase alive after the target is tapped
         disposeOnTap: false,
-        // Style condensed if set as dense
+        // Applies dense or standard font size and line height to the tooltip description
         descTextStyle: TextStyle(
             color: colorScheme.onPrimary,
             fontSize: dense ? 15 : 17,
             height: dense ? 1 : null,
             fontFamily: 'Exo2'),
         tooltipBackgroundColor: colorScheme.primary,
+        // Circular mode highlights a round target; default is a rounded rectangle
         targetShapeBorder: circular
             ? CircleBorder()
             : RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(8)),
-              ),
-        // Action button set inside bottom right of text bubble
+          borderRadius: BorderRadius.all(Radius.circular(8)),
+        ),
+        // "Next" button is right-aligned with no gap between the description and the action
         tooltipActionConfig: TooltipActionConfig(
             alignment: MainAxisAlignment.end, gapBetweenContentAndAction: 0),
         tooltipActions: [
-          // Custom ToolTip button; "Done" button which simulates tap on shaded region
+          // Custom "Next" button that simulates a barrier tap after a brief delay
           TooltipActionButton.custom(
               button: StyledButton(
                   text: "Next",
@@ -105,7 +152,7 @@ class TutorialSystem {
                       height: dense ? 1 : null,
                       fontFamily: 'Exo2'),
                   onTap: () async {
-                    // Brief delay to feel more natural
+                    // Brief delay to make the progression feel more natural
                     await Future.delayed(const Duration(milliseconds: 50));
                     simulateTap();
                   }))
@@ -113,76 +160,108 @@ class TutorialSystem {
         child: child);
   }
 
-  /// Re-generates keys and resets finished state
+  /// Regenerates [GlobalKey]s for all tutorial IDs and resets [finished] to `false`
+  /// (or `true` if [tutorials] is empty).
   void refreshKeys() {
     generateKeys(tutorials.keys.toSet(), reference: keys);
     finished = keys.isEmpty;
   }
 
-  /// Removes any tutorials marked in local storage as complete
+  /// Removes tutorial steps that have been marked complete in [localStorage] from [keys].
+  ///
+  /// This method:
+  /// - Iterates all tutorial IDs and removes any whose [localStorage] value is `'T'`
+  /// - Sets [finished] to `true` if no tutorial steps remain in [keys]
+  ///
+  /// Completion is stored as the string `'T'` under each tutorial ID as the key.
   void removeFinished() {
-    // Goes through each tutorial id
     for (String tutorial in tutorials.keys) {
-      // If state marked as T (true), remove from keys
+      // A stored value of 'T' indicates this step was previously completed
       if ((localStorage.getItem(tutorial) ?? '') == 'T') {
         keys.remove(tutorial);
       }
     }
-    // If none left, mark as finished
+    // If all steps have been completed and removed, mark the system as finished
     if (keys.isEmpty) {
       finished = true;
     }
   }
 
-  /// Clears the states of each tutorial id stored in local storage
+  /// Clears the [localStorage] completion record for every tutorial ID in this system.
+  ///
+  /// After calling this, [removeFinished] will treat all steps as incomplete.
   void clearStorage() {
     for (String tutorial in tutorials.keys) {
       localStorage.removeItem(tutorial);
     }
   }
 
-  /// Pairs a provided tutorial id with it's GlobalKey
+  /// Returns the [GlobalKey] associated with [tutorial], creating one if absent.
+  ///
+  /// Parameters:
+  /// - [tutorial]: The tutorial ID to look up
+  /// - [uniqueNull]: When `true`, returns a new one-off [GlobalKey] for unrecognised IDs
+  ///   without storing it in [keys]; defaults to `false`
+  ///
+  /// Returns: The stored [GlobalKey] for [tutorial], or a new [GlobalKey] if not found
   GlobalKey key(String tutorial, {bool uniqueNull = false}) {
-    // If uniqueNull, store GlobalKey w/ undefined key
     if (!uniqueNull) {
+      // Stores a new GlobalKey for this ID if one doesn't already exist
       keys[tutorial] ??= GlobalKey();
     }
+    // Returns the stored key, or a throwaway GlobalKey if uniqueNull and ID is unrecognised
     return keys[tutorial] ?? GlobalKey();
   }
 
-  /// Begins the tutorial showcase of the system
+  /// Starts the [Showcase] sequence for all incomplete tutorial steps.
+  ///
+  /// This method:
+  /// - Collects tutorial IDs that have not been marked complete in [localStorage]
+  ///   (when [storeCompletion] is `true`) or all IDs (when `false`)
+  /// - Marks each collected ID as complete in [localStorage] under the value `'T'`
+  /// - Starts the [ShowCaseWidget] sequence with the resolved [GlobalKey]s
+  ///
+  /// Parameters:
+  /// - [context]: The [BuildContext] of the enclosing [ShowCaseWidget]; required
+  /// - [storeCompletion]: When `true`, skips IDs already stored as complete and
+  ///   persists new completions; defaults to `true`
   void showTutorials(final BuildContext context,
       {final bool storeCompletion = true}) {
-    // Set of tutorial ids to display
     final Set<String> showTutorials = {};
 
-    // If storeCompletion, ignore all tutorials with ids marked as complete
     if (storeCompletion) {
+      // Only includes tutorial IDs with no existing completion record in localStorage
       showTutorials.addAll(tutorials.keys
           .where((element) => (localStorage.getItem(element) ?? '').isEmpty));
     } else {
       showTutorials.addAll(tutorials.keys);
     }
 
-    // Marks each tutorial id as complete while converting Set to List.
+    // Marks each tutorial as complete and collects its GlobalKey for the showcase sequence
     final List<GlobalKey> tutorialKeys = [];
     for (String tutorial in showTutorials) {
+      // Persists completion as 'T' so this step is skipped on future launches
       localStorage.setItem(tutorial, 'T');
       tutorialKeys.add(key(tutorial));
     }
 
-    // If list of tutorials to display is not empty, begin tutorial
+    // Starts the showcase only if there are steps to display
     if (tutorialKeys.isNotEmpty) {
       ShowCaseWidget.of(context).startShowCase(tutorialKeys);
     }
   }
 
-  /// Simulates a tap on the shaded region
+  /// Simulates a quick tap at the top-left corner of the screen (`Offset.zero`).
+  ///
+  /// This method:
+  /// - Fires a [PointerDownEvent] followed immediately by a [PointerUpEvent] at [Offset.zero]
+  /// - This is used to advance the [Showcase] by triggering the barrier tap handler,
+  ///   since [ShowCaseWidget] does not expose a direct programmatic "advance" API at this time
   void simulateTap() {
-    // Very quickly presses and releases top left corner of screen
+    // Fires a pointer down then pointer up at the top-left corner to simulate a screen tap
     GestureBinding.instance.handlePointerEvent(
       PointerDownEvent(
-        position: Offset.zero, // Adjust if needed
+        position: Offset.zero,
       ),
     );
     GestureBinding.instance.handlePointerEvent(
@@ -192,12 +271,15 @@ class TutorialSystem {
     );
   }
 
-  /// Sets the finished state of the system to true
+  /// Sets [finished] to `true`, marking this tutorial system as complete.
   void finish() {
     finished = true;
   }
 
-  /// Adds updates the system to include specified tutorials.
+  /// Replaces the current tutorials with [setTutorials] and resets [finished] to `false`.
+  ///
+  /// Parameters:
+  /// - [setTutorials]: The new map of tutorial ID to description text to display
   void set(Map<String, String> setTutorials) {
     tutorials.clear();
     tutorials.addAll(setTutorials);

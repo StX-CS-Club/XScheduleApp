@@ -1,13 +1,15 @@
-/*
-  * date_time_extension.dart *
-  Provided basic methods and static variables for displaying DateTime instances
- */
-
-/// DateTime extension <p>
-/// Provides basic instance methods and static variables for displaying DateTime objects.
+/// An extension on Dart's [DateTime] class for display formatting and date arithmetic.
+///
+/// Responsibilities:
+/// - Mapping integer month and weekday values to their full name strings
+/// - Adding days to a [DateTime] with daylight saving time compensation
+/// - Formatting a [DateTime] as human-readable date and weekday strings
+/// - Computing the difference in months between two [DateTime] instances
+/// - Stripping time components from a [DateTime] to produce a date-only value
 extension DateTimeExtension on DateTime {
-  /// DateTime extension <p>
-  /// Map of String value for each int month value
+  /// Maps each integer month value (1–12) to its full English name.
+  ///
+  /// Follows [DateTime.month] conventions: `1` → `'January'`, ..., `12` → `'December'`
   static Map<int, String> monthString = {
     1: 'January',
     2: 'February',
@@ -23,8 +25,9 @@ extension DateTimeExtension on DateTime {
     12: 'December'
   };
 
-  /// DateTime extension <p>
-  /// Map of String value for each int weekday value
+  /// Maps each integer weekday value (1–7) to its full English name.
+  ///
+  /// Follows [DateTime.weekday] conventions: `1` → `'Monday'`, ..., `7` → `'Sunday'`
   static Map<int, String> weekdayString = {
     1: 'Monday',
     2: 'Tuesday',
@@ -35,11 +38,24 @@ extension DateTimeExtension on DateTime {
     7: 'Sunday'
   };
 
-  /// DateTime extension <p>
-  /// Returns a DateTime a given amount of days from the parent DateTime, accounting for daylight savings
-  DateTime addDay(int days){
+  /// Returns a new [DateTime] that is [days] days after this instance,
+  /// correcting for any hour shift introduced by daylight saving time transitions.
+  ///
+  /// This method:
+  /// - Adds the requested number of days using [Duration]
+  /// - Detects a DST-induced hour offset by checking if the result's hour is non-zero
+  /// - Steps the result forward or backward by one hour at a time until midnight is reached
+  ///
+  /// Parameters:
+  /// - [days]: The number of days to add; may be negative to subtract days
+  ///
+  /// Returns: A [DateTime] at midnight, [days] calendar days from this instance
+  DateTime addDay(int days) {
     DateTime result = add(Duration(days: days));
-    // Adjusts for automatic daylight savings adjustment
+
+    // DST transitions can shift the result's hour by ±1; correct back to midnight.
+    // If the hour is past noon, the clock has sprung forward — advance to next midnight.
+    // If the hour is before noon, the clock has fallen back — retreat to midnight.
     if (result.hour > 12) {
       while (result.hour != 0) {
         result = result.add(const Duration(hours: 1));
@@ -52,33 +68,49 @@ extension DateTimeExtension on DateTime {
     return result;
   }
 
-  /// DateTime extension <p>
-  /// Provides a String in the format "{Weekday} {Month #}/{Date #}"
+  /// Returns a formatted date string for this [DateTime].
+  ///
+  /// Returns: A [String] in the format `'{Weekday}, {Month #}/{Day #}'`
+  /// (e.g. `'Monday, 3/19'`)
   String dateText() {
     return '${weekdayText()}, $month/$day';
   }
 
-  /// DateTime extension <p>
-  /// Provides the String value of the DateTime's month
-  String monthText(){
+  /// Returns the full English name of this [DateTime]'s month.
+  ///
+  /// Returns: A [String] such as `'January'` or `'December'`
+  String monthText() {
     return monthString[month]!;
   }
 
-  /// DateTime extension <p>
-  /// Provides a String value of the DateTime's weekday
-  String weekdayText(){
+  /// Returns the full English name of this [DateTime]'s weekday.
+  ///
+  /// Returns: A [String] such as `'Monday'` or `'Sunday'`
+  String weekdayText() {
     return weekdayString[weekday]!;
   }
 
-  /// DateTime extension <p>
-  /// Finds the difference, in months, between this and a given DateTime
+  /// Returns the difference in whole months between this [DateTime] and [dateTime].
+  ///
+  /// This method:
+  /// - Converts each date to a total month count (`year * 12 + month`)
+  /// - Subtracts to find the signed month difference
+  ///
+  /// Parameters:
+  /// - [dateTime]: The [DateTime] to subtract from this instance
+  ///
+  /// Returns: A positive [int] if this date is later, negative if earlier, or `0` if same month
   int monthDiff(DateTime dateTime) {
     return (year * 12 + month) - (dateTime.year * 12 + dateTime.month);
   }
 
-  /// DateTime extension <p>
-  /// Returns a DateTime instance with time variables set to 0
-  DateTime dateOnly(){
+  /// Returns a copy of this [DateTime] with all time components set to zero.
+  ///
+  /// Constructs a new [DateTime] using only [year], [month], and [day],
+  /// discarding hour, minute, second, and sub-second values.
+  ///
+  /// Returns: A [DateTime] at midnight (`00:00:00.000`) on the same calendar date
+  DateTime dateOnly() {
     return DateTime(year, month, day);
   }
 }
