@@ -7,16 +7,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:xschedule/display/splash_page.dart';
-import 'package:xschedule/display/themes.dart';
-import 'package:xschedule/global/dynamic_content/backend/github.dart';
-import 'package:xschedule/global/dynamic_content/backend/schedule_directory.dart';
-import 'package:xschedule/global/dynamic_content/stream_signal.dart';
-import 'package:xschedule/global/static_content/extensions/date_time_extension.dart';
-import 'package:xschedule/personal/credits.dart';
-import 'package:xschedule/schedule/schedule_display/schedule_display.dart';
-
-import 'global/dynamic_content/backend/rss.dart';
+import 'package:xschedule/startup/splash_page.dart';
+import 'package:xschedule/startup/themes.dart';
+import 'package:xschedule/schedule/schedule_directory.dart';
+import 'package:xschedule/util/stream_signal.dart';
+import 'package:xschedule/extensions/date_time_extension.dart';
+import 'package:xschedule/interface/personal/credits.dart';
+import 'package:xschedule/interface/schedule/schedule_display.dart';
+import 'package:xschedule/backend/rss/rss.dart';
 
 Future<void> main() async {
   // Initializes several processes in the app

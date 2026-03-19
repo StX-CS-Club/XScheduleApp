@@ -6,8 +6,7 @@
 import 'dart:convert';
 
 import 'package:localstorage/localstorage.dart';
-
-import '../global/dynamic_content/clock.dart';
+import 'package:xschedule/schedule/clock.dart';
 
 /// class for managing the various variables of each day's Schedule
 class Schedule {
