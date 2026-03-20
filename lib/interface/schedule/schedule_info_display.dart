@@ -9,7 +9,7 @@ import 'package:xschedule/backend/rss/rss.dart';
 import 'package:xschedule/schedule/schedule_directory.dart';
 import 'package:xschedule/extensions/date_time_extension.dart';
 import 'package:xschedule/extensions/widget_extension.dart';
-import 'package:xschedule/schedule/schedule.dart';
+import 'package:xschedule/schedule/schedule_entry.dart';
 import 'package:xschedule/materials/popup_menu.dart';
 
 /// StatelessWidget which displays the popup containing the dailyInfo of a given date. <p>
@@ -36,8 +36,7 @@ class ScheduleInfoDisplay extends StatelessWidget {
     final MediaQueryData mediaQuery = MediaQuery.of(context);
 
     // Gets the schedules and dailyInfo based on the given date
-    final Schedule schedule = ScheduleDirectory.readSchedule(date);
-    final Map<String, dynamic> dailyInfo = schedule.info;
+    final ScheduleEntry schedule = ScheduleDirectory.readSchedule(date);
 
     // Returns dailyInfo popup
     return PopupMenu(
@@ -79,116 +78,6 @@ class ScheduleInfoDisplay extends StatelessWidget {
                                   : FontStyle.normal))
                     ]),
                   ).fit(),
-                  // Row of quarter and dress code
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      // If variable is null, do not display
-                      if (dailyInfo['quarter'] != null)
-                        // expandedFit Text for quarter
-                        Text(
-                          '🗓️ Quarter ${dailyInfo['quarter']}',
-                          style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w500,
-                              color: colorScheme.onSurface),
-                        ).expandedFit(),
-                      // If variable is null, then replace with empty string, and checks if string is empty; detects both null and empty values
-                      if ((dailyInfo['dressCode'] ?? '').isNotEmpty)
-                        // expandedFit Text for dressCode
-                        Text(
-                          '${dressEmoji(dailyInfo['dressCode'])} ${dailyInfo['dressCode']}',
-                          style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w500,
-                              color: colorScheme.onSurface),
-                        ).expandedFit()
-                    ],
-                  ),
-                  // Checks to display lunch divider and header
-                  if ((dailyInfo['lunchPasta'] ?? '').isNotEmpty ||
-                      (dailyInfo['lunchBox'] ?? '').isNotEmpty ||
-                      (dailyInfo['lunchMain'] ?? '').isNotEmpty)
-                    Column(
-                      children: [
-                        // Divider between lunch info; only displayed if lunch data exists
-                        Divider(
-                          color: colorScheme.shadow,
-                        ),
-                        // Lunch Title
-                        Text(
-                          "Lunch",
-                          style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w600,
-                              color: colorScheme.onSurface),
-                        ),
-                        // If lunchMain exists, display
-                        if ((dailyInfo['lunchMain'] ?? '').isNotEmpty)
-                          // fitted Text for lunchMain
-                          Text(
-                            '🥘 ${dailyInfo['lunchMain']}',
-                            style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w500,
-                                color: colorScheme.onSurface),
-                          ).fit(),
-                        // Row containing lunchPasta and lunchBox Texts
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            // If lunchPasta value exists, display
-                            if ((dailyInfo['lunchPasta'] ?? '').isNotEmpty)
-                              // expandedFit Text for lunchPasta
-                              Text(
-                                '🍝 ${dailyInfo['lunchPasta']}',
-                                style: TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w500,
-                                    color: colorScheme.onSurface),
-                              ).expandedFit(),
-                            if ((dailyInfo['lunchBox'] ?? '').isNotEmpty)
-                              Text(
-                                '🍱 ${dailyInfo['lunchBox']}',
-                                style: TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w500,
-                                    color: colorScheme.onSurface),
-                              ).expandedFit(),
-                          ],
-                        )
-                      ],
-                    ),
-                  // Checks to display event Text and Divider
-                  if ((dailyInfo['event'] ?? '').isNotEmpty)
-                    Column(
-                      children: [
-                        // Divider which only displays if event exists
-                        Divider(
-                          color: colorScheme.shadow,
-                        ),
-                        // Event Title
-                        Text(
-                          '📢 Announcement',
-                          style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 20,
-                              color: colorScheme.onSurface),
-                        ),
-                        // Event Text
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8),
-                          child: Text(
-                            dailyInfo['event'],
-                            maxLines: 10,
-                            style: TextStyle(
-                                fontSize: 15,
-                                overflow: TextOverflow.ellipsis,
-                                color: colorScheme.onSurface),
-                          ),
-                        ),
-                      ],
-                    ),
                 ],
               )),
           if (RSS.offline)

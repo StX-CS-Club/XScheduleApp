@@ -9,7 +9,7 @@ import 'package:xschedule/extensions/widget_extension.dart';
 import 'package:xschedule/interface/schedule/schedule_settings/bell_settings/bell_button.dart';
 import 'package:xschedule/interface/schedule/schedule_settings/bell_settings/bell_settings.dart';
 import 'package:xschedule/interface/schedule/schedule_settings/bell_settings/bell_settings_menu.dart';
-import 'package:xschedule/schedule/schedule.dart';
+import 'package:xschedule/schedule/schedule_entry.dart';
 import 'package:xschedule/materials/popup_menu.dart';
 import 'package:xschedule/materials/styled_button.dart';
 
@@ -177,8 +177,8 @@ class _ScheduleSettingsQrState extends State<ScheduleSettingsQr> {
                     child: SingleChildScrollView(
                         child: Column(
                             children: List<Widget>.generate(
-                                Schedule.sampleBells.length, (i) {
-                  String bell = Schedule.sampleBells[i];
+                                ScheduleEntry.sampleBells.length, (i) {
+                  String bell = ScheduleEntry.sampleBells[i];
                   return BellButton(
                       bell: bell,
                       buttonWidth: mediaQuery.size.width * .8 - 16,
@@ -205,7 +205,7 @@ class _ScheduleSettingsQrState extends State<ScheduleSettingsQr> {
   Widget _displayQr(String bell) {
     final MediaQueryData mediaQuery = MediaQuery.of(context);
 
-    final Map<String, dynamic> bellVanity = Schedule.bellVanity[bell] ?? {};
+    final Map<String, dynamic> bellVanity = ScheduleEntry.bellVanity[bell] ?? {};
     final Map<String, Map<String, dynamic>> bellMap = {bell: bellVanity};
     final String encodedBell = jsonEncode(bellMap);
 

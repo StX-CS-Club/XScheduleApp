@@ -15,7 +15,7 @@ import 'package:xschedule/interface/schedule/schedule_settings/bell_settings/bel
 import 'package:xschedule/interface/schedule/schedule_settings/bell_settings/bell_settings_menu.dart';
 import 'package:xschedule/interface/schedule/schedule_settings/schedule_settings_qr.dart';
 
-import '../../../schedule/schedule.dart';
+import '../../../schedule/schedule_entry.dart';
 import 'bell_settings/bell_settings.dart';
 
 /// Settings page which allows the user to configure bell vanity. <p>
@@ -159,8 +159,8 @@ class _ScheduleSettingsState extends State<ScheduleSettings> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                ...List<Widget>.generate(Schedule.sampleBells.length, (i) {
-                  String bell = Schedule.sampleBells[i];
+                ...List<Widget>.generate(ScheduleEntry.sampleBells.length, (i) {
+                  String bell = ScheduleEntry.sampleBells[i];
                   if (i == 0) {
                     return ScheduleSettings.tutorialSystem.showcase(
                         context: context,

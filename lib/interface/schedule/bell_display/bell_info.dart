@@ -2,16 +2,16 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:xschedule/extensions/widget_extension.dart';
-import 'package:xschedule/schedule/clock.dart';
-import 'package:xschedule/schedule/schedule.dart';
+import 'package:xschedule/schedule/bell_entry.dart';
+import 'package:xschedule/schedule/schedule_entry.dart';
 import 'package:xschedule/extensions/color_extension.dart';
 import 'package:xschedule/materials/popup_menu.dart';
 
 class BellInfo extends StatelessWidget {
   const BellInfo({super.key, required this.schedule, required this.bell});
 
-  final Schedule schedule;
-  final String bell;
+  final ScheduleEntry schedule;
+  final BellEntry bell;
 
   @override
   Widget build(BuildContext context) {
@@ -22,16 +22,16 @@ class BellInfo extends StatelessWidget {
     final double width = min(mediaQuery.size.width, 500);
 
     // Gets vanity data of bell
-    Map<String, dynamic> vanity = Schedule.bellVanity[bell] ?? {};
+    Map<String, dynamic> vanity = ScheduleEntry.bellVanity[bell] ?? {};
 
     // Suffix after base bell String
-    String suffix = bell.length <= 1 ? ' Bell' : '';
+    String suffix = bell.title.length <= 1 ? ' Bell' : '';
 
-    if (bell.contains("HR")) {
-      vanity = Schedule.bellVanity["HR"] ?? {};
+    if (bell.title.contains("HR")) {
+      vanity = ScheduleEntry.bellVanity["HR"] ?? {};
     }
-    if (bell.contains("FLEX")) {
-      vanity = Schedule.bellVanity["FLEX"] ?? {};
+    if (bell.title.contains("FLEX")) {
+      vanity = ScheduleEntry.bellVanity["FLEX"] ?? {};
     }
 
     // If schedule fits alternate bell conditions, set vanity map as alternate
@@ -47,8 +47,6 @@ class BellInfo extends StatelessWidget {
       }
     }
 
-    // Clock Map of bell ('start' and 'end')
-    final Map<String, Clock?> times = schedule.clockMap(bell) ?? {};
     // Aligns on center of screen w/ shadowed background
     return PopupMenu(
         child: SizedBox(
@@ -101,7 +99,7 @@ class BellInfo extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  vanity['name'] ?? '$bell$suffix',
+                                  vanity['name'] ?? '${bell.title}$suffix',
                                   style: TextStyle(
                                       height: 0.9,
                                       fontSize: 25,
@@ -138,7 +136,7 @@ class BellInfo extends StatelessWidget {
                           padding: const EdgeInsets.only(left: 12.5),
                           alignment: Alignment.centerLeft,
                           child: Text(
-                            '$bell$suffix:   ${times['start']?.display()} - ${times['end']?.display()}',
+                            '$bell$suffix:   ${bell.startClock?.displayString} - ${bell.endClock?.displayString}',
                             style: TextStyle(
                                 height: 0.9,
                                 fontSize: 25,

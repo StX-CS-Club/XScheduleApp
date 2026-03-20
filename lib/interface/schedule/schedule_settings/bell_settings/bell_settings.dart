@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:xschedule/extensions/color_extension.dart';
-import 'package:xschedule/schedule/schedule.dart';
+import 'package:xschedule/schedule/schedule_entry.dart';
 import 'package:xschedule/util/stream_signal.dart';
 import 'package:xschedule/interface/schedule/schedule_display.dart';
 
@@ -28,7 +28,7 @@ class BellSettings {
 
   static void saveBells() {
     // Saves the schedule vanity data to local storage
-    localStorage.setItem("bellVanity", json.encode(Schedule.bellVanity));
+    localStorage.setItem("bellVanity", json.encode(ScheduleEntry.bellVanity));
     // Confirms that the user's progress is marked as "logged"
     localStorage.setItem("state", "logged");
     // Refreshed HomePage stream
@@ -88,37 +88,37 @@ class BellSettings {
     // If not alternate bell, define vanity defaults
     if (!alternate) {
       // Defines bellVanity map
-      Schedule.bellVanity[bell] ??= {};
-      Schedule.bellVanity[bell]!['alt'] ??= {};
-      Schedule.bellVanity[bell]!['alt_days'] ??= [];
+      ScheduleEntry.bellVanity[bell] ??= {};
+      ScheduleEntry.bellVanity[bell]!['alt'] ??= {};
+      ScheduleEntry.bellVanity[bell]!['alt_days'] ??= [];
       // Defines color values
       if (bell == "FLEX") {
-        Schedule.bellVanity[bell]!['color'] ??= "#888888";
+        ScheduleEntry.bellVanity[bell]!['color'] ??= "#888888";
       } else {
-        Schedule.bellVanity[bell]!['color'] ??= "#006aff";
+        ScheduleEntry.bellVanity[bell]!['color'] ??= "#006aff";
       }
       // Defines emoji values
       if (bell == "FLEX" || bell == "HR") {
-        Schedule.bellVanity[bell]!['emoji'] ??= '📚';
+        ScheduleEntry.bellVanity[bell]!['emoji'] ??= '📚';
       } else {
-        Schedule.bellVanity[bell]!['emoji'] ??= bell;
+        ScheduleEntry.bellVanity[bell]!['emoji'] ??= bell;
       }
       // Defines name values
-      Schedule.bellVanity[bell]!['name'] ??= '$bell Bell'
+      ScheduleEntry.bellVanity[bell]!['name'] ??= '$bell Bell'
           .replaceAll('HR Bell', 'Homeroom')
           .replaceAll('FLEX Bell', 'FLEX');
       // Defines teacher values
-      Schedule.bellVanity[bell]!['teacher'] ??= '';
+      ScheduleEntry.bellVanity[bell]!['teacher'] ??= '';
       // Defines location values
-      Schedule.bellVanity[bell]!['location'] ??= '';
+      ScheduleEntry.bellVanity[bell]!['location'] ??= '';
 
-      reference = Schedule.bellVanity[bell]!;
+      reference = ScheduleEntry.bellVanity[bell]!;
 
       altDays[bell] ??= List<String>.from(reference['alt_days']);
     } else {
       // ...else set as any existing alt vanity values
-      reference = Map<String, dynamic>.from(Schedule.bellVanity[bell]!['alt']);
-      Schedule.bellVanity[bell]!.forEach((key, value) {
+      reference = Map<String, dynamic>.from(ScheduleEntry.bellVanity[bell]!['alt']);
+      ScheduleEntry.bellVanity[bell]!.forEach((key, value) {
         reference[key] ??= value;
       });
       // set bell id as alt id

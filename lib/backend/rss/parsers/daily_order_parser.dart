@@ -1,7 +1,9 @@
 import 'package:icalendar_parser/icalendar_parser.dart';
 import 'package:xschedule/extensions/date_time_extension.dart';
-import 'package:xschedule/schedule/schedule.dart';
+import 'package:xschedule/schedule/schedule_entry.dart';
 import 'package:xschedule/schedule/schedule_directory.dart';
+
+import '../../../schedule/bell_entry.dart';
 
 /// Parses daily order calendar data (ICS format) into bell schedules.
 ///
@@ -58,7 +60,7 @@ class DailyOrderParser {
       }
 
       // Parse bell schedule for this event
-      final Map<String, String> bells = DailyOrderParser.parseEvent(instance);
+      final List<BellEntry> bells = DailyOrderParser.parseEvent(instance);
 
       // Skip if no valid bell data found
       if (bells.isEmpty) {
@@ -93,7 +95,7 @@ class DailyOrderParser {
   ///
   /// Returns:
   /// - Map of bell title → "start-end" string
-  static Map<String, String> parseEvent(Map<String, dynamic> instance) {
+  static List<BellEntry> parseEvent(Map<String, dynamic> instance) {
     // Extract description safely (may be null)
     final String rawDescription = instance['description'] as String? ?? '';
 
@@ -104,13 +106,13 @@ class DailyOrderParser {
     final List<BellEntry> entries = _extractEntries(normalizedDescription);
 
     // If nothing parsed, return empty map
-    if (entries.isEmpty) return {};
+    if (entries.isEmpty) return [];
 
     // Fill in missing times between entries
     _fillMissingTimes(entries);
 
     // Convert structured entries into final output format
-    return _toBellMap(entries);
+    return entries;
   }
 
   /// Cleans and standardizes raw description text.
@@ -224,7 +226,7 @@ class DailyOrderParser {
     final String upper = title.toUpperCase();
 
     // Normalize known bell names
-    if (Schedule.sampleBells.contains(upper) ||
+    if (ScheduleEntry.sampleBells.contains(upper) ||
         upper.contains('FLEX') ||
         upper.contains('HOMEROOM')) {
       return upper.replaceAll('HOMEROOM', 'HR');
@@ -249,26 +251,4 @@ class DailyOrderParser {
 
     return bells;
   }
-}
-
-/// Represents a single bell period with title and optional times.
-///
-/// Responsibilities:
-/// - Store parsed bell data before final formatting
-/// - Allow mutation during time-filling process
-class BellEntry {
-  /// Name of the bell (e.g., "A", "HR", "FLEX 1")
-  String title;
-
-  /// Start time (nullable until inferred)
-  String? start;
-
-  /// End time (nullable until inferred)
-  String? end;
-
-  BellEntry({
-    required this.title,
-    this.start,
-    this.end,
-  });
 }

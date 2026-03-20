@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:xschedule/extensions/widget_extension.dart';
-import 'package:xschedule/schedule/schedule.dart';
+import 'package:xschedule/schedule/schedule_entry.dart';
 import 'package:xschedule/extensions/color_extension.dart';
 import 'package:xschedule/interface/schedule/schedule_settings/bell_settings/bell_settings.dart';
 
@@ -25,7 +25,7 @@ class BellButton extends StatelessWidget {
     BellSettings.defineBell(bell);
 
     // Vanity map of provided bell
-    final Map<String, dynamic> vanity = Schedule.bellVanity[bell] ?? {};
+    final Map<String, dynamic> vanity = ScheduleEntry.bellVanity[bell] ?? {};
 
     // Returns "Settings Tile", which displays current bell info and ability to edit bell
     return Container(

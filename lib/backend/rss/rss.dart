@@ -80,8 +80,7 @@ class RSS {
 
     // If requested, clear existing stored schedules before writing new ones
     if (overwrite) {
-      ScheduleDirectory.clearBells();
-      ScheduleDirectory.clearNames();
+      ScheduleDirectory.clearAll();
     }
 
     // Delegate parsing + writing logic to parser

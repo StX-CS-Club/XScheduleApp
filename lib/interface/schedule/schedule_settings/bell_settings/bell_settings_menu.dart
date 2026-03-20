@@ -10,7 +10,7 @@ import 'package:xschedule/extensions/widget_extension.dart';
 import 'package:xschedule/materials/styled_button.dart';
 
 import 'package:xschedule/util/tutorial_system.dart';
-import 'package:xschedule/schedule/schedule.dart';
+import 'package:xschedule/schedule/schedule_entry.dart';
 import 'package:xschedule/interface/schedule/schedule_settings/bell_settings/bell_settings.dart';
 
 class BellSettingsMenu extends StatefulWidget {
@@ -151,7 +151,7 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
     _writeBell("");
     _writeBell("_alt");
 
-    Schedule.bellVanity[widget.bell] = {
+    ScheduleEntry.bellVanity[widget.bell] = {
       'name': BellSettings.names[widget.bell],
       'teacher': BellSettings.teachers[widget.bell],
       'location': BellSettings.locations[widget.bell],
@@ -280,7 +280,7 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
                                         tutorial:
                                             "tutorial_settings_bell_alternate",
                                         circular: true,
-                                        child: Schedule.sampleDays['All Meet']!
+                                        child: ScheduleEntry.sampleDays['All Meet']!
                                                 .contains(widget.bell)
                                             ? IconButton(
                                                 onPressed: () async {
@@ -876,7 +876,7 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     final List<String> meetDays = [];
-    Schedule.sampleDays.forEach((key, value) {
+    ScheduleEntry.sampleDays.forEach((key, value) {
       if (value.contains(widget.bell)) {
         meetDays.add(key);
       }
@@ -892,7 +892,7 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: List<Widget>.generate(meetDays.length, (i) {
               final String dayTitle = meetDays[i];
-              final List<String> day = Schedule.sampleDays[dayTitle] ?? [];
+              final List<String> day = ScheduleEntry.sampleDays[dayTitle] ?? [];
               final double bellHeight = 150 / (day.length - 1);
 
               return Container(

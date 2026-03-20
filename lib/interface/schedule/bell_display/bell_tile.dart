@@ -6,9 +6,10 @@ import 'package:xschedule/extensions/widget_extension.dart';
 import 'package:xschedule/schedule/schedule_directory.dart';
 import 'package:xschedule/schedule/clock.dart';
 import 'package:xschedule/extensions/color_extension.dart';
-import 'package:xschedule/schedule/schedule.dart';
+import 'package:xschedule/schedule/schedule_entry.dart';
 import 'package:xschedule/interface/schedule/schedule_display.dart';
 import 'package:xschedule/interface/schedule/bell_display/bell_info.dart';
+import "package:xschedule/schedule/bell_entry.dart";
 
 class BellTile extends StatelessWidget {
   const BellTile(
@@ -19,7 +20,7 @@ class BellTile extends StatelessWidget {
       this.index});
 
   final DateTime date;
-  final String bell;
+  final BellEntry bell;
   final double minuteHeight;
   final int? index;
 
@@ -28,7 +29,7 @@ class BellTile extends StatelessWidget {
     // Checks if date matches selected tutorialDate
     if (date == ScheduleDisplay.tutorialDate) {
       // The Schedule of the date
-      final Schedule schedule = ScheduleDirectory.readSchedule(date);
+      final ScheduleEntry schedule = ScheduleDirectory.readSchedule(date);
       // Checks if bell matches first bell or flex bell
       if (bell == schedule.firstBell) {
         return 'tutorial_schedule_bell';
@@ -46,20 +47,20 @@ class BellTile extends StatelessWidget {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final MediaQueryData mediaQuery = MediaQuery.of(context);
 
-    // The Schedule the bell is in
-    final Schedule schedule = ScheduleDirectory.readSchedule(date);
+    // The ScheduleEntry the bell is in
+    final ScheduleEntry schedule = ScheduleDirectory.readSchedule(date);
 
     // Vanity info of bell
-    Map<String, dynamic> vanity = Schedule.bellVanity[bell] ?? {};
+    Map<String, dynamic> vanity = ScheduleEntry.bellVanity[bell.title] ?? {};
     String suffix = "";
 
-    if (bell.contains("HR")) {
-      vanity = Schedule.bellVanity["HR"] ?? {};
-      suffix = "${bell.replaceAll("HR", "")}$suffix";
+    if (bell.title.contains("HR")) {
+      vanity = ScheduleEntry.bellVanity["HR"] ?? {};
+      suffix = "${bell.title.replaceAll("HR", "")}$suffix";
     }
-    if (bell.contains("FLEX")) {
-      vanity = Schedule.bellVanity["FLEX"] ?? {};
-      suffix = "${bell.replaceAll("FLEX", "")}$suffix";
+    if (bell.title.contains("FLEX")) {
+      vanity = ScheduleEntry.bellVanity["FLEX"] ?? {};
+      suffix = "${bell.title.replaceAll("FLEX", "")}$suffix";
     }
 
     // If schedule fits alternate bell conditions, set vanity map as alternate
@@ -72,20 +73,17 @@ class BellTile extends StatelessWidget {
 
     final Color color = ColorExtension.fromHex(vanity['color'] ?? '#909090');
 
-    // Clock values of bell ('start' and 'end' primarily)
-    final Map<String, Clock?> times = schedule.clockMap(bell) ?? {};
-
     // Height of bell base don start and end times
     final double height =
-        minuteHeight * times['end']!.difference(times['start']!).abs();
+        minuteHeight * bell.endClock!.difference(bell.startClock!).abs();
     final double radius = min(height * 3 / 7 - 5, mediaQuery.size.width / 6);
     // Margin from top of schedule based on start time
     final double margin =
-        times['start']!.difference(Clock(hours: 8)).abs() * minuteHeight;
+        bell.startClock!.difference(Clock(hours: 8)).abs() * minuteHeight;
 
     // Time range text to be displayed
     final String timeRange =
-        '${times['start']!.display()} - ${times['end']!.display()}';
+        '${bell.startClock!.display()} - ${bell.endClock!.display()}';
 
     final bool dense = height <= 50;
     final bool veryDense = height <= 25;
@@ -105,7 +103,7 @@ class BellTile extends StatelessWidget {
           },
           child: ScheduleDisplay.tutorialSystem.showcase(
             context: context,
-            tutorial: _tutorial(date, bell),
+            tutorial: _tutorial(date, bell.title),
             uniqueNull: true,
             child: Row(
               children: [
@@ -144,7 +142,7 @@ class BellTile extends StatelessWidget {
                             dense ? Alignment.centerLeft : Alignment.bottomLeft,
                         child: Text(
                           // If there won't be room for time range line, include it in this line
-                          '${(vanity['name'] ?? bell) ?? ''}$suffix${dense ? ':     $timeRange' : ''}',
+                          '${(vanity['name'] ?? bell.title) ?? ''}$suffix${dense ? ':     $timeRange' : ''}',
                           style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w600,

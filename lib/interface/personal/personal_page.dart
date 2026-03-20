@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:xschedule/startup/splash_page.dart';
-import 'package:xschedule/schedule/schedule.dart';
+import 'package:xschedule/schedule/schedule_entry.dart';
 import 'package:xschedule/extensions/build_context_extension.dart';
 import 'package:xschedule/extensions/widget_extension.dart';
 import 'package:xschedule/materials/styled_button.dart';
@@ -239,7 +239,7 @@ class Personal extends StatelessWidget {
 
   static void _clearBellVanity() {
     BellSettings.clearSettings();
-    Schedule.bellVanity.clear();
+    ScheduleEntry.bellVanity.clear();
     localStorage.setItem("bellVanity", "{}");
   }
 

@@ -16,7 +16,7 @@ import 'package:xschedule/extensions/date_time_extension.dart';
 import 'package:xschedule/extensions/widget_extension.dart';
 import 'package:xschedule/materials/icon_circle.dart';
 import 'package:xschedule/materials/styled_button.dart';
-import 'package:xschedule/schedule/schedule.dart';
+import 'package:xschedule/schedule/schedule_entry.dart';
 import 'package:xschedule/interface/schedule/calendar_navigation.dart';
 import 'package:xschedule/interface/schedule/schedule_display_card.dart';
 import 'package:xschedule/interface/schedule/schedule_info_display.dart';
@@ -406,7 +406,7 @@ class _ScheduleDisplayState extends State<ScheduleDisplay> {
   Widget _buildInfoButton(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
-    final Schedule schedule = ScheduleDirectory.readSchedule(
+    final ScheduleEntry schedule = ScheduleDirectory.readSchedule(
         ScheduleDisplay.initialDate.addDay(ScheduleDisplay.pageIndex));
 
     Color iconColor = colorScheme.onSurface;
@@ -415,7 +415,7 @@ class _ScheduleDisplayState extends State<ScheduleDisplay> {
     if (RSS.offline) {
       iconColor = colorScheme.onError;
       backgroundColor = colorScheme.error.withAlpha(194);
-    } else if (schedule.info.isEmpty) {
+    } else {
       iconColor = iconColor.withAlpha(128);
     }
 
