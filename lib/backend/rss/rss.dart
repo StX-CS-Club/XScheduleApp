@@ -4,7 +4,7 @@ import 'package:xschedule/backend/rss/parsers/daily_order_parser.dart';
 import 'package:xschedule/backend/rss/rss_client.dart';
 import 'package:xschedule/backend/rss/rss_config.dart';
 import 'package:xschedule/util/stream_signal.dart';
-import 'package:xschedule/interface/schedule/schedule_display.dart';
+import 'package:xschedule/ui/schedule/schedule_display.dart';
 
 /// Public facing API for RSS functionality
 ///
@@ -14,6 +14,9 @@ import 'package:xschedule/interface/schedule/schedule_display.dart';
 /// - Delegating parsing to [DailyOrderParser]
 /// - Writing results to [ScheduleDirectory]
 class RSS {
+  // Private constructor — this class is not intended to be instantiated
+  RSS._();
+
   /// Loaded configuration (URLs, retry codes, etc.)
   static late RSSConfig _config;
 

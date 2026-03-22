@@ -7,9 +7,10 @@ import 'package:xschedule/schedule/schedule_directory.dart';
 import 'package:xschedule/schedule/clock.dart';
 import 'package:xschedule/extensions/color_extension.dart';
 import 'package:xschedule/schedule/schedule_entry.dart';
-import 'package:xschedule/interface/schedule/schedule_display.dart';
-import 'package:xschedule/interface/schedule/bell_display/bell_info.dart';
+import 'package:xschedule/ui/schedule/schedule_display.dart';
+import 'package:xschedule/ui/schedule/bell_display/bell_info.dart';
 import "package:xschedule/schedule/bell_entry.dart";
+import 'package:xschedule/schedule/schedule_settings.dart';
 
 /// A single bell tile rendered within the schedule card's bell stack.
 ///
@@ -71,7 +72,7 @@ class BellTile extends StatelessWidget {
   /// Resolves the vanity data map and display suffix for [bell] within [schedule].
   ///
   /// This method:
-  /// - Looks up [bell.title] in [ScheduleEntry.bellVanity]
+  /// - Looks up [bell.title] in [ScheduleSettings.bellVanity]
   /// - Overrides with the `'HR'` or `'FLEX'` entry and strips the keyword from the suffix
   /// - Switches to the alternate vanity map if the schedule name matches an `'alt_days'` entry
   ///
@@ -85,16 +86,16 @@ class BellTile extends StatelessWidget {
   ({Map<String, dynamic> vanity, String bellSuffix}) _resolveVanity(
       ScheduleEntry schedule) {
     Map<String, dynamic> bellVanity =
-        ScheduleEntry.bellVanity[bell.title] ?? {};
+        ScheduleSettings.bellVanity[bell.title] ?? {};
     String bellSuffix = "";
 
     // HR and FLEX bells use their own fixed vanity entries; keyword is stripped into the suffix
     if (bell.title.contains("HR")) {
-      bellVanity = ScheduleEntry.bellVanity["HR"] ?? {};
+      bellVanity = ScheduleSettings.bellVanity["HR"] ?? {};
       bellSuffix = "${bell.title.replaceAll("HR", "")}$bellSuffix";
     }
     if (bell.title.contains("FLEX")) {
-      bellVanity = ScheduleEntry.bellVanity["FLEX"] ?? {};
+      bellVanity = ScheduleSettings.bellVanity["FLEX"] ?? {};
       bellSuffix = "${bell.title.replaceAll("FLEX", "")}$bellSuffix";
     }
 

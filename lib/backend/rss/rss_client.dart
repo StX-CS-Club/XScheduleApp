@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer' as dev;
 import 'package:http/http.dart' as http;
 
 /// Handles all network communication for RSS feeds.
@@ -10,6 +9,9 @@ import 'package:http/http.dart' as http;
 /// - Track online/offline state
 /// - Notify listeners when connection state changes
 class RSSClient {
+  // Private constructor — this class is not intended to be instantiated
+  RSSClient._();
+
   /// Whether the app is currently considered offline.
   ///
   /// Set to `true` when:

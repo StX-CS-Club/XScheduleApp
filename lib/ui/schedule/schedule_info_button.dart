@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:xschedule/backend/rss/rss.dart';
-import 'package:xschedule/materials/icon_circle.dart';
+import 'package:xschedule/widgets/icon_circle.dart';
 import 'package:xschedule/extensions/build_context_extension.dart';
-import 'package:xschedule/interface/schedule/schedule_info_display.dart';
+import 'package:xschedule/ui/schedule/schedule_info_display.dart';
 
 /// A self-contained info button for the [ScheduleDisplay] top bar.
 ///

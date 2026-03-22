@@ -1,39 +1,38 @@
-/*
-  * splash_page.dart *
-  Temporary destination page of the app which appears while it determines where to send the user.
-  Displays static load featuring logo while loading.
-  Currently useless, considering destination is determined synchronously.
-*/
 import 'package:flutter/material.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:xschedule/startup/home_page.dart';
-import 'package:xschedule/materials/static_load.dart';
+import 'package:xschedule/widgets/static_load.dart';
 import 'package:xschedule/startup/welcome_page.dart';
 
-/// Splash page which appears while determining destination <p>
-/// Displays the logo on a beige background while the destination is determined.
+/// Transient splash page shown while the app determines where to send the user.
+///
+/// Responsibilities:
+/// - Displays [StaticLoad] (logo on beige background) during the brief routing decision
+/// - Reads the "state" key from local storage to decide the destination
+/// - Navigates to [HomePage] if the user has previously logged in, or [WelcomePage] otherwise
 class SplashPage extends StatelessWidget {
   const SplashPage({super.key});
 
-  // Determines where to send the user based on app history status
-  static void determineDestination(BuildContext context) {
-    // Sends user to Welcome if not logged, else sends them to home page
-    if (localStorage.getItem("state") != "logged") {
-      Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const Welcome()), (_) => false);
-    } else {
-      Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (_) => const HomePage()), (_) => false);
-    }
+  /// Reads local storage state and immediately navigates to the correct destination.
+  /// Replaces the entire navigation stack so the user cannot back-navigate to the splash.
+  ///
+  /// Parameters:
+  /// - [context]: The current build context used for navigation.
+  static void _navigateFromSplash(BuildContext context) {
+    // Route to HomePage if previously logged in, otherwise to WelcomePage
+    final Widget destination = localStorage.getItem("state") == "logged"
+        ? const HomePage()
+        : const WelcomePage();
+    Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => destination), (_) => false);
   }
 
   @override
   Widget build(BuildContext context) {
-    // Schedules reroute post build
-    WidgetsBinding.instance.addPostFrameCallback((_){
-      determineDestination(context);
+    // Navigation must be deferred until after the widget tree is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _navigateFromSplash(context);
     });
-    // Basic scaffold displaying logo while app loads (as of right now, practically unused)
-    return StaticLoad();
+    return const StaticLoad();
   }
 }

@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:localstorage/localstorage.dart';
 import 'package:xschedule/schedule/bell_entry.dart';
+import 'package:xschedule/schedule/schedule_storage.dart';
 
 /// A model class representing a single day's schedule and its associated bell data.
 ///
@@ -11,40 +11,6 @@ import 'package:xschedule/schedule/bell_entry.dart';
 /// - Providing static reference data for standard day structures and bell labels
 /// - Serialising schedule data to a JSON-compatible map
 class ScheduleEntry {
-  /// Persisted vanity data for each bell, keyed by bell label.
-  ///
-  /// Each entry maps value names (e.g. `'className'`, `'location'`, `'color'`) to their values.
-  /// Loaded from [localStorage] on startup under the key `'bellVanity'`.
-  static Map<String, Map<String, dynamic>> bellVanity =
-  Map<String, Map<String, dynamic>>.from(
-      json.decode(localStorage.getItem("bellVanity") ?? '{}'));
-
-  /// Standard day structures, mapping a day title to its ordered list of bell labels.
-  ///
-  /// Used as reference templates when constructing or validating a schedule's bell order.
-  static const Map<String, List<String>> sampleDays = {
-    "A Day": ["A", "B", "C", "FLEX", "D", "E", "F"],
-    "G Day": ["G", "H", "A", "FLEX", "B", "C", "D"],
-    "E Day": ["E", "F", "G", "FLEX", "H", "A", "B"],
-    "C Day": ["C", "D", "E", "FLEX", "F", "G", "H"],
-    "X Day": ["A", "B", "FLEX", "C", "D"],
-    "Y Day": ["E", "F", "FLEX", "G", "H"],
-    "All Meet": ["A", "B", "C", "D", "FLEX", "E", "F", "G", "H"],
-  };
-
-  /// The full set of recognised bell labels across all standard day types.
-  static const List<String> sampleBells = [
-    "A",
-    "B",
-    "C",
-    "D",
-    "E",
-    "F",
-    "G",
-    "H",
-    "HR",
-    "FLEX"
-  ];
 
   /// The ordered list of [BellEntry]s for this schedule.
   ///
@@ -91,30 +57,39 @@ class ScheduleEntry {
     }
   }
 
-  /// Serialises this schedule to a JSON-compatible map.
+  /// Serialises this schedule to a compressed JSON-compatible map.
   ///
-  /// Returns: A [Map] with `'name'` and `'bells'` keys, suitable for [jsonEncode]
-  Map<String, dynamic> toJsonEntry() => {"name": name, "bells": _bellMap()};
+  /// Uses [ScheduleKeys.encode] to shorten field names for storage efficiency.
+  /// Omits [name] if it is the default `'No Classes'` to reduce payload size.
+  ///
+  /// Returns: A [Map] with compressed keys, suitable for [jsonEncode]
+  Map<String, dynamic> toJsonEntry() => {
+    if (name != "No Classes") ScheduleStorage.scheduleEncode['name']!: name,
+    ScheduleStorage.scheduleEncode['bells']!: _bellList(),
+  };
 
-  /// Converts [bells] to a `Map<title, timeRange>` for JSON serialisation.
+  /// Converts [bells] to a compact list-of-arrays for JSON serialisation.
   ///
-  /// Only includes [BellEntry]s with valid (non-null) start and end times,
-  /// to prevent `'null-null'` time range strings that would fail to parse on restore.
-  /// Duplicate bell titles are deduplicated by appending zero-width spaces (`'\u200B'`)
-  /// to the key — stripped on deserialisation in [BellEntry.listFromMap].
+  /// Each bell is stored as a three-element list `[title, start, end]` rather
+  /// than a map, eliminating per-bell key strings and reducing payload size.
+  /// Only includes [BellEntry]s with valid (non-null) start and end times.
+  /// Duplicate bell titles are deduplicated by appending zero-width spaces
+  /// (`'\u200B'`) to the title — stripped on deserialisation in [BellEntry.listFromList].
   ///
-  /// Returns: A [Map]<[String], [String]> of bell title to `'HH:MM-HH:MM'` time range
-  Map<String, String> _bellMap() {
-    final Map<String, String> result = {};
+  /// Returns: A [List] of `[title, start, end]` arrays
+  List<List<String>> _bellList() {
+    final List<List<String>> result = [];
+    final Set<String> seenTitles = {};
     for (BellEntry bell in bells) {
-      // Skips bells with missing times to avoid storing unparseable 'null-null' ranges
+      // Skips bells with missing times to avoid storing unparseable entries
       if (bell.start != null && bell.end != null) {
-        // Appends zero-width spaces until the key is unique, preserving duplicate-titled bells
-        String key = bell.title;
-        while (result.containsKey(key)) {
-          key += '\u200B';
+        // Appends zero-width spaces to deduplicate titles with identical labels
+        String title = bell.title;
+        while (seenTitles.contains(title)) {
+          title += '\u200B';
         }
-        result[key] = "${bell.start}-${bell.end}";
+        seenTitles.add(title);
+        result.add([title, bell.start!, bell.end!]);
       }
     }
     return result;

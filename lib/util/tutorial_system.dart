@@ -2,7 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:showcaseview/showcaseview.dart';
-import 'package:xschedule/materials/styled_button.dart';
+import 'package:xschedule/widgets/styled_button.dart';
 
 /// Manages a set of sequential [Showcase] tutorial steps for a given screen or feature.
 ///

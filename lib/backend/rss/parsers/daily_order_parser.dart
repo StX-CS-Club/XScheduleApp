@@ -1,9 +1,8 @@
 import 'package:icalendar_parser/icalendar_parser.dart';
 import 'package:xschedule/extensions/date_time_extension.dart';
-import 'package:xschedule/schedule/schedule_entry.dart';
 import 'package:xschedule/schedule/schedule_directory.dart';
-
-import '../../../schedule/bell_entry.dart';
+import 'package:xschedule/schedule/schedule_settings.dart';
+import 'package:xschedule/schedule/bell_entry.dart';
 
 /// Parses daily order calendar data (ICS format) into bell schedules.
 ///
@@ -14,6 +13,9 @@ import '../../../schedule/bell_entry.dart';
 /// - Fill missing start/end times between bells
 /// - Write parsed schedules to [ScheduleDirectory]
 class DailyOrderParser {
+  // Private constructor — this class is not intended to be instantiated
+  DailyOrderParser._();
+
   /// Regex used to extract bell titles and times from schedule text.
   ///
   /// Matches patterns like:
@@ -226,7 +228,7 @@ class DailyOrderParser {
     final String upper = title.toUpperCase();
 
     // Normalize known bell names
-    if (ScheduleEntry.sampleBells.contains(upper) ||
+    if (ScheduleSettings.sampleBells.contains(upper) ||
         upper.contains('FLEX') ||
         upper.contains('HOMEROOM')) {
       return upper.replaceAll('HOMEROOM', 'HR');

@@ -18,9 +18,7 @@ class BellEntry {
     required this.title,
     this.start,
     this.end,
-  }){
-    if(title.contains("BellEntry")) print("yo");
-  }
+  });
 
   /// The label of this bell period (e.g. `'A'`, `'HR'`, `'FLEX 1'`).
   final String title;
@@ -122,5 +120,23 @@ class BellEntry {
       entry.value,
     ))
         .toList();
+  }
+
+  /// Converts a list of `[title, start, end]` arrays into an ordered [List] of [BellEntry]s.
+  ///
+  /// This is the deserialisation counterpart to [ScheduleEntry._bellList].
+  /// Zero-width spaces (`'\u200B'`) appended to titles during serialisation for
+  /// deduplication are stripped before construction.
+  ///
+  /// Parameters:
+  /// - [list]: A list of three-element string arrays `[title, start, end]`
+  ///
+  /// Returns: A [List]<[BellEntry]> in the same order as [list]
+  static List<BellEntry> listFromList(List<dynamic> list) {
+    return list.map((entry) {
+      // Strips zero-width spaces added during serialisation for title deduplication
+      final String title = (entry[0] as String).replaceAll('\u200B', '');
+      return BellEntry(title: title, start: entry[1], end: entry[2]);
+    }).toList();
   }
 }

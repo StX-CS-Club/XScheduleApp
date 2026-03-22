@@ -5,7 +5,8 @@ import 'package:xschedule/extensions/widget_extension.dart';
 import 'package:xschedule/schedule/bell_entry.dart';
 import 'package:xschedule/schedule/schedule_entry.dart';
 import 'package:xschedule/extensions/color_extension.dart';
-import 'package:xschedule/materials/popup_menu.dart';
+import 'package:xschedule/widgets/popup_menu.dart';
+import 'package:xschedule/schedule/schedule_settings.dart';
 
 /// A popup displaying detailed vanity information for a single [BellEntry].
 ///
@@ -25,26 +26,26 @@ class BellInfo extends StatelessWidget {
   /// Resolves the vanity data map and display suffix for [bell].
   ///
   /// This method:
-  /// - Looks up [bell] in [ScheduleEntry.bellVanity] by title string
+  /// - Looks up [bell] in [ScheduleSettings.bellVanity] by title string
   /// - Overrides with the `'HR'` or `'FLEX'` vanity entry if the title contains either
   /// - Switches to the alternate vanity map if the schedule name matches any `'alt_days'` entry
   ///
-  /// NOTE: [ScheduleEntry.bellVanity] is keyed by [String] — relies on [BellEntry.toString]
+  /// NOTE: [ScheduleSettings.bellVanity] is keyed by [String] — relies on [BellEntry.toString]
   /// returning the correct key for the initial lookup.
   ///
   /// Returns: A record with the resolved [vanity] map and the display [bellSuffix]
   ({Map<String, dynamic> vanity, String bellSuffix}) _resolveVanity() {
-    Map<String, dynamic> bellVanity = ScheduleEntry.bellVanity[bell.title] ?? {};
+    Map<String, dynamic> bellVanity = ScheduleSettings.bellVanity[bell.title] ?? {};
 
     /// Suffix appended after the bell title in display strings; single-char bells get ' Bell'.
     String bellSuffix = bell.title.length <= 1 ? ' Bell' : '';
 
     // HR and FLEX bells use their own fixed vanity entries regardless of the full title
     if (bell.title.contains("HR")) {
-      bellVanity = ScheduleEntry.bellVanity["HR"] ?? {};
+      bellVanity = ScheduleSettings.bellVanity["HR"] ?? {};
     }
     if (bell.title.contains("FLEX")) {
-      bellVanity = ScheduleEntry.bellVanity["FLEX"] ?? {};
+      bellVanity = ScheduleSettings.bellVanity["FLEX"] ?? {};
     }
 
     // Switch to the alternate vanity map if the schedule name matches an alt_days entry

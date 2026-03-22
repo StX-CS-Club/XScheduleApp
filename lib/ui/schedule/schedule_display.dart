@@ -3,16 +3,17 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:showcaseview/showcaseview.dart';
 import 'package:xschedule/schedule/schedule_directory.dart';
+import 'package:xschedule/schedule/schedule_storage.dart';
 import 'package:xschedule/util/stream_signal.dart';
 import 'package:xschedule/extensions/build_context_extension.dart';
 import 'package:xschedule/extensions/date_time_extension.dart';
 import 'package:xschedule/extensions/widget_extension.dart';
-import 'package:xschedule/materials/icon_circle.dart';
-import 'package:xschedule/materials/styled_button.dart';
-import 'package:xschedule/interface/schedule/calendar_navigation.dart';
-import 'package:xschedule/interface/schedule/schedule_display_card.dart';
-import 'package:xschedule/interface/schedule/schedule_info_button.dart';
-import 'package:xschedule/interface/schedule/schedule_settings/schedule_settings.dart';
+import 'package:xschedule/widgets/icon_circle.dart';
+import 'package:xschedule/widgets/styled_button.dart';
+import 'package:xschedule/ui/schedule/calendar_navigation.dart';
+import 'package:xschedule/ui/schedule/schedule_display_card.dart';
+import 'package:xschedule/ui/schedule/schedule_info_button.dart';
+import 'package:xschedule/ui/schedule/schedule_settings/schedule_settings_page.dart';
 import 'package:xschedule/util/tutorial_system.dart';
 
 /// The main schedule page, displaying a swipeable [PageView] of daily schedules.
@@ -213,9 +214,9 @@ class _ScheduleDisplayState extends State<ScheduleDisplay> {
                             backgroundColor: colorScheme.secondary,
                             contentColor: colorScheme.onSecondary,
                             onTap: () {
-                              ScheduleDirectory.readStoredSchedule();
-                              context.pushSwipePage(const ScheduleSettings(
-                                backArrow: true,
+                              ScheduleStorage.restore();
+                              context.pushSwipePage(const ScheduleSettingsPage(
+                                showBackArrow: true,
                               ));
                             },
                           )),

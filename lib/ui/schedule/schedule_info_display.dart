@@ -1,7 +1,3 @@
-/*
-  * schedule_info_display.dart *
-  StatelessWidget of a popup which displays the daily information of a given date from the database.
-*/
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -10,7 +6,7 @@ import 'package:xschedule/schedule/schedule_directory.dart';
 import 'package:xschedule/extensions/date_time_extension.dart';
 import 'package:xschedule/extensions/widget_extension.dart';
 import 'package:xschedule/schedule/schedule_entry.dart';
-import 'package:xschedule/materials/popup_menu.dart';
+import 'package:xschedule/widgets/popup_menu.dart';
 
 /// A popup displaying the daily info for a given [date].
 ///

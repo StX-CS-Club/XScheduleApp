@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:xschedule/extensions/int_extension.dart';
-import 'package:xschedule/materials/refresh_widget.dart';
-import 'package:xschedule/interface/schedule/schedule_display.dart';
+import 'package:xschedule/widgets/refresh_widget.dart';
+import 'package:xschedule/ui/schedule/schedule_display.dart';
 import 'package:xschedule/schedule/bell_entry.dart';
 import 'package:xschedule/schedule/schedule_directory.dart';
 import 'package:xschedule/schedule/schedule_entry.dart';
-import 'package:xschedule/interface/schedule/bell_display/bell_tile.dart';
+import 'package:xschedule/ui/schedule/bell_display/bell_tile.dart';
 
 /// Displays the schedule card for a single calendar day.
 ///
