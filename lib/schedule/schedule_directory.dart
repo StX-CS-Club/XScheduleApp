@@ -38,8 +38,10 @@ class ScheduleDirectory {
     // Normalises key to date-only to prevent duplicate entries for the same calendar date
     final DateTime key = date.dateOnly();
     schedules[key] ??= ScheduleEntry();
-    schedules[key]!.writeBells(bells);
-    schedules[key]!.writeName(name);
+    final ScheduleEntry schedule = schedules[key]!;
+    schedule.writeBells(bells);
+    schedule.writeName(name);
+    schedule.removeInvalid();
   }
 
   /// Returns the [ScheduleEntry] for [date], creating and storing an empty one if absent.

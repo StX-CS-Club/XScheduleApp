@@ -2,9 +2,9 @@
 ///
 /// Responsibilities:
 /// - Mapping integer month and weekday values to their full name strings
-/// - Adding days to a [DateTime] with daylight saving time compensation
+/// - Adding days to a [DateTime] without daylight saving time interference
 /// - Formatting a [DateTime] as human-readable date and weekday strings
-/// - Computing the difference in months between two [DateTime] instances
+/// - Computing the difference in calendar days or months between two [DateTime] instances
 /// - Stripping time components from a [DateTime] to produce a date-only value
 extension DateTimeExtension on DateTime {
   /// Maps each integer month value (1–12) to its full English name.
@@ -38,34 +38,67 @@ extension DateTimeExtension on DateTime {
     7: 'Sunday'
   };
 
-  /// Returns a new [DateTime] that is [days] days after this instance,
-  /// correcting for any hour shift introduced by daylight saving time transitions.
+  /// Returns a new [DateTime] that is [days] days after this instance.
   ///
-  /// This method:
-  /// - Adds the requested number of days using [Duration]
-  /// - Detects a DST-induced hour offset by checking if the result's hour is non-zero
-  /// - Steps the result forward or backward by one hour at a time until midnight is reached
+  /// Uses direct [DateTime] construction rather than [Duration] arithmetic,
+  /// which sidesteps DST transitions entirely and always returns a midnight value.
+  /// Dart's [DateTime] constructor normalises out-of-range day values automatically
+  /// (e.g. day 32 of March becomes April 1).
   ///
   /// Parameters:
   /// - [days]: The number of days to add; may be negative to subtract days
   ///
   /// Returns: A [DateTime] at midnight, [days] calendar days from this instance
   DateTime addDay(int days) {
-    DateTime result = add(Duration(days: days));
+    return DateTime(year, month, day + days);
+  }
 
-    // DST transitions can shift the result's hour by ±1; correct back to midnight.
-    // If the hour is past noon, the clock has sprung forward — advance to next midnight.
-    // If the hour is before noon, the clock has fallen back — retreat to midnight.
-    if (result.hour > 12) {
-      while (result.hour != 0) {
-        result = result.add(const Duration(hours: 1));
-      }
-    } else {
-      while (result.hour != 0) {
-        result = result.subtract(const Duration(hours: 1));
-      }
-    }
-    return result;
+  /// Returns the difference in whole calendar days between this [DateTime] and [dateTime].
+  ///
+  /// Uses Julian Day Numbers to perform pure integer arithmetic, avoiding
+  /// [Duration]-based subtraction which is susceptible to DST off-by-one errors.
+  ///
+  /// Parameters:
+  /// - [dateTime]: The [DateTime] to subtract from this instance
+  ///
+  /// Returns: A positive [int] if this date is later, negative if earlier, or `0` if the same day
+  int dayDiff(DateTime dateTime) {
+    return _toJulianDay(dateOnly()) -
+        _toJulianDay(dateTime.dateOnly());
+  }
+
+  /// Converts a [DateTime] to a Julian Day Number — an integer count of days since
+  /// the Julian epoch (January 1, 4713 BC). Used internally by [dayDiff].
+  ///
+  /// Parameters:
+  /// - [d]: The [DateTime] to convert; only [DateTime.year], [DateTime.month],
+  ///   and [DateTime.day] are used
+  ///
+  /// Returns: An [int] Julian Day Number for the given date
+  static int _toJulianDay(DateTime d) {
+    final int m = d.month;
+    final int y = d.year + (m < 3 ? -1 : 0);
+    return d.day +
+        ((153 * (m + (m < 3 ? 9 : -3)) + 2) ~/ 5) +
+        (365 * y) +
+        (y ~/ 4) -
+        (y ~/ 100) +
+        (y ~/ 400) -
+        32045;
+  }
+
+  /// Returns the difference in whole months between this [DateTime] and [dateTime].
+  ///
+  /// This method:
+  /// - Converts each date to a total month count (`year * 12 + month`)
+  /// - Subtracts to find the signed month difference
+  ///
+  /// Parameters:
+  /// - [dateTime]: The [DateTime] to subtract from this instance
+  ///
+  /// Returns: A positive [int] if this date is later, negative if earlier, or `0` if same month
+  int monthDiff(DateTime dateTime) {
+    return (year * 12 + month) - (dateTime.year * 12 + dateTime.month);
   }
 
   /// Returns a formatted date string for this [DateTime].
@@ -88,20 +121,6 @@ extension DateTimeExtension on DateTime {
   /// Returns: A [String] such as `'Monday'` or `'Sunday'`
   String weekdayText() {
     return weekdayString[weekday]!;
-  }
-
-  /// Returns the difference in whole months between this [DateTime] and [dateTime].
-  ///
-  /// This method:
-  /// - Converts each date to a total month count (`year * 12 + month`)
-  /// - Subtracts to find the signed month difference
-  ///
-  /// Parameters:
-  /// - [dateTime]: The [DateTime] to subtract from this instance
-  ///
-  /// Returns: A positive [int] if this date is later, negative if earlier, or `0` if same month
-  int monthDiff(DateTime dateTime) {
-    return (year * 12 + month) - (dateTime.year * 12 + dateTime.month);
   }
 
   /// Returns a copy of this [DateTime] with all time components set to zero.

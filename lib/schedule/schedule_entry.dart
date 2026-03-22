@@ -34,7 +34,16 @@ class ScheduleEntry {
 
   /// The full set of recognised bell labels across all standard day types.
   static const List<String> sampleBells = [
-    "A", "B", "C", "D", "E", "F", "G", "H", "HR", "FLEX"
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "HR",
+    "FLEX"
   ];
 
   /// The ordered list of [BellEntry]s for this schedule.
@@ -51,8 +60,9 @@ class ScheduleEntry {
   ///
   /// Derived lazily from [bells] via [BellEntry.isFlex]; always reflects the
   /// current state of [bells] without requiring manual cache updates.
-  BellEntry? get firstBell =>
-      bells.cast<BellEntry?>().firstWhere((b) => !b!.isFlex, orElse: () => null);
+  BellEntry? get firstBell => bells
+      .cast<BellEntry?>()
+      .firstWhere((b) => !b!.isFlex, orElse: () => null);
 
   /// The first flex [BellEntry] in [bells], or `null` if none exists.
   ///
@@ -110,30 +120,33 @@ class ScheduleEntry {
     return result;
   }
 
+  /// Removes any [BellEntry]s from [bells] whose [Clock]s are invalid via [BellEntry.isValid].
+  ///
+  /// This method mutates [bells] in place. Call before [containsClasses] if
+  /// invalid bells need to be purged prior to the check.
+  void removeInvalid() {
+    bells.removeWhere((bell) => !bell.isValid);
+  }
+
   /// Returns whether this schedule contains valid class data.
   ///
   /// This method:
-  /// - Returns `false` immediately if [bells] is empty
+  /// - Returns `false` immediately if [bells] is empty (fast path; also guards when no cleaning has occurred)
   /// - When [tutorial] is `true`, also requires both [firstBell] and [firstFlex] to be non-null
-  /// - When [clean] is `true`, removes any [BellEntry]s with invalid [Clock]s via [BellEntry.isValid]
   ///
   /// Parameters:
   /// - [tutorial]: When `true`, requires both a standard bell and a flex bell to be present;
   ///   defaults to `false`
-  /// - [clean]: When `true`, removes invalid bells from [bells] before returning;
+  /// - [includeEvents]: When `true`, a schedule containing only flex/event bells still returns `true`;
   ///   defaults to `true`
   ///
   /// Returns: `true` if the schedule has at least one valid bell (and passes tutorial checks)
-  bool containsClasses({bool tutorial = false, bool clean = true}) {
+  bool containsClasses({bool tutorial = false, bool includeEvents = true}) {
+    // Fast path before any cleaning; also guards when removeInvalid has not been called
     if (bells.isEmpty) return false;
 
     if (tutorial && (firstBell == null || firstFlex == null)) return false;
 
-    if (clean) {
-      // removeWhere avoids ConcurrentModificationError from mutating during iteration
-      bells.removeWhere((bell) => !bell.isValid);
-    }
-
-    return bells.isNotEmpty;
+    return firstBell != null || includeEvents;
   }
 }

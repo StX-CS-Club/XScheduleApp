@@ -1,14 +1,7 @@
-/*
-  * schedule_display.dart *
-  Main page which displays the schedule.
-  Consists of multiple Widgets which come together to form Schedule page.
-  References other files under schedule_display for Widgets.
-*/
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:showcaseview/showcaseview.dart';
-import 'package:xschedule/backend/rss/rss.dart';
 import 'package:xschedule/schedule/schedule_directory.dart';
 import 'package:xschedule/util/stream_signal.dart';
 import 'package:xschedule/extensions/build_context_extension.dart';
@@ -16,123 +9,156 @@ import 'package:xschedule/extensions/date_time_extension.dart';
 import 'package:xschedule/extensions/widget_extension.dart';
 import 'package:xschedule/materials/icon_circle.dart';
 import 'package:xschedule/materials/styled_button.dart';
-import 'package:xschedule/schedule/schedule_entry.dart';
 import 'package:xschedule/interface/schedule/calendar_navigation.dart';
 import 'package:xschedule/interface/schedule/schedule_display_card.dart';
-import 'package:xschedule/interface/schedule/schedule_info_display.dart';
+import 'package:xschedule/interface/schedule/schedule_info_button.dart';
 import 'package:xschedule/interface/schedule/schedule_settings/schedule_settings.dart';
 import 'package:xschedule/util/tutorial_system.dart';
 
-/// Main page which displays the schedules. <p>
-/// Features an AppBar with navigation and info and a PageView for all different schedules.
+/// The main schedule page, displaying a swipeable [PageView] of daily schedules.
+///
+/// Responsibilities:
+/// - Holding shared static state (current date, page index, stream, tutorial system)
+/// - Rendering a [PageView] of [ScheduleDisplayCard]s, one per calendar day
+/// - Providing a top bar with date navigation, calendar popup, and info button
+/// - Managing and sequencing the first-launch tutorial flow
 class ScheduleDisplay extends StatefulWidget {
   const ScheduleDisplay({super.key});
 
-  // The current date, ignoring time
+  /// Today's date with time stripped; serves as the anchor for all page index calculations.
   static DateTime initialDate = DateTime.now().dateOnly();
 
-  // A date verified to have a schedule for the tutorial; TBD
+  /// A date confirmed to have tutorial-valid classes; determined lazily on first tutorial run.
   static DateTime? tutorialDate;
 
-  // pageIndex of Schedule PageView
+  /// The currently visible page offset from [initialDate]; negative values are in the past.
   static int pageIndex = 0;
 
-  // ScheduleDisplay Stream
+  /// Stream used to trigger rebuilds of [ScheduleDisplay] from external sources.
   static StreamController<StreamSignal> scheduleStream =
-      StreamController<StreamSignal>();
+  StreamController<StreamSignal>();
 
-  // TutorialSystem used in ScheduleDisplay
+  /// The [TutorialSystem] managing all showcase steps on the schedule page.
+  ///
+  /// Keys map tutorial IDs to their display strings shown during the walkthrough.
   static final TutorialSystem tutorialSystem = TutorialSystem({
     'tutorial_schedule':
-        "In this menu, you'll be able to see the schedule of any school day out of the year.",
+    "In this menu, you'll be able to see the schedule of any school day out of the year.",
     'tutorial_schedule_bell':
-        'Each individual bell is set to match the information you provided about your class schedule, and clicking on any bell will display more information about it.',
+    'Each individual bell is set to match the information you provided about your class schedule, and clicking on any bell will display more information about it.',
     'tutorial_schedule_flex':
-        'Additionally, you can tap the Flex bell to view information about lunch, clubs, and more!',
+    'Additionally, you can tap the Flex bell to view information about lunch, clubs, and more!',
     'tutorial_schedule_date':
-        "Up top, you'll find the date you're currently viewing. You can use the buttons or simple swiping gestures to flip between days.",
+    "Up top, you'll find the date you're currently viewing. You can use the buttons or simple swiping gestures to flip between days.",
     'tutorial_schedule_calendar':
-        "... or click this button to quickly navigate through the school days of the year.",
+    "... or click this button to quickly navigate through the school days of the year.",
     'tutorial_schedule_info':
-        "Tap this button to view important information about a school day, if available.",
+    "Tap this button to view important information about a school day, if available.",
     'tutorial_schedule_settings':
-        'Lastly, if you ever want to edit your class information, you can do so by clicking this button.'
+    'Lastly, if you ever want to edit your class information, you can do so by clicking this button.'
   });
 
   @override
   State<ScheduleDisplay> createState() => _ScheduleDisplayState();
 }
 
+/// The private [State] for [ScheduleDisplay].
+///
+/// Responsibilities:
+/// - Owning and disposing the [PageController]
+/// - Initialising the [scheduleStream] once on mount
+/// - Running the tutorial sequence after schedule data is available
+/// - Building the top bar, page view, and settings button
 class _ScheduleDisplayState extends State<ScheduleDisplay> {
-  // Page uses PageController system with set amount of pages, starting in the middle to provide a "negative index" scroll effect
-  // # of pages to display on PageView (3 years)
-  static const int maxPages = 1095;
+  // Uses a large fixed page count centered at [pageMidpoint] to simulate
+  // endless scrolling in both directions without a true infinite list
 
-  // Starting page (middle of PageView; 1.5 years in)
-  static const int initialPage = 547;
+  /// Total number of pages in the [PageView] (~3 years of days).
+  static const int pageCount = 1095;
 
-  // PageView controller; initial page with set index from "0"
-  final PageController _controller =
-      PageController(initialPage: initialPage + ScheduleDisplay.pageIndex);
+  /// The page index representing today; pages before/after map to negative/positive offsets.
+  static const int pageMidpoint = 547;
 
-  // On Widget disposed, also dispose of timer and PageController
+  /// Controls the [PageView]; initialized at [pageMidpoint] plus any previously saved [pageIndex].
+  final PageController _pageController =
+  PageController(initialPage: pageMidpoint + ScheduleDisplay.pageIndex);
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialise stream once here rather than recreating it on every build
+    ScheduleDisplay.scheduleStream = StreamController<StreamSignal>();
+  }
+
   @override
   void dispose() {
     super.dispose();
-    _controller.dispose();
+    _pageController.dispose();
   }
 
-  // Method which begins the ScheduleDisplay tutorial
-  Future<void> _showTutorial(BuildContext context) async {
-    // awaits the fetching of schedule data before starting
-    while (ScheduleDirectory.schedules.isEmpty) {
-      // wait .1 seconds before checking again for Thread resting
-      await Future.delayed(Duration(milliseconds: 100));
+  /// Searches up to 25 days forward and backward from [initialDate] for a date
+  /// with tutorial-valid classes (i.e. at least one standard bell and one flex bell).
+  ///
+  /// Returns: The nearest such [DateTime], or `null` if none found within range
+  DateTime? _findNearestTutorialDate() {
+    for (int dayOffset = 0; dayOffset <= 25; dayOffset++) {
+      if (ScheduleDirectory.readSchedule(
+          ScheduleDisplay.initialDate.addDay(dayOffset))
+          .containsClasses(tutorial: true)) {
+        return ScheduleDisplay.initialDate.addDay(dayOffset);
+      }
+      // Skip the negative check on the first iteration (addDay(0) == addDay(-0))
+      if (dayOffset > 0 &&
+          ScheduleDirectory.readSchedule(
+              ScheduleDisplay.initialDate.addDay(-dayOffset))
+              .containsClasses(tutorial: true)) {
+        return ScheduleDisplay.initialDate.addDay(-dayOffset);
+      }
     }
-    // Verify that >= .25 seconds have been waited for any page animation to finish
+    return null;
+  }
+
+  /// Orchestrates the tutorial sequence after the widget is built and data is loaded.
+  ///
+  /// This method:
+  /// - Polls until [ScheduleDirectory.schedules] is populated
+  /// - Waits an additional 250ms for any in-progress page animation to settle
+  /// - On first run, finds and sets [tutorialDate] via [_findNearestTutorialDate]
+  /// - On subsequent runs, animates to [tutorialDate] if not already there, then starts the tutorial
+  ///
+  /// Parameters:
+  /// - [context]: The [BuildContext] used to trigger the showcase; must be [mounted] before use
+  Future<void> _showTutorial(BuildContext context) async {
+    // Poll until schedule data is available; 100ms delay avoids busy-spinning the thread
+    while (ScheduleDirectory.schedules.isEmpty) {
+      await Future.delayed(const Duration(milliseconds: 100));
+    }
+    // Ensure any page animation has finished before proceeding
     await Future.delayed(const Duration(milliseconds: 250));
-    if (!ScheduleDisplay.tutorialSystem.finished) {
-      if (ScheduleDisplay.tutorialDate == null) {
-        // Temporary counting int for determining tutorialDate
-        int index = 0;
-        while (index <= 25 && ScheduleDisplay.tutorialDate == null) {
-          // Checks dates of both positive and negative count index from starting date for schedule
-          if (ScheduleDirectory.readSchedule(
-                  ScheduleDisplay.initialDate.addDay(index))
-              .containsClasses(tutorial: true)) {
-            break;
-          }
-          if (ScheduleDirectory.readSchedule(
-                  ScheduleDisplay.initialDate.addDay(-index))
-              .containsClasses(tutorial: true)) {
-            index = -index;
-            break;
-          }
-          // Increment index
-          index++;
-        }
-        // If index != 26, schedule was found
-        if (index != 26) {
-          setState(() {
-            ScheduleDisplay.tutorialDate =
-                ScheduleDisplay.initialDate.addDay(index);
-          });
-        }
-      } else {
-        int index =
-            ScheduleDisplay.tutorialDate!.day - ScheduleDisplay.initialDate.day;
-        // if animation needs to occur, run it and end
-        if (index != ScheduleDisplay.pageIndex) {
-          // Set pageIndex to determined index, then animate page
-          ScheduleDisplay.pageIndex = index;
-          _controller.animateToPage(initialPage + index,
-              duration: const Duration(milliseconds: 250),
-              curve: Curves.easeInOut);
-        } else if (context.mounted) {
-          // ...else begin tutorial
-          ScheduleDisplay.tutorialSystem.showTutorials(context);
-          ScheduleDisplay.tutorialSystem.finish();
-        }
+
+    if (ScheduleDisplay.tutorialSystem.finished) return;
+
+    if (ScheduleDisplay.tutorialDate == null) {
+      // First run: find and persist the nearest tutorial-valid date
+      final DateTime? found = _findNearestTutorialDate();
+      if (found != null) {
+        setState(() {
+          ScheduleDisplay.tutorialDate = found;
+        });
+      }
+    } else {
+      final int dayOffset =
+          ScheduleDisplay.tutorialDate!.day - ScheduleDisplay.initialDate.day;
+      if (dayOffset != ScheduleDisplay.pageIndex) {
+        // Animate to the tutorial date; _showTutorial will re-run after the animation settles
+        ScheduleDisplay.pageIndex = dayOffset;
+        _pageController.animateToPage(pageMidpoint + dayOffset,
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeInOut);
+      } else if (context.mounted) {
+        // Already on the correct date — begin the tutorial
+        ScheduleDisplay.tutorialSystem.showTutorials(context);
+        ScheduleDisplay.tutorialSystem.finish();
       }
     }
   }
@@ -142,52 +168,42 @@ class _ScheduleDisplayState extends State<ScheduleDisplay> {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final MediaQueryData mediaQuery = MediaQuery.of(context);
 
-    // Refreshes tutorialSystem GlobalKeys
+    // Refresh showcase GlobalKeys and remove any already-completed steps
     ScheduleDisplay.tutorialSystem.refreshKeys();
     ScheduleDisplay.tutorialSystem.removeFinished();
 
-    // Runs addDailyData asynchronously on page moved; may do nothing at all if ranges overlap
-    ScheduleDirectory.addDailyData(
-        ScheduleDisplay.initialDate.addDay(ScheduleDisplay.pageIndex - 25),
-        ScheduleDisplay.initialDate.addDay(ScheduleDisplay.pageIndex + 25));
-    // Refreshes stream
-    ScheduleDisplay.scheduleStream = StreamController();
-    // ScheduleDisplay wrapped in StreamBuilder
+    // Wrap in StreamBuilder so external signals can trigger a full rebuild
     return StreamBuilder(
         stream: ScheduleDisplay.scheduleStream.stream,
         builder: (context, snapshot) {
-          // ScheduleDisplay wrapped in Showcase View
+          // Wrap in ShowCaseWidget to enable showcase step rendering
           return ShowCaseWidget(onComplete: (_, __) {
             ScheduleDisplay.tutorialSystem.finish();
           }, builder: (context) {
-            // Schedule tutorial to begin after widget finished building
+            // Queue tutorial to start after this frame's layout is complete
             WidgetsBinding.instance.addPostFrameCallback((_) async {
               await _showTutorial(context);
             });
-            // ScheduleDisplay
             return Scaffold(
                 backgroundColor: colorScheme.primaryContainer,
-                // Body as Column w/ TopBar, PageView, and settings button
                 body: Column(
                   children: [
-                    // The TopBar containing calendar button, current viewing date, and info button
+                    // Top bar: calendar button, date navigator, info button
                     Container(
-                      // Row w/ margin set to compensate for device safeZone
+                      // Top margin compensates for device safe zone
                       margin: EdgeInsets.only(
                           top: 8 + mediaQuery.padding.top, bottom: 8),
                       height: 50,
                       alignment: Alignment.center,
-                      // TopBar
                       child: _buildTopBar(context),
                     ),
-                    // Schedule PageView set to take up remaining column space
+                    // Schedule PageView fills remaining vertical space
                     Expanded(child: _buildPageView(context)),
-                    // ScheduleSettings Button
+                    // Settings button centered at the bottom
                     Container(
                       margin: EdgeInsets.symmetric(
                           horizontal: mediaQuery.size.width * .3),
                       height: 30,
-                      // Button wrapped in ShowCase
                       child: ScheduleDisplay.tutorialSystem.showcase(
                           context: context,
                           tutorial: 'tutorial_schedule_settings',
@@ -198,14 +214,12 @@ class _ScheduleDisplayState extends State<ScheduleDisplay> {
                             contentColor: colorScheme.onSecondary,
                             onTap: () {
                               ScheduleDirectory.readStoredSchedule();
-                              // Push animated page of ScheduleSettings
                               context.pushSwipePage(const ScheduleSettings(
                                 backArrow: true,
                               ));
                             },
                           )),
                     ),
-                    // Bottom padding of 8px
                     const SizedBox(height: 8)
                   ],
                 ));
@@ -213,25 +227,25 @@ class _ScheduleDisplayState extends State<ScheduleDisplay> {
         });
   }
 
-  // Builds the TopBar containing the calendar button, date title, and info button
+  /// Builds the top bar containing the calendar button, date navigator, and info button.
+  ///
+  /// Appearance: A horizontal [Row] spanning the full width with items spaced apart;
+  /// calendar icon on the left, date title with arrows in the center, info icon on the right.
   Widget _buildTopBar(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final MediaQueryData mediaQuery = MediaQuery.of(context);
 
-    // Simple row of buttons and title
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // Calendar button w/ padding
+        // Calendar button — opens [CalendarNavigation] popup
         Padding(
           padding: const EdgeInsets.only(left: 16),
-          // Calendar button wrapped in Showcase
           child: ScheduleDisplay.tutorialSystem.showcase(
               context: context,
               circular: true,
               tutorial: 'tutorial_schedule_calendar',
-              // Calendar IconCircle (serves as button)
               child: IconCircle(
                   icon: Icons.calendar_month,
                   iconColor: colorScheme.onSurface,
@@ -239,11 +253,10 @@ class _ScheduleDisplayState extends State<ScheduleDisplay> {
                   radius: 20,
                   padding: 10,
                   onTap: () {
-                    // Pushes the calendar navigation popup
                     _pushCalendarNav();
                   })),
         ),
-        // Current Date Navigator wrapped in Showcase
+        // Date navigator: left arrow, current date text, right arrow
         ScheduleDisplay.tutorialSystem.showcase(
             context: context,
             tutorial: 'tutorial_schedule_date',
@@ -251,9 +264,7 @@ class _ScheduleDisplayState extends State<ScheduleDisplay> {
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Left Arrow IconButton
                 _buildNavButton(context, -1),
-                // Date Title is SizedBox
                 SizedBox(
                   width: mediaQuery.size.width - 220,
                   child: Text(
@@ -268,35 +279,41 @@ class _ScheduleDisplayState extends State<ScheduleDisplay> {
                     maxLines: 1,
                   ).fit(),
                 ),
-                // Right Arrow IconButton
                 _buildNavButton(context, 1),
               ],
             )),
-        // Info button w/ padding
+        // Info button — opens [ScheduleInfoDisplay] popup for the current date
         Padding(
           padding: const EdgeInsets.only(right: 16),
           child: ScheduleDisplay.tutorialSystem.showcase(
               context: context,
               circular: true,
               tutorial: 'tutorial_schedule_info',
-              // Info Button
-              child: _buildInfoButton(context)),
+              child: ScheduleInfoButton(
+                date: ScheduleDisplay.initialDate
+                    .addDay(ScheduleDisplay.pageIndex),
+              )),
         ),
       ],
     );
   }
 
-  // Loading wheel which appears while fetching data
-  Widget _buildLoading(BuildContext context) {
+  /// Builds a centered loading spinner shown while schedule data is being fetched.
+  ///
+  /// Appearance: A 20×20 [CircularProgressIndicator] centered in the full card height.
+  ///
+  /// Parameters:
+  /// - [context]: Used to resolve [ColorScheme] and [MediaQueryData]
+  Widget _buildLoadingIndicator(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final MediaQueryData mediaQuery = MediaQuery.of(context);
 
-    // Remaining height on page for card
+    // Match the card height so the spinner is vertically centered in the same space
     final double cardHeight = mediaQuery.size.height -
         200 -
         mediaQuery.padding.top -
         mediaQuery.padding.bottom;
-    // Returns Loading Wheel of set size aligned at center of space
+
     return Container(
       height: cardHeight,
       alignment: Alignment.center,
@@ -310,148 +327,129 @@ class _ScheduleDisplayState extends State<ScheduleDisplay> {
     );
   }
 
-  // Pseudo-PageView which displays all schedule cards
+  /// Returns the [BoxDecoration] applied to each schedule card container in the [PageView].
+  ///
+  /// Parameters:
+  /// - [colorScheme]: Used to derive surface and shadow colors
+  BoxDecoration _cardDecoration(ColorScheme colorScheme) => BoxDecoration(
+    color: colorScheme.surface,
+    borderRadius: BorderRadius.circular(20),
+    boxShadow: [
+      BoxShadow(
+          color: colorScheme.surfaceContainer,
+          blurRadius: 3,
+          spreadRadius: 1),
+      BoxShadow(
+          color: colorScheme.surfaceContainer,
+          offset: const Offset(2.25, 2.25)),
+    ],
+  );
+
+  /// Builds the [PageView] that displays one [ScheduleDisplayCard] per calendar day.
+  ///
+  /// Appearance: Full-height swipeable cards with rounded corners and a drop shadow.
+  /// Long press returns to today; swipe up advances one page; swipe down opens [CalendarNavigation].
+  ///
+  /// Parameters:
+  /// - [context]: Used to resolve [ColorScheme]
   Widget _buildPageView(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
-    // Returns PageView which builds schedule cards by index
     return PageView.builder(
-        controller: _controller,
+        controller: _pageController,
         physics: const PageScrollPhysics(),
-        // When page index changes, updates pageIndex variable
-        onPageChanged: (i) {
+        onPageChanged: (pageIndex) {
           setState(() {
-            ScheduleDisplay.pageIndex = i - initialPage;
+            ScheduleDisplay.pageIndex = pageIndex - pageMidpoint;
           });
+          // Extend the loaded schedule data window around the new position
+          ScheduleDirectory.addDailyData(
+              ScheduleDisplay.initialDate
+                  .addDay(ScheduleDisplay.pageIndex - 25),
+              ScheduleDisplay.initialDate
+                  .addDay(ScheduleDisplay.pageIndex + 25));
         },
-        // # of pages to ~1000, creating pseudo-endless scrolling effect in both directions
-        itemCount: maxPages,
-        // Builds the schedules based on given index (i)
-        itemBuilder: (_, i) {
-          // The date of the schedule by index (currentDate+index)
+        // ~1000 pages simulates an endless scroll in both directions
+        itemCount: pageCount,
+        itemBuilder: (_, pageIndex) {
+          // Derive the calendar date for this page from its offset to initialDate
           final DateTime date =
-              ScheduleDisplay.initialDate.addDay(i - initialPage);
+          ScheduleDisplay.initialDate.addDay(pageIndex - pageMidpoint);
 
-          // Schedule card wrapped in GestureDetector
           return GestureDetector(
-            // On long tap, animate to current date schedule
+            // Long press: return to today's page
             onLongPress: () {
-              _controller.animateToPage(
-                  (_controller.page! - ScheduleDisplay.pageIndex).floor(),
+              _pageController.animateToPage(
+                  (_pageController.page! - ScheduleDisplay.pageIndex).floor(),
                   duration: const Duration(milliseconds: 500),
                   curve: Curves.easeInOut);
               ScheduleDisplay.pageIndex = 0;
             },
-            // Vertical swipe listener
-            onVerticalDragEnd: (detail) {
-              // If swipe up, animate to next page (to correct people who try and do that fsr)
-              if (detail.primaryVelocity! < 0) {
-                _controller.animateToPage((_controller.page! + 1).floor(),
+            onVerticalDragEnd: (drag) {
+              if (drag.primaryVelocity! < 0) {
+                // Swipe up: advance to next page (catches users who swipe vertically by habit)
+                _pageController.animateToPage(
+                    (_pageController.page! + 1).floor(),
                     duration: const Duration(milliseconds: 200),
                     curve: Curves.easeInOut);
                 ScheduleDisplay.pageIndex++;
               } else {
-                // If swipe down, bring up calendar navigation popup
+                // Swipe down: open calendar navigation popup
                 _pushCalendarNav();
               }
             },
-            // Schedule Builder wrapped in Decoration Container
             child: Container(
               margin: const EdgeInsets.only(left: 20, right: 20, bottom: 10),
-              // Decoration with simple offset shadow
-              decoration: BoxDecoration(
-                  color: colorScheme.surface,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                        color: colorScheme.surfaceContainer,
-                        blurRadius: 3,
-                        spreadRadius: 1),
-                    BoxShadow(
-                        color: colorScheme.surfaceContainer,
-                        offset: const Offset(2.25, 2.25))
-                  ]),
-              // If schedule data is empty, return FutureBuilder for schedule, else simply display schedule
+              decoration: _cardDecoration(colorScheme),
+              // Show spinner while data loads, then swap to the schedule card
               child: ScheduleDirectory.schedules.isEmpty
-                  // FutureBuilder, which displays placeholder (loading wheel) while data is fetched asynchronously, then replaced by schedule
-                  ? _buildLoading(context)
-                  // ...else simply display schedule
+                  ? _buildLoadingIndicator(context)
                   : ScheduleDisplayCard(date: date),
             ),
           );
         });
   }
 
-  // Builds the arrow buttons for swapping between pages
+  /// Builds a single directional navigation arrow button for the date navigator.
+  ///
+  /// Appearance: An [IconButton] showing a forward or back iOS-style arrow.
+  ///
+  /// Parameters:
+  /// - [context]: Used to resolve [ColorScheme]
+  /// - [direction]: `1` for forward (right arrow), `-1` for backward (left arrow)
   Widget _buildNavButton(BuildContext context, int direction) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
-    // Returns Arrow Icon Button
     return IconButton(
-      // When pressed, animates to new page
       onPressed: () {
-        // If forwards == true, animates to next page, if not, animates backwards
-        _controller.animateToPage(_controller.page!.round() + direction,
+        _pageController.animateToPage(
+            _pageController.page!.round() + direction,
             duration: const Duration(milliseconds: 200),
             curve: Curves.easeInOut);
       },
-      // If forwards == true, displays forward arrow, if not, backwards arrow
       icon:
-          Icon(direction > 0 ? Icons.arrow_forward_ios : Icons.arrow_back_ios),
+      Icon(direction > 0 ? Icons.arrow_forward_ios : Icons.arrow_back_ios),
       color: colorScheme.onSurface,
     );
   }
 
-  // Builds the info popup button
-  Widget _buildInfoButton(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
-
-    final ScheduleEntry schedule = ScheduleDirectory.readSchedule(
-        ScheduleDisplay.initialDate.addDay(ScheduleDisplay.pageIndex));
-
-    Color iconColor = colorScheme.onSurface;
-    Color backgroundColor = colorScheme.tertiary.withAlpha(128);
-
-    if (RSS.offline) {
-      iconColor = colorScheme.onError;
-      backgroundColor = colorScheme.error.withAlpha(194);
-    } else {
-      iconColor = iconColor.withAlpha(128);
-    }
-
-    // Returns IconCircle of info button
-    return IconCircle(
-        // Simple info icon
-        icon: Icons.info_outline,
-        // Icon opacity changes w/ info available
-        iconColor: iconColor,
-        color: backgroundColor,
-        radius: 20,
-        padding: 5,
-        // OnTap, pushes info popup
-        onTap: () {
-          context.pushPopup(ScheduleInfoDisplay(
-              date: ScheduleDisplay.initialDate
-                  .addDay(ScheduleDisplay.pageIndex)));
-        });
-  }
-
+  /// Pushes the [CalendarNavigation] popup, sliding in from the top.
+  ///
+  /// On date selection, animates the [PageView] to the chosen date.
+  /// Animation duration scales with distance: fast for nearby dates, slow for distant ones.
   void _pushCalendarNav() {
     context.pushPopup(
         CalendarNavigation(
             initialDate: ScheduleDisplay.initialDate,
             currentDate:
-                ScheduleDisplay.initialDate.addDay(ScheduleDisplay.pageIndex),
+            ScheduleDisplay.initialDate.addDay(ScheduleDisplay.pageIndex),
             onSelect: (date) {
-              final int change = ScheduleDisplay.initialDate
-                  .addDay(ScheduleDisplay.pageIndex)
-                  .difference(date)
-                  .inDays;
-              ScheduleDisplay.pageIndex -= change;
-
-              _controller.animateToPage(_controller.page!.round() - change,
-                  duration:
-                      Duration(milliseconds: change.abs() < 10 ? 250 : 1000),
+              final int newIndex = date.dayDiff(ScheduleDisplay.initialDate);
+              ScheduleDisplay.pageIndex = newIndex;
+              _pageController.animateToPage(
+                  pageMidpoint + newIndex,
+                  duration: Duration(
+                      milliseconds: (newIndex - ScheduleDisplay.pageIndex).abs() < 10 ? 250 : 1000),
                   curve: Curves.easeInOut);
             }),
         begin: Offset(0, -1));
