@@ -5,7 +5,6 @@ import 'package:localstorage/localstorage.dart';
 import 'package:xschedule/schedule/schedule_entry.dart';
 import 'package:xschedule/extensions/date_time_extension.dart';
 import 'package:xschedule/schedule/bell_entry.dart';
-import 'package:xschedule/schedule/schedule_storage.dart';
 
 /// A simple immutable date range used to track prior Supabase request windows.
 ///

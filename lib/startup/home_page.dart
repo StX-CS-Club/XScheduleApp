@@ -5,6 +5,7 @@ import 'package:icon_decoration/icon_decoration.dart';
 import 'package:xschedule/util/stream_signal.dart';
 import 'package:xschedule/ui/schedule/schedule_display.dart';
 import 'package:xschedule/ui/personal/personal_page.dart';
+import 'package:xschedule/april_fools/2026_battle_pass/battle_pass_page.dart';
 
 /// Main destination page of the app after login.
 ///
@@ -27,16 +28,17 @@ class _HomePageState extends State<HomePage> {
   /// The ordered list of pages displayed in the [PageView].
   /// Index corresponds directly to the nav bar icon positions.
   static const List<Widget> _pages = [
+    BattlePassPage(),
     ScheduleDisplay(),
     PersonalPage(),
   ];
 
   /// Controls programmatic navigation between pages.
-  final PageController _pageController = PageController(initialPage: 0);
+  final PageController _pageController = PageController(initialPage: 1);
 
   /// Tracks which page index is currently visible.
   /// Used to highlight the active nav bar icon and compute swipe targets.
-  int _currentPageIndex = 0;
+  int _currentPageIndex = 1;
 
   @override
   void dispose() {
@@ -112,8 +114,9 @@ class _HomePageState extends State<HomePage> {
           crossAxisAlignment: CrossAxisAlignment.end,
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            _buildPageIcon(Icons.calendar_month, 0),
-            _buildPageIcon(Icons.person, 1),
+            _buildPageIcon(Icons.local_activity, 0),
+            _buildPageIcon(Icons.calendar_month, 1),
+            _buildPageIcon(Icons.person, 2),
           ],
         ),
       ),
