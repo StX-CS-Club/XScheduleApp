@@ -7,9 +7,10 @@ import 'package:keyboard_avoider/keyboard_avoider.dart';
 import 'package:showcaseview/showcaseview.dart';
 import 'package:xschedule/extensions/color_extension.dart';
 import 'package:xschedule/extensions/widget_extension.dart';
-import 'package:xschedule/widgets/styled_button.dart';
-import 'package:xschedule/util/tutorial_system.dart';
 import 'package:xschedule/schedule/schedule_settings.dart';
+import 'package:xschedule/util/tutorial_system.dart';
+import 'package:xschedule/widgets/icon_circle.dart';
+import 'package:xschedule/widgets/styled_button.dart';
 
 /// Popup menu for configuring the vanity of a single bell.
 ///
@@ -51,36 +52,38 @@ class BellSettingsMenu extends StatefulWidget {
   /// Keys map to showcase widget tutorial IDs.
   static const Map<String, String> bellTutorials = {
     'tutorial_settings_bell':
-    "In this menu, you'll be able to customize any individual bell on your schedule.",
+        "In this menu, you'll be able to customize any individual bell on your schedule.",
     'tutorial_settings_bell_color_wheel':
-    "You can give each bell a distinctive color using the color wheel.",
+        "You can give each bell a distinctive color using the color wheel.",
     'tutorial_settings_bell_color_row':
-    "...or by selecting one from the available options.",
+        "...or by selecting one from the available options.",
     'tutorial_settings_bell_icon':
-    "Additionally, you can select an icon to represent each bell.",
+        "Additionally, you can select an icon to represent each bell.",
+    'tutorial_settings_bell_decal':
+        "Try setting the decal background of the bell, too!",
     'tutorial_settings_bell_info':
-    "As well, you can input the information about your class so that you can remember it later.",
+        "As well, you can input the information about your class so that you can remember it later.",
     'tutorial_settings_bell_alternate':
-    '...and if your class changes daily, you can add an "alternate" class for the bell.',
+        '...and if your class changes daily, you can add an "alternate" class for the bell.',
     'tutorial_settings_bell_complete':
-    "When you've finished customizing the bell, press this button to save your changes and exit.",
+        "When you've finished customizing the bell, press this button to save your changes and exit.",
     'tutorial_settings_bell_help':
-    'If you ever need help, press this button here.'
+        'If you ever need help, press this button here.'
   };
 
   /// Tutorial text shown on the alternate (back) bell configuration card.
   /// Reuses 'tutorial_settings_bell' key to target the same showcase widget.
   static const Map<String, String> bellAltTutorials = {
     'tutorial_settings_bell':
-    "In this menu, you'll be able to specify an alternate bell dependent on the day.",
+        "In this menu, you'll be able to specify an alternate bell dependent on the day.",
     'tutorial_settings_bell_alt_day':
-    "Down here, you can scroll through all the days this bell appears on and select when to replace the normal settings for this bell.",
+        "Down here, you can scroll through all the days this bell appears on and select when to replace the normal settings for this bell.",
     'tutorial_settings_bell_alt_vanity':
-    "Up here, you can customize the alternate bell using the same settings as normal.",
+        "Up here, you can customize the alternate bell using the same settings as normal.",
     'tutorial_settings_bell_alt_alternate':
-    "When you're done, tap this button up here to return to the standard bell settings.",
+        "When you're done, tap this button up here to return to the standard bell settings.",
     'tutorial_settings_bell_alt_help':
-    "...and if you ever need help, press this button here.",
+        "...and if you ever need help, press this button here.",
   };
 
   /// Tutorial system managing the guided walkthrough for this popup.
@@ -89,7 +92,8 @@ class BellSettingsMenu extends StatefulWidget {
   /// Kept static so tutorial completion persists across popup instances.
   static final TutorialSystem bellTutorialSystem = TutorialSystem({
     'tutorial_settings_bell': bellTutorials['tutorial_settings_bell']!,
-    'tutorial_settings_bell_help': bellTutorials['tutorial_settings_bell_help']!,
+    'tutorial_settings_bell_help':
+        bellTutorials['tutorial_settings_bell_help']!,
   });
 
   /// Resets [bellTutorialSystem] to its initial two-tutorial state and refreshes keys.
@@ -97,7 +101,8 @@ class BellSettingsMenu extends StatefulWidget {
   static void resetTutorials() {
     bellTutorialSystem.set({
       'tutorial_settings_bell': bellTutorials['tutorial_settings_bell']!,
-      'tutorial_settings_bell_help': bellTutorials['tutorial_settings_bell_help']!,
+      'tutorial_settings_bell_help':
+          bellTutorials['tutorial_settings_bell_help']!,
     });
     bellTutorialSystem.refreshKeys();
   }
@@ -109,10 +114,34 @@ class BellSettingsMenu extends StatefulWidget {
 class _BellSettingsMenuState extends State<BellSettingsMenu> {
   /// Preset hex color options shown in the horizontal color scroll.
   static const List<String> hexColorOptions = [
-    '#ff0000', '#ff6600', '#ffbb00', '#ffff00', '#88ff00',
-    '#00ff00', '#00bb00', '#00bb88', '#00eeff', '#0000ff',
-    '#0000aa', '#8800ff', '#dd00ff', '#ff00aa', '#ff8888',
-    '#ffffff', '#bbbbbb', '#884400', '#666666', '#000000',
+    '#ff0000',
+    '#ff6600',
+    '#ffbb00',
+    '#ffff00',
+    '#88ff00',
+    '#00ff00',
+    '#00bb00',
+    '#00bb88',
+    '#00eeff',
+    '#0000ff',
+    '#0000aa',
+    '#8800ff',
+    '#dd00ff',
+    '#ff00aa',
+    '#ff8888',
+    '#ffffff',
+    '#bbbbbb',
+    '#884400',
+    '#666666',
+    '#000000',
+  ];
+
+  static const List<String> decalOptions = [
+    "blank",
+    "generic",
+    "books",
+    "writing",
+    "reading"
   ];
 
   /// Controls the flip animation between the front (standard) and back (alternate) card faces.
@@ -155,10 +184,14 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
     _focusNodes['name$suffix'] = FocusNode();
     _focusNodes['teacher$suffix'] = FocusNode();
     _focusNodes['location$suffix'] = FocusNode();
-    _controllers['emoji$suffix'] = TextEditingController(text: ScheduleSettings.emojis[bellKey]);
-    _controllers['name$suffix'] = TextEditingController(text: ScheduleSettings.names[bellKey]);
-    _controllers['teacher$suffix'] = TextEditingController(text: ScheduleSettings.teachers[bellKey]);
-    _controllers['location$suffix'] = TextEditingController(text: ScheduleSettings.locations[bellKey]);
+    _controllers['emoji$suffix'] =
+        TextEditingController(text: ScheduleSettings.emojis[bellKey]);
+    _controllers['name$suffix'] =
+        TextEditingController(text: ScheduleSettings.names[bellKey]);
+    _controllers['teacher$suffix'] =
+        TextEditingController(text: ScheduleSettings.teachers[bellKey]);
+    _controllers['location$suffix'] =
+        TextEditingController(text: ScheduleSettings.locations[bellKey]);
   }
 
   /// Writes the current text controller values back into [ScheduleSettings] editing maps
@@ -170,8 +203,10 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
     final bellKey = widget.bell + suffix;
     ScheduleSettings.emojis[bellKey] = _controllers['emoji$suffix']?.text ?? '';
     ScheduleSettings.names[bellKey] = _controllers['name$suffix']?.text ?? '';
-    ScheduleSettings.teachers[bellKey] = _controllers['teacher$suffix']?.text ?? '';
-    ScheduleSettings.locations[bellKey] = _controllers['location$suffix']?.text ?? '';
+    ScheduleSettings.teachers[bellKey] =
+        _controllers['teacher$suffix']?.text ?? '';
+    ScheduleSettings.locations[bellKey] =
+        _controllers['location$suffix']?.text ?? '';
   }
 
   /// Writes all controller values to [ScheduleSettings] and assembles the final
@@ -191,6 +226,7 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
       'teacher': ScheduleSettings.teachers[widget.bell],
       'location': ScheduleSettings.locations[widget.bell],
       'emoji': ScheduleSettings.emojis[widget.bell],
+      'decal': ScheduleSettings.decals[widget.bell],
       'color': ScheduleSettings.colors[widget.bell]!.toColor().toHex(),
       'alt_days': ScheduleSettings.altDays[widget.bell],
       'alt': {
@@ -198,6 +234,7 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
         'teacher': ScheduleSettings.teachers[altBell],
         'location': ScheduleSettings.locations[altBell],
         'emoji': ScheduleSettings.emojis[altBell],
+        'decal': ScheduleSettings.decals[altBell],
         'color': ScheduleSettings.colors[altBell]!.toColor().toHex(),
       },
     };
@@ -237,11 +274,13 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
   /// - [context]: Used to run the showcase.
   /// - [alt]: If true, loads [bellAltTutorials]; otherwise loads [bellTutorials].
   /// - [storeCompletion]: If true, marks the tutorial as permanently complete after running.
-  void _startBellTutorial(BuildContext context, bool alt, {bool storeCompletion = false}) {
+  void _startBellTutorial(BuildContext context, bool alt,
+      {bool storeCompletion = false}) {
     BellSettingsMenu.bellTutorialSystem.set(
       alt ? BellSettingsMenu.bellAltTutorials : BellSettingsMenu.bellTutorials,
     );
-    BellSettingsMenu.bellTutorialSystem.showTutorials(context, storeCompletion: storeCompletion);
+    BellSettingsMenu.bellTutorialSystem
+        .showTutorials(context, storeCompletion: storeCompletion);
   }
 
   @override
@@ -303,20 +342,25 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
               onHelpTap: () => _startBellTutorial(context, false),
               actionTutorial: 'tutorial_settings_bell_alternate',
               // Only show the flip button if this bell appears on "All Meet" days
-              action: ScheduleSettings.sampleDays['All Meet']!.contains(widget.bell)
+              action: ScheduleSettings.sampleDays['All Meet']!
+                      .contains(widget.bell)
                   ? IconButton(
-                onPressed: () async {
-                  _cardKey.currentState?.toggleCard();
-                  // Wait for the flip animation before starting the alt tutorial
-                  await Future.delayed(const Duration(milliseconds: 1000));
-                  if (context.mounted) {
-                    _startBellTutorial(context, true, storeCompletion: true);
-                  }
-                },
-                icon: Icon(Icons.autorenew, size: 30, color: colorScheme.onSurface),
-              )
-              // Transparent placeholder to maintain row layout for non-alternating bells
-                  : const CircleAvatar(radius: 20, backgroundColor: Colors.transparent),
+                      onPressed: () async {
+                        _cardKey.currentState?.toggleCard();
+                        // Wait for the flip animation before starting the alt tutorial
+                        await Future.delayed(
+                            const Duration(milliseconds: 1000));
+                        if (context.mounted) {
+                          _startBellTutorial(context, true,
+                              storeCompletion: true);
+                        }
+                      },
+                      icon: Icon(Icons.autorenew,
+                          size: 30, color: colorScheme.onSurface),
+                    )
+                  // Transparent placeholder to maintain row layout for non-alternating bells
+                  : const CircleAvatar(
+                      radius: 20, backgroundColor: Colors.transparent),
             ),
             _buildVanityEditor(false),
             Padding(
@@ -389,7 +433,8 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
               actionTutorial: 'tutorial_settings_bell_alt_alternate',
               action: IconButton(
                 onPressed: () => _cardKey.currentState?.toggleCard(),
-                icon: Icon(Icons.autorenew, size: 30, color: colorScheme.onSurface),
+                icon: Icon(Icons.autorenew,
+                    size: 30, color: colorScheme.onSurface),
               ),
             ),
             BellSettingsMenu.bellTutorialSystem.showcase(
@@ -468,7 +513,8 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
             circular: true,
             child: IconButton(
               onPressed: onHelpTap,
-              icon: Icon(Icons.help_outline_rounded, size: 30, color: colorScheme.onSurface),
+              icon: Icon(Icons.help_outline_rounded,
+                  size: 30, color: colorScheme.onSurface),
             ),
           ),
           Text(
@@ -526,7 +572,8 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
           mainAxisSize: MainAxisSize.min,
           children: [
             InkWell(
-              onTap: () => setState(() => _appearanceExpanded = !_appearanceExpanded),
+              onTap: () =>
+                  setState(() => _appearanceExpanded = !_appearanceExpanded),
               child: Container(
                 height: 50,
                 alignment: Alignment.center,
@@ -545,7 +592,9 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
                       ),
                     ).expandedFit(),
                     Icon(
-                      expanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                      expanded
+                          ? Icons.keyboard_arrow_up
+                          : Icons.keyboard_arrow_down,
                       color: colorScheme.onSurface,
                       size: 32,
                     ),
@@ -567,16 +616,39 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
   /// Parameters:
   /// - [alternate]: If true, builds for the alternate bell (suffix '_alt').
   Widget _buildVanityEditor(bool alternate) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+
     final String suffix = alternate ? '_alt' : '';
     final String bell = '${widget.bell}$suffix';
 
     return Column(
       children: [
-        BellSettingsMenu.bellTutorialSystem.showcase(
-          context: context,
-          tutorial: 'tutorial_settings_bell${suffix}_color_wheel',
-          child: _buildColorWheel(alternate),
-        ),
+        SizedBox(
+            height: 240,
+            child: Stack(
+              alignment: Alignment.topCenter,
+              children: [
+                BellSettingsMenu.bellTutorialSystem.showcase(
+                  context: context,
+                  tutorial: 'tutorial_settings_bell${suffix}_color_wheel',
+                  child: _buildColorWheel(alternate),
+                ),
+                Container(
+                  margin: const EdgeInsets.only(bottom: 16, right: 24),
+                  alignment: Alignment.bottomRight,
+                  child: BellSettingsMenu.bellTutorialSystem.showcase(
+                      context: context,
+                      tutorial: "tutorial_settings_bell${suffix}_decal",
+                      child: IconCircle(
+                          onTap: () => _showDecalPopup(context, bell),
+                          color: colorScheme.surfaceContainer,
+                          iconColor: colorScheme.onSurface,
+                          radius: 20,
+                          padding: 8,
+                          icon: Icons.brush)),
+                )
+              ],
+            )),
         BellSettingsMenu.bellTutorialSystem.showcase(
           context: context,
           tutorial: 'tutorial_settings_bell${suffix}_color_row',
@@ -624,6 +696,16 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
             child: CircleAvatar(
               backgroundColor: ScheduleSettings.colors[bell]!.toColor(),
               radius: 95,
+              child: (ScheduleSettings.decals[bell] ?? "blank") != "blank"
+                  ? ClipOval(
+                child: Image.asset(
+                    "assets/images/decals/${ScheduleSettings.decals[bell]}.png",
+                    width: 190,
+                    height: 190,
+                    fit: BoxFit.cover,
+                  ).withOpacity(0.25),
+              )
+                  : null,
             ),
           ),
           WheelPicker(
@@ -632,7 +714,8 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
             onChanged: (HSVColor value) {
               setState(() {
                 // Lock to full value and saturation so color matches wheel position
-                ScheduleSettings.colors[bell] = value.withValue(1).withSaturation(1);
+                ScheduleSettings.colors[bell] =
+                    value.withValue(1).withSaturation(1);
               });
             },
           ),
@@ -650,7 +733,8 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
                 fit: BoxFit.scaleDown,
                 alignment: Alignment.center,
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(minWidth: 80, maxWidth: 240),
+                  constraints:
+                      const BoxConstraints(minWidth: 80, maxWidth: 240),
                   child: TextField(
                     controller: _controllers['emoji$suffix']!,
                     focusNode: _focusNodes['emoji$suffix']!,
@@ -673,7 +757,9 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
                     onChanged: (String text) {
                       // Enforce a single character; fall back to '_' if empty
                       if (text.isEmpty) text = '_';
-                      if (text.characters.length > 1) text = text.characters.last;
+                      if (text.characters.length > 1) {
+                        text = text.characters.last;
+                      }
                       setState(() => _controllers['emoji$suffix']!.text = text);
                     },
                   ).intrinsicFit(),
@@ -696,7 +782,7 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final double width = min(MediaQuery.of(context).size.width, 500);
     final ScrollController controller =
-    alternate ? _colorScrollAltController : _colorScrollController;
+        alternate ? _colorScrollAltController : _colorScrollController;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -708,7 +794,8 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
           ),
-          icon: Icon(Icons.arrow_back_ios, color: colorScheme.onSurface.withAlpha(128), size: 12),
+          icon: Icon(Icons.arrow_back_ios,
+              color: colorScheme.onSurface.withAlpha(128), size: 12),
         ).expandedFit(),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -726,18 +813,21 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
                     return InkWell(
                       onTap: () {
                         setState(() {
-                          ScheduleSettings.colors[bell] =
-                              HSVColor.fromColor(ColorExtension.fromHex(hexColorOptions[i]));
+                          ScheduleSettings.colors[bell] = HSVColor.fromColor(
+                              ColorExtension.fromHex(hexColorOptions[i]));
                         });
                       },
                       child: Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 8),
                         width: 30,
                         height: 30,
                         decoration: BoxDecoration(
                           color: ColorExtension.fromHex(hexColorOptions[i]),
                           borderRadius: BorderRadius.circular(5),
-                          boxShadow: [BoxShadow(color: colorScheme.shadow, blurRadius: 1)],
+                          boxShadow: [
+                            BoxShadow(color: colorScheme.shadow, blurRadius: 1)
+                          ],
                         ),
                       ),
                     );
@@ -758,7 +848,8 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
           ),
-          icon: Icon(Icons.arrow_forward_ios, color: colorScheme.onSurface.withAlpha(128), size: 12),
+          icon: Icon(Icons.arrow_forward_ios,
+              color: colorScheme.onSurface.withAlpha(128), size: 12),
         ).expandedFit(),
       ],
     );
@@ -794,11 +885,11 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
   /// - [maxLength]: Maximum number of characters allowed.
   /// - [focusNode]: Optional focus node for keyboard management.
   Widget _buildTextForm(
-      TextEditingController controller,
-      String label,
-      int maxLength, {
-        FocusNode? focusNode,
-      }) {
+    TextEditingController controller,
+    String label,
+    int maxLength, {
+    FocusNode? focusNode,
+  }) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final double size = min(MediaQuery.of(context).size.width, 500) * 5 / 6;
 
@@ -817,7 +908,8 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
           isDense: true,
           // Hide the character counter shown below the field by default
           counterText: '',
-          labelStyle: TextStyle(color: colorScheme.onSurface, overflow: TextOverflow.ellipsis),
+          labelStyle: TextStyle(
+              color: colorScheme.onSurface, overflow: TextOverflow.ellipsis),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
             borderSide: BorderSide(color: colorScheme.shadow, width: 1),
@@ -855,7 +947,8 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: List<Widget>.generate(meetDays.length, (i) {
               final String dayTitle = meetDays[i];
-              final List<String> day = ScheduleSettings.sampleDays[dayTitle] ?? [];
+              final List<String> day =
+                  ScheduleSettings.sampleDays[dayTitle] ?? [];
               // Distribute 150px total height evenly across non-FLEX bells
               final double bellHeight = 150 / (day.length - 1);
 
@@ -865,7 +958,8 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
                 child: InkWell(
                   onTap: () {
                     setState(() {
-                      if (ScheduleSettings.altDays[widget.bell]!.contains(dayTitle)) {
+                      if (ScheduleSettings.altDays[widget.bell]!
+                          .contains(dayTitle)) {
                         ScheduleSettings.altDays[widget.bell]!.remove(dayTitle);
                       } else {
                         ScheduleSettings.altDays[widget.bell]!.add(dayTitle);
@@ -877,7 +971,10 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
                     children: [
                       Text(
                         dayTitle,
-                        style: TextStyle(fontSize: 24, color: colorScheme.onSurface, fontFamily: 'Exo_2'),
+                        style: TextStyle(
+                            fontSize: 24,
+                            color: colorScheme.onSurface,
+                            fontFamily: 'Exo_2'),
                       ).fit(),
                       ClipRRect(
                         borderRadius: BorderRadius.circular(8),
@@ -891,7 +988,8 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
                               // This bell is highlighted in primary; others use muted onSurface
                               color: dayBell == widget.bell
                                   ? colorScheme.primary
-                                  : colorScheme.onSurface.withAlpha(dayBell == 'FLEX' ? 64 : 96),
+                                  : colorScheme.onSurface
+                                      .withAlpha(dayBell == 'FLEX' ? 64 : 96),
                             );
                           }),
                         ),
@@ -899,7 +997,8 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
                       // Read-only checkbox; interaction handled by the parent InkWell
                       Checkbox(
                         activeColor: colorScheme.primary,
-                        value: ScheduleSettings.altDays[widget.bell]!.contains(dayTitle),
+                        value: ScheduleSettings.altDays[widget.bell]!
+                            .contains(dayTitle),
                         onChanged: (_) {},
                       ),
                     ],
@@ -915,6 +1014,122 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
           child: _buildScrollFade(colorScheme, fromLeft: false),
         ),
       ],
+    );
+  }
+
+  void _showDecalPopup(BuildContext context, String bell) {
+    showDialog<String>(
+      context: context,
+      builder: (context) {
+        final ColorScheme colorScheme = Theme.of(context).colorScheme;
+        final Size screen = MediaQuery.of(context).size;
+
+        final String selected = ScheduleSettings.decals[bell] ?? "blank";
+
+        return Center(
+          child: Material(
+            color: colorScheme.surface,
+            borderRadius: BorderRadius.circular(16),
+            clipBehavior: Clip.antiAlias,
+            child: SizedBox(
+              width: screen.width * 0.85,
+              height: screen.height * 0.75,
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Text(
+                      'Select Decal',
+                      style: TextStyle(
+                        fontFamily: "Georama",
+                        fontSize: 24,
+                        fontWeight: FontWeight.w600,
+                        color: colorScheme.onSurface,
+                      ),
+                    ),
+                  ),
+                  Divider(
+                      color: colorScheme.onSurface.withAlpha(64), height: 1),
+                  Expanded(
+                    child: ListView(
+                      children: decalOptions.map((String decal) {
+                        return InkWell(
+                          onTap: () => Navigator.pop(context, decal),
+                          child: _buildDecalPreview(
+                              decal,
+                              ScheduleSettings.colors[bell]!.toColor(),
+                              decal == selected),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    ).then((selected) {
+      if (selected != null) {
+        setState(() {
+          ScheduleSettings.decals[bell] = selected;
+        });
+      }
+    });
+  }
+
+  Widget _buildDecalPreview(String decal, Color color, bool selected) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final String label = decal[0].toUpperCase() + decal.substring(1);
+
+    return Container(
+      constraints: BoxConstraints(maxHeight: 64),
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          if (decal != "blank")
+            Image.asset(
+              'assets/images/decals/$decal.png',
+              fit: BoxFit.cover,
+            ).withOpacity(0.5),
+          Container(color: color.withAlpha(selected ? 112 : 64)),
+          Center(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const SizedBox(width: 40),
+                Text(
+                  ' $label ',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontFamily: 'Exo_2',
+                    fontWeight: FontWeight.w600,
+                    color: colorScheme.onSurface,
+                    shadows: [
+                      Shadow(
+                        color: colorScheme.surface.withAlpha(180),
+                        blurRadius: 4,
+                      ),
+                    ],
+                  ),
+                ),
+                selected
+                    ? Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: Icon(Icons.check,
+                            size: 32, color: colorScheme.onSurface))
+                    : const SizedBox(width: 40),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

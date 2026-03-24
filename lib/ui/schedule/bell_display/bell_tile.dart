@@ -2,15 +2,17 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:xschedule/extensions/build_context_extension.dart';
-import 'package:xschedule/extensions/widget_extension.dart';
-import 'package:xschedule/schedule/schedule_directory.dart';
-import 'package:xschedule/schedule/clock.dart';
 import 'package:xschedule/extensions/color_extension.dart';
-import 'package:xschedule/schedule/schedule_entry.dart';
-import 'package:xschedule/ui/schedule/schedule_display.dart';
-import 'package:xschedule/ui/schedule/bell_display/bell_info.dart';
+import 'package:xschedule/extensions/widget_extension.dart';
 import "package:xschedule/schedule/bell_entry.dart";
+import 'package:xschedule/schedule/clock.dart';
+import 'package:xschedule/schedule/schedule_directory.dart';
+import 'package:xschedule/schedule/schedule_entry.dart';
 import 'package:xschedule/schedule/schedule_settings.dart';
+import 'package:xschedule/ui/schedule/bell_display/bell_info.dart';
+import 'package:xschedule/ui/schedule/schedule_display.dart';
+
+typedef _BellData = ({Map<String, dynamic> vanity, String bellSuffix});
 
 /// A single bell tile rendered within the schedule card's bell stack.
 ///
@@ -23,10 +25,10 @@ import 'package:xschedule/schedule/schedule_settings.dart';
 class BellTile extends StatelessWidget {
   const BellTile(
       {super.key,
-        required this.date,
-        required this.bell,
-        required this.minuteHeight,
-        this.index});
+      required this.date,
+      required this.bell,
+      required this.minuteHeight,
+      this.index});
 
   /// The calendar date this tile belongs to; used for tutorial ID resolution and popup context.
   final DateTime date;
@@ -83,8 +85,7 @@ class BellTile extends StatelessWidget {
   /// - [schedule]: The [ScheduleEntry] used for alternate day condition matching
   ///
   /// Returns: A record with the resolved [vanity] map and the display [bellSuffix]
-  ({Map<String, dynamic> vanity, String bellSuffix}) _resolveVanity(
-      ScheduleEntry schedule) {
+  _BellData _resolveVanity(ScheduleEntry schedule) {
     Map<String, dynamic> bellVanity =
         ScheduleSettings.bellVanity[bell.title] ?? {};
     String bellSuffix = "";
@@ -138,12 +139,12 @@ class BellTile extends StatelessWidget {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return CircleAvatar(
-      backgroundColor: Colors.black.withValues(alpha: .2),
+      backgroundColor: Colors.black.withValues(alpha: .25),
       radius: emojiRadius,
       child: Text(
         bellVanity['emoji'] ?? '📚',
         style:
-        TextStyle(fontSize: emojiRadius + 10, color: colorScheme.onSurface),
+            TextStyle(fontSize: emojiRadius + 10, color: colorScheme.onSurface),
       ).fit(),
     );
   }
@@ -188,10 +189,10 @@ class BellTile extends StatelessWidget {
           Expanded(
             child: Container(
               alignment:
-              isCompact ? Alignment.centerLeft : Alignment.bottomLeft,
+                  isCompact ? Alignment.centerLeft : Alignment.bottomLeft,
               child: Text(
                 '${(bellVanity['name'] ?? bell.title) ?? ''}$bellSuffix'
-                    '${isCompact ? ':     $timeRange' : ''}',
+                '${isCompact ? ':     $timeRange' : ''}',
                 style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
@@ -225,10 +226,12 @@ class BellTile extends StatelessWidget {
     final MediaQueryData mediaQuery = MediaQuery.of(context);
 
     final ScheduleEntry schedule = ScheduleDirectory.readSchedule(date);
-    final resolved = _resolveVanity(schedule);
+    final _BellData resolved = _resolveVanity(schedule);
 
     final Color bellColor =
-    ColorExtension.fromHex(resolved.vanity['color'] ?? '#909090');
+        ColorExtension.fromHex(resolved.vanity['color'] ?? '#909090');
+
+    final String bellDecal = resolved.vanity['decal'] ?? "blank";
 
     // Tile height spans the bell's full duration in pixels
     final double height =
@@ -237,7 +240,7 @@ class BellTile extends StatelessWidget {
     // Emoji radius proportional to tile height; capped to prevent overflow on wide screens.
     // The 3/7 ratio keeps the avatar visually balanced within the tile.
     final double emojiRadius =
-    min(height * 3 / 7 - 5, mediaQuery.size.width / 6);
+        min(height * 3 / 7 - 5, mediaQuery.size.width / 6);
 
     // Top margin positions the tile at the correct time relative to 8:00AM
     final double topMargin =
@@ -252,32 +255,56 @@ class BellTile extends StatelessWidget {
     return Container(
         height: height,
         margin: EdgeInsets.only(top: topMargin),
-        // Alternating alpha between even/odd tiles for subtle visual separation
-        color: (index ?? 1) % 2 == 0
-            ? bellColor.withAlpha(64)
-            : bellColor.withAlpha(40),
-        child: InkWell(
-          // Tap opens the BellInfo popup for this bell
-          onTap: () {
-            context.pushPopup(BellInfo(schedule: schedule, bell: bell));
-          },
-          child: ScheduleDisplay.tutorialSystem.showcase(
-            context: context,
-            tutorial: _tutorialId(date, bell.title),
-            uniqueNull: true,
-            child: Row(
-              children: [
-                _buildColorNib(bellColor),
-                const SizedBox(width: 8),
-                // Emoji avatar hidden when tile is too short
-                if (!isTiny)
-                  _buildEmojiAvatar(context, resolved.vanity, emojiRadius),
-                // Name and time range text
-                _buildTextColumn(context, resolved.vanity, resolved.bellSuffix,
-                    timeRange, isCompact, isTiny, emojiRadius),
-              ],
-            ),
-          ),
+        child: Stack(
+          children: [
+            if (bellDecal != "blank")
+              Positioned.fill(
+                child: Opacity(
+                    opacity: 0.25,
+                    child: ClipRect(
+                        child: Image.asset(
+                      "assets/images/decals/$bellDecal.png",
+                      fit: BoxFit.cover,
+                    ))),
+              ),
+            Positioned.fill(
+                child: ColoredBox(
+              // Alternating alpha between even/odd tiles for subtle visual separation
+              color: (index ?? 1) % 2 == 0
+                  ? bellColor.withAlpha(64)
+                  : bellColor.withAlpha(40),
+            )),
+            Positioned.fill(
+                child: InkWell(
+              // Tap opens the BellInfo popup for this bell
+              onTap: () {
+                context.pushPopup(BellInfo(schedule: schedule, bell: bell));
+              },
+              child: ScheduleDisplay.tutorialSystem.showcase(
+                context: context,
+                tutorial: _tutorialId(date, bell.title),
+                uniqueNull: true,
+                child: Row(
+                  children: [
+                    _buildColorNib(bellColor),
+                    const SizedBox(width: 8),
+                    // Emoji avatar hidden when tile is too short
+                    if (!isTiny)
+                      _buildEmojiAvatar(context, resolved.vanity, emojiRadius),
+                    // Name and time range text
+                    _buildTextColumn(
+                        context,
+                        resolved.vanity,
+                        resolved.bellSuffix,
+                        timeRange,
+                        isCompact,
+                        isTiny,
+                        emojiRadius),
+                  ],
+                ),
+              ),
+            ))
+          ],
         ));
   }
 }

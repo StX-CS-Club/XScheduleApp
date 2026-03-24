@@ -1,12 +1,14 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:xschedule/extensions/color_extension.dart';
 import 'package:xschedule/extensions/widget_extension.dart';
 import 'package:xschedule/schedule/bell_entry.dart';
 import 'package:xschedule/schedule/schedule_entry.dart';
-import 'package:xschedule/extensions/color_extension.dart';
-import 'package:xschedule/widgets/popup_menu.dart';
 import 'package:xschedule/schedule/schedule_settings.dart';
+import 'package:xschedule/widgets/popup_menu.dart';
+
+typedef _BellData = ({Map<String, dynamic> vanity, String bellSuffix});
 
 /// A popup displaying detailed vanity information for a single [BellEntry].
 ///
@@ -34,8 +36,9 @@ class BellInfo extends StatelessWidget {
   /// returning the correct key for the initial lookup.
   ///
   /// Returns: A record with the resolved [vanity] map and the display [bellSuffix]
-  ({Map<String, dynamic> vanity, String bellSuffix}) _resolveVanity() {
-    Map<String, dynamic> bellVanity = ScheduleSettings.bellVanity[bell.title] ?? {};
+  _BellData _resolveVanity() {
+    Map<String, dynamic> bellVanity =
+        ScheduleSettings.bellVanity[bell.title] ?? {};
 
     /// Suffix appended after the bell title in display strings; single-char bells get ' Bell'.
     String bellSuffix = bell.title.length <= 1 ? ' Bell' : '';
@@ -72,8 +75,7 @@ class BellInfo extends StatelessWidget {
   Widget _buildColorNib(Map<String, dynamic> bellVanity) {
     return Container(
       decoration: BoxDecoration(
-        borderRadius:
-        const BorderRadius.horizontal(left: Radius.circular(10)),
+        borderRadius: const BorderRadius.horizontal(left: Radius.circular(10)),
         color: ColorExtension.fromHex(bellVanity['color'] ?? '#999999'),
       ),
       width: 10,
@@ -193,13 +195,21 @@ class BellInfo extends StatelessWidget {
 
     // Cap popup width at 500px on large screens
     final double popupWidth = min(mediaQuery.size.width, 500);
-    final resolved = _resolveVanity();
+    final _BellData resolved = _resolveVanity();
 
     return PopupMenu(
         child: SizedBox(
-          width: popupWidth * 4 / 5,
-          height: 160,
-          child: Row(
+      width: popupWidth * 4 / 5,
+      height: 160,
+      child: Stack(
+        children: [
+          if ((resolved.vanity['decal'] ?? "blank") != "blank")
+            Positioned.fill(
+                child: Image.asset(
+                    'assets/images/decals/${resolved.vanity['decal']}.png',
+                    fit: BoxFit.cover)
+                    .withOpacity(0.1)),
+          Row(
             children: [
               // Left color nib
               _buildColorNib(resolved.vanity),
@@ -217,13 +227,15 @@ class BellInfo extends StatelessWidget {
                       ],
                     ),
                     // Bottom row: bell title and time range
-                    _buildTimeRow(context, resolved.vanity, resolved.bellSuffix,
-                        popupWidth),
+                    _buildTimeRow(
+                        context, resolved.vanity, resolved.bellSuffix, popupWidth),
                   ],
                 ),
               ),
             ],
-          ),
-        ));
+          )
+        ],
+      ),
+    ));
   }
 }

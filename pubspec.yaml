@@ -83,7 +83,12 @@ flutter:
     - assets/images/xschedule.png
     - assets/images/xschedule_transparent.png
     - assets/images/xschedule_small.png
-    - assets/images/x_building.jpg
+    - assets/images/x_building.png
+    - assets/images/decals/math.png
+    - assets/images/decals/generic.png
+    - assets/images/decals/reading.png
+    - assets/images/decals/books.png
+    - assets/images/decals/writing.png
     - assets/data/credits.json
     - assets/data/rss.json
 

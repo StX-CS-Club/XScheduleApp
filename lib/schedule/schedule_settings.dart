@@ -13,7 +13,8 @@ class ScheduleSettings {
   ///
   /// Each entry maps value names (e.g. `'className'`, `'location'`, `'color'`) to their values.
   /// Loaded from [localStorage] on startup under the key `'bellVanity'`.
-  static Map<String, Map<String, dynamic>> bellVanity = ScheduleStorage.restoreBellVanity();
+  static Map<String, Map<String, dynamic>> bellVanity =
+      ScheduleStorage.restoreBellVanity();
 
   /// Standard day structures, mapping a day title to its ordered list of bell labels.
   ///
@@ -45,6 +46,7 @@ class ScheduleSettings {
   // Temporary bell vanity values used during editing, keyed by bell name
   static final Map<String, HSVColor> colors = {};
   static final Map<String, String> emojis = {};
+  static final Map<String, String?> decals = {};
   static final Map<String, String> names = {};
   static final Map<String, String> teachers = {};
   static final Map<String, String> locations = {};
@@ -54,6 +56,7 @@ class ScheduleSettings {
   static void clearSettings() {
     colors.clear();
     emojis.clear();
+    decals.clear();
     names.clear();
     teachers.clear();
     locations.clear();
@@ -91,6 +94,7 @@ class ScheduleSettings {
           HSVColor.fromColor(ColorExtension.fromHex(vanity['color']));
     }
     if (vanity['emoji'] != null) emojis[bell] = vanity['emoji'];
+    if (vanity['decal'] != null) decals[bell] = vanity['decal'];
     if (vanity['name'] != null) names[bell] = vanity['name'];
     if (vanity['teacher'] != null) teachers[bell] = vanity['teacher'];
     if (vanity['location'] != null) locations[bell] = vanity['location'];
@@ -106,8 +110,7 @@ class ScheduleSettings {
       reference = bellVanity[bell]!;
       altDays[bell] ??= List<String>.from(reference['alt_days']);
     } else {
-      reference =
-          Map<String, dynamic>.from(bellVanity[bell]!['alt']);
+      reference = Map<String, dynamic>.from(bellVanity[bell]!['alt']);
       // Fill in any missing alt fields from the primary bell's vanity
       bellVanity[bell]!.forEach((key, value) {
         reference[key] ??= value;
@@ -118,6 +121,7 @@ class ScheduleSettings {
     colors[bell] ??=
         HSVColor.fromColor(ColorExtension.fromHex(reference['color']));
     emojis[bell] ??= reference['emoji'].replaceAll('HR', '📚');
+    decals[bell] ??= reference['decal'];
     names[bell] ??= reference['name'];
     teachers[bell] ??= reference['teacher'];
     locations[bell] ??= reference['location'];

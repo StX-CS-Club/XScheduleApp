@@ -44,7 +44,7 @@ class WelcomePage extends StatelessWidget {
       child: ClipRect(
         child: FittedBox(
           fit: BoxFit.cover,
-          child: Image.asset("assets/images/x_building.jpg"),
+          child: Image.asset("assets/images/x_building.png"),
         ),
       ),
     );

@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:localstorage/localstorage.dart';
+import 'package:xschedule/extensions/date_time_extension.dart';
 import 'package:xschedule/schedule/bell_entry.dart';
 import 'package:xschedule/schedule/schedule_directory.dart';
 import 'package:xschedule/schedule/schedule_entry.dart';
-import 'package:xschedule/extensions/date_time_extension.dart';
 
 /// Handles all local storage serialisation, compression, and encoding of
 /// schedule and bell vanity data.
@@ -33,7 +33,7 @@ class ScheduleStorage {
   ///
   /// Used during serialisation in [_buildScheduleJson] and [ScheduleEntry.toJsonEntry].
   static const Map<String, String> scheduleEncode = {
-    'name':  'n',
+    'name': 'n',
     'bells': 'b',
   };
 
@@ -41,13 +41,14 @@ class ScheduleStorage {
   ///
   /// Used during serialisation in [encodeBellVanity] and [encodeAllBellVanity].
   static const Map<String, String> vanityEncode = {
-    'name':     'n',
-    'teacher':  't',
+    'name': 'n',
+    'teacher': 't',
     'location': 'l',
-    'emoji':    'e',
-    'color':    'c',
+    'emoji': 'e',
+    'decal': 'i',
+    'color': 'c',
     'alt_days': 'd',
-    'alt':      'a',
+    'alt': 'a',
   };
 
   /// Maps compressed single-character keys back to full bell vanity field names.
@@ -58,6 +59,7 @@ class ScheduleStorage {
     't': 'teacher',
     'l': 'location',
     'e': 'emoji',
+    'i': 'decal',
     'c': 'color',
     'd': 'alt_days',
     'a': 'alt',
@@ -74,7 +76,7 @@ class ScheduleStorage {
   /// Only stores schedules within the next 100 days from today.
   static void store() {
     final List<int> compressed =
-    _gzip.encode(utf8.encode(_buildScheduleJson(100)));
+        _gzip.encode(utf8.encode(_buildScheduleJson(100)));
     localStorage.setItem("schedule", base64Encode(compressed));
   }
 
@@ -93,25 +95,23 @@ class ScheduleStorage {
       if (stored == null) return;
 
       // Base64 → GZip decompress → UTF-8 decode to recover the original JSON string
-      final String jsonString =
-      utf8.decode(_gzip.decode(base64Decode(stored)));
+      final String jsonString = utf8.decode(_gzip.decode(base64Decode(stored)));
 
       final Map<String, dynamic> scheduleJson =
-      Map<String, dynamic>.from(jsonDecode(jsonString));
+          Map<String, dynamic>.from(jsonDecode(jsonString));
 
       for (final String key in scheduleJson.keys) {
         final DateTime date = DateTime.parse(key);
         final Map<String, dynamic> scheduleMap =
-        Map<String, dynamic>.from(scheduleJson[key] ?? {});
+            Map<String, dynamic>.from(scheduleJson[key] ?? {});
 
         if (scheduleMap.isNotEmpty) {
           ScheduleDirectory.writeSchedule(date,
               // Uses compressed 'n' key since that's what was stored
               name: scheduleMap[scheduleEncode['name']],
               // Reconstructs BellEntrys from compact list-of-arrays
-              bells: BellEntry.listFromList(
-                  List<dynamic>.from(
-                      scheduleMap[scheduleEncode['bells']] ?? [])));
+              bells: BellEntry.listFromList(List<dynamic>.from(
+                  scheduleMap[scheduleEncode['bells']] ?? [])));
         }
       }
     } catch (_) {
@@ -176,8 +176,7 @@ class ScheduleStorage {
       if (stored == null) return {};
 
       // Base64 → GZip decompress → UTF-8 decode to recover the original JSON string
-      final String jsonString =
-      utf8.decode(_gzip.decode(base64Decode(stored)));
+      final String jsonString = utf8.decode(_gzip.decode(base64Decode(stored)));
 
       return decodeAllBellVanity(
           Map<String, dynamic>.from(jsonDecode(jsonString)));
@@ -231,16 +230,17 @@ class ScheduleStorage {
   /// - [compressed]: A compressed vanity map with single-character keys
   ///
   /// Returns: A full bell vanity map with restored keys and default empty values
-  static Map<String, dynamic> decodeBellVanity(Map<String, dynamic> compressed) {
+  static Map<String, dynamic> decodeBellVanity(
+      Map<String, dynamic> compressed) {
     // Initialises all fields to defaults so missing keys are always present
     final Map<String, dynamic> result = {
-      'name':     '',
-      'teacher':  '',
+      'name': '',
+      'teacher': '',
       'location': '',
-      'emoji':    '',
-      'color':    '',
+      'emoji': '',
+      'color': '',
       'alt_days': <String>[],
-      'alt':      <String, dynamic>{},
+      'alt': <String, dynamic>{},
     };
     for (final MapEntry<String, dynamic> entry in compressed.entries) {
       final String? key = vanityDecode[entry.key];
@@ -264,8 +264,7 @@ class ScheduleStorage {
   /// Returns: A new map with the same bell label keys and compressed vanity values
   static Map<String, dynamic> encodeAllBellVanity(
       Map<String, Map<String, dynamic>> vanity) {
-    return vanity.map(
-            (bell, data) => MapEntry(bell, encodeBellVanity(data)));
+    return vanity.map((bell, data) => MapEntry(bell, encodeBellVanity(data)));
   }
 
   /// Decodes all compressed bell vanity entries back to full key names via

@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:xschedule/extensions/widget_extension.dart';
 import 'package:xschedule/extensions/color_extension.dart';
+import 'package:xschedule/extensions/widget_extension.dart';
 import 'package:xschedule/schedule/schedule_settings.dart';
 
 /// A tappable tile displaying a single bell's current vanity configuration.
@@ -55,26 +55,36 @@ class BellButton extends StatelessWidget {
       height: 100,
       child: Card(
         color: colorScheme.surface,
-        child: InkWell(
-          highlightColor: colorScheme.onPrimary,
-          onTap: onTap,
-          child: Row(
-            children: [
-              _buildColorNib(vanity),
-              Padding(
-                padding: const EdgeInsets.all(10),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    _buildEmojiAvatar(vanity, colorScheme),
-                    const SizedBox(width: 4),
-                    _buildTextColumn(vanity, colorScheme, width),
-                    _buildIconButton(colorScheme),
-                  ],
-                ),
+        child: Stack(
+          children: [
+            if ((vanity['decal'] ?? "blank") != "blank")
+              Positioned.fill(
+                  child: Image.asset(
+                          'assets/images/decals/${vanity['decal']}.png',
+                          fit: BoxFit.cover)
+                      .withOpacity(0.25)),
+            InkWell(
+              highlightColor: colorScheme.onPrimary,
+              onTap: onTap,
+              child: Row(
+                children: [
+                  _buildColorNib(vanity),
+                  Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        _buildEmojiAvatar(vanity, colorScheme),
+                        const SizedBox(width: 4),
+                        _buildTextColumn(vanity, colorScheme, width),
+                        _buildIconButton(colorScheme),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            )
+          ],
         ),
       ),
     );
@@ -101,7 +111,8 @@ class BellButton extends StatelessWidget {
   /// Parameters:
   /// - [vanity]: The bell's vanity map, must contain an 'emoji' field.
   /// - [colorScheme]: Provides the avatar background color.
-  Widget _buildEmojiAvatar(Map<String, dynamic> vanity, ColorScheme colorScheme) {
+  Widget _buildEmojiAvatar(
+      Map<String, dynamic> vanity, ColorScheme colorScheme) {
     return Stack(
       alignment: Alignment.center,
       children: [
@@ -125,10 +136,10 @@ class BellButton extends StatelessWidget {
   /// - [colorScheme]: Provides text color.
   /// - [width]: The full tile width, used to compute the text column's constrained width.
   Widget _buildTextColumn(
-      Map<String, dynamic> vanity,
-      ColorScheme colorScheme,
-      double width,
-      ) {
+    Map<String, dynamic> vanity,
+    ColorScheme colorScheme,
+    double width,
+  ) {
     return Container(
       // 184px accounts for: color nib (10) + padding (20) + avatar (70) + spacer (4) + icon (70) + padding (10)
       width: width - 184,
@@ -143,7 +154,8 @@ class BellButton extends StatelessWidget {
           if (vanity['teacher'].isNotEmpty)
             _buildInfoText(vanity['teacher'], 18, FontWeight.w500, colorScheme),
           if (vanity['location'].isNotEmpty)
-            _buildInfoText(vanity['location'], 18, FontWeight.w500, colorScheme),
+            _buildInfoText(
+                vanity['location'], 18, FontWeight.w500, colorScheme),
         ],
       ),
     );
@@ -157,11 +169,11 @@ class BellButton extends StatelessWidget {
   /// - [fontWeight]: Weight of the text.
   /// - [colorScheme]: Provides text color.
   Widget _buildInfoText(
-      String text,
-      double fontSize,
-      FontWeight fontWeight,
-      ColorScheme colorScheme,
-      ) {
+    String text,
+    double fontSize,
+    FontWeight fontWeight,
+    ColorScheme colorScheme,
+  ) {
     return Text(
       text,
       style: TextStyle(
