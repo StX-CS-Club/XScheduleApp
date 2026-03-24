@@ -25,6 +25,7 @@ typedef _BellData = ({Map<String, dynamic> vanity, String bellSuffix});
 class BellTile extends StatelessWidget {
   const BellTile(
       {super.key,
+        required this.scContext,
       required this.date,
       required this.bell,
       required this.minuteHeight,
@@ -32,6 +33,8 @@ class BellTile extends StatelessWidget {
 
   /// The calendar date this tile belongs to; used for tutorial ID resolution and popup context.
   final DateTime date;
+
+  final BuildContext scContext;
 
   /// The bell entry this tile represents.
   final BellEntry bell;
@@ -61,10 +64,10 @@ class BellTile extends StatelessWidget {
   static String _tutorialId(final DateTime date, final String bellTitle) {
     if (date == ScheduleDisplay.tutorialDate) {
       final ScheduleEntry schedule = ScheduleDirectory.readSchedule(date);
-      if (bellTitle == schedule.firstBell.toString()) {
+      if (bellTitle == schedule.firstBell?.title) {
         return 'tutorial_schedule_bell';
       }
-      if (bellTitle == schedule.firstFlex.toString()) {
+      if (bellTitle == schedule.firstFlex?.title) {
         return 'tutorial_schedule_flex';
       }
     }
@@ -281,7 +284,7 @@ class BellTile extends StatelessWidget {
                 context.pushPopup(BellInfo(schedule: schedule, bell: bell));
               },
               child: ScheduleDisplay.tutorialSystem.showcase(
-                context: context,
+                context: scContext,
                 tutorial: _tutorialId(date, bell.title),
                 uniqueNull: true,
                 child: Row(

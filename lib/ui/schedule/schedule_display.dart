@@ -47,8 +47,6 @@ class ScheduleDisplay extends StatefulWidget {
     "In this menu, you'll be able to see the schedule of any school day out of the year.",
     'tutorial_schedule_bell':
     'Each individual bell is set to match the information you provided about your class schedule, and clicking on any bell will display more information about it.',
-    'tutorial_schedule_flex':
-    'Additionally, you can tap the Flex bell to view information about lunch, clubs, and more!',
     'tutorial_schedule_date':
     "Up top, you'll find the date you're currently viewing. You can use the buttons or simple swiping gestures to flip between days.",
     'tutorial_schedule_calendar':
@@ -405,7 +403,7 @@ class _ScheduleDisplayState extends State<ScheduleDisplay> {
               // Show spinner while data loads, then swap to the schedule card
               child: ScheduleDirectory.schedules.isEmpty
                   ? _buildLoadingIndicator(context)
-                  : ScheduleDisplayCard(date: date),
+                  : ScheduleDisplayCard(scContext: context, date: date),
             ),
           );
         });

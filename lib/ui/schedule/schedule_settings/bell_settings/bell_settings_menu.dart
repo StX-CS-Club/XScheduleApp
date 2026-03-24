@@ -248,13 +248,6 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
     ScheduleSettings.defineBell(widget.bell, alternate: true);
     _loadBell('');
     _loadBell('_alt');
-
-    // Start tutorial after the first frame if it hasn't been shown yet
-    if (!BellSettingsMenu.bellTutorialSystem.finished) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        BellSettingsMenu.bellTutorialSystem.showTutorials(context);
-      });
-    }
   }
 
   @override
@@ -293,6 +286,7 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
         child: ShowCaseWidget(
           onFinish: () => BellSettingsMenu.bellTutorialSystem.finish(),
           builder: (context) {
+            BellSettingsMenu.bellTutorialSystem.schedule(context);
             return BellSettingsMenu.bellTutorialSystem.showcase(
               context: context,
               tutorial: 'tutorial_settings_bell',
@@ -362,7 +356,7 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
                   : const CircleAvatar(
                       radius: 20, backgroundColor: Colors.transparent),
             ),
-            _buildVanityEditor(false),
+            _buildVanityEditor(context, false),
             Padding(
               padding: const EdgeInsets.only(top: 8),
               child: BellSettingsMenu.bellTutorialSystem.showcase(
@@ -451,7 +445,7 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
                   setState(() => _appearanceExpanded = false);
                   await Future.delayed(const Duration(milliseconds: 150));
                 },
-                content: _buildVanityEditor(true),
+                content: _buildVanityEditor(context, true),
               ),
             ),
             Divider(color: colorScheme.onSurface, height: 8),
@@ -615,7 +609,7 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
   ///
   /// Parameters:
   /// - [alternate]: If true, builds for the alternate bell (suffix '_alt').
-  Widget _buildVanityEditor(bool alternate) {
+  Widget _buildVanityEditor(BuildContext context, bool alternate) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     final String suffix = alternate ? '_alt' : '';
@@ -631,7 +625,7 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
                 BellSettingsMenu.bellTutorialSystem.showcase(
                   context: context,
                   tutorial: 'tutorial_settings_bell${suffix}_color_wheel',
-                  child: _buildColorWheel(alternate),
+                  child: _buildColorWheel(context, alternate),
                 ),
                 Container(
                   margin: const EdgeInsets.only(bottom: 16, right: 24),
@@ -680,7 +674,7 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
   ///
   /// Parameters:
   /// - [alternate]: If true, targets the alternate bell's color and emoji fields.
-  Widget _buildColorWheel(bool alternate) {
+  Widget _buildColorWheel(BuildContext context, bool alternate) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final String suffix = alternate ? '_alt' : '';
     final String bell = '${widget.bell}$suffix';

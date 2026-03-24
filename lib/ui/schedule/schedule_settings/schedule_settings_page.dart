@@ -56,19 +56,6 @@ class ScheduleSettingsPage extends StatefulWidget {
 }
 
 class _ScheduleSettingsPageState extends State<ScheduleSettingsPage> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      // Wait for the page slide animation to finish before starting the tutorial
-      await Future.delayed(const Duration(milliseconds: 250));
-      if (!ScheduleSettingsPage.tutorialSystem.finished && mounted) {
-        ScheduleSettingsPage.tutorialSystem.showTutorials(context);
-        ScheduleSettingsPage.tutorialSystem.finish();
-      }
-    });
-  }
-
   /// Opens the [BellSettingsMenu] popup for the given [bell].
   ///
   /// Parameters:
@@ -83,7 +70,7 @@ class _ScheduleSettingsPageState extends State<ScheduleSettingsPage> {
   /// Parameters:
   /// - [bell]: The bell identifier to display.
   /// - [isFirst]: Whether this is the first bell in the list (used for tutorial targeting).
-  Widget _buildBellButton(String bell, {required bool isFirst}) {
+  Widget _buildBellButton(BuildContext context, String bell, {required bool isFirst}) {
     final button = BellButton(bell: bell, onTap: () => _openBellSettings(bell));
     if (!isFirst) return button;
     return ScheduleSettingsPage.tutorialSystem.showcase(
@@ -98,7 +85,7 @@ class _ScheduleSettingsPageState extends State<ScheduleSettingsPage> {
   ///
   /// Parameters:
   /// - [screenWidth]: Used to size the trailing spacer.
-  Widget _buildBellList(double screenWidth) {
+  Widget _buildBellList(BuildContext context, double screenWidth) {
     return SingleChildScrollView(
       physics: const ClampingScrollPhysics(),
       child: Column(
@@ -106,7 +93,7 @@ class _ScheduleSettingsPageState extends State<ScheduleSettingsPage> {
         children: [
           ...List<Widget>.generate(
             ScheduleSettings.sampleBells.length,
-                (i) => _buildBellButton(ScheduleSettings.sampleBells[i], isFirst: i == 0),
+                (i) => _buildBellButton(context, ScheduleSettings.sampleBells[i], isFirst: i == 0),
           ),
           // Blank space so the bottom button doesn't overlap the last bell
           SizedBox(height: 60, width: screenWidth),
@@ -201,12 +188,13 @@ class _ScheduleSettingsPageState extends State<ScheduleSettingsPage> {
     ScheduleSettingsPage.tutorialSystem.removeFinished();
 
     return ShowCaseWidget(builder: (context) {
+      ScheduleSettingsPage.tutorialSystem.schedule(context);
       return Scaffold(
         backgroundColor: colorScheme.primaryContainer,
         appBar: _buildAppBar(context, colorScheme),
         extendBody: true,
         bottomNavigationBar: _buildDoneButton(context, screenWidth),
-        body: _buildBellList(screenWidth),
+        body: _buildBellList(context, screenWidth),
       );
     });
   }

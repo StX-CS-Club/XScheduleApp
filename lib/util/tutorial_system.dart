@@ -91,13 +91,13 @@ class TutorialSystem {
   ///   defaults to a no-op
   Showcase showcase(
       {required BuildContext context,
-        required String tutorial,
-        required Widget child,
-        bool dense = false,
-        bool uniqueNull = false,
-        bool circular = false,
-        EdgeInsets? targetPadding,
-        Future<void> Function()? onTap}) {
+      required String tutorial,
+      required Widget child,
+      bool dense = false,
+      bool uniqueNull = false,
+      bool circular = false,
+      EdgeInsets? targetPadding,
+      Future<void> Function()? onTap}) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     onTap ??= () async {};
 
@@ -136,8 +136,8 @@ class TutorialSystem {
         targetShapeBorder: circular
             ? CircleBorder()
             : RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(8)),
-        ),
+                borderRadius: BorderRadius.all(Radius.circular(8)),
+              ),
         // "Next" button is right-aligned with no gap between the description and the action
         tooltipActionConfig: TooltipActionConfig(
             alignment: MainAxisAlignment.end, gapBetweenContentAndAction: 0),
@@ -284,5 +284,16 @@ class TutorialSystem {
     tutorials.clear();
     tutorials.addAll(setTutorials);
     finished = false;
+  }
+
+  void schedule(BuildContext context, {Duration delay = const Duration(milliseconds: 250)}) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Wait for the page slide animation to finish before starting the tutorial
+      await Future.delayed(delay);
+      if (!finished && context.mounted) {
+        showTutorials(context);
+        finish();
+      }
+    });
   }
 }

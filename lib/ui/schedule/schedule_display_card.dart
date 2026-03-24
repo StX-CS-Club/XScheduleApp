@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:xschedule/extensions/int_extension.dart';
-import 'package:xschedule/widgets/refresh_widget.dart';
-import 'package:xschedule/ui/schedule/schedule_display.dart';
 import 'package:xschedule/schedule/bell_entry.dart';
 import 'package:xschedule/schedule/schedule_directory.dart';
 import 'package:xschedule/schedule/schedule_entry.dart';
 import 'package:xschedule/ui/schedule/bell_display/bell_tile.dart';
+import 'package:xschedule/ui/schedule/schedule_display.dart';
+import 'package:xschedule/widgets/refresh_widget.dart';
 
 /// Displays the schedule card for a single calendar day.
 ///
@@ -15,10 +15,13 @@ import 'package:xschedule/ui/schedule/bell_display/bell_tile.dart';
 /// - Laying out an hour timeline alongside a stack of [BellTile]s
 /// - Overlaying a current-time indicator refreshed every minute
 class ScheduleDisplayCard extends StatelessWidget {
-  const ScheduleDisplayCard({super.key, required this.date});
+  const ScheduleDisplayCard(
+      {super.key, required this.scContext, required this.date});
 
   /// The calendar date this card represents.
   final DateTime date;
+
+  final BuildContext scContext;
 
   /// Total minutes in the schedule window displayed on screen (8:00AM–3:10PM).
   static const int scheduleMinutes = 430;
@@ -53,7 +56,7 @@ class ScheduleDisplayCard extends StatelessWidget {
 
     // Wrap in Showcase so the tutorial can highlight this card on the tutorial date
     return ScheduleDisplay.tutorialSystem.showcase(
-        context: context,
+        context: scContext,
         uniqueNull: true,
         tutorial: date == ScheduleDisplay.tutorialDate
             ? 'tutorial_schedule'
@@ -73,11 +76,12 @@ class ScheduleDisplayCard extends StatelessWidget {
                     // Bell tiles fill the remaining width
                     Expanded(
                         child: Container(
-                          // 6.5px top padding aligns bell tops with their timeline hour labels
-                          padding: const EdgeInsets.only(top: 6.5),
-                          height: cardHeight,
-                          child: _buildBellStack(bells, minuteHeight, cardHeight),
-                        )),
+                      // 6.5px top padding aligns bell tops with their timeline hour labels
+                      padding: const EdgeInsets.only(top: 6.5),
+                      height: cardHeight,
+                      child: _buildBellStack(
+                          context, bells, minuteHeight, cardHeight),
+                    )),
                   ],
                 ),
               ),
@@ -126,13 +130,14 @@ class ScheduleDisplayCard extends StatelessWidget {
   /// - [bells]: The ordered list of [BellEntry]s to render
   /// - [minuteHeight]: Pixels per minute, passed through to each [BellTile]
   /// - [cardHeight]: Total card height, passed through to each [BellTile]
-  Widget _buildBellStack(
-      List<BellEntry> bells, double minuteHeight, double cardHeight) {
+  Widget _buildBellStack(BuildContext context, List<BellEntry> bells,
+      double minuteHeight, double cardHeight) {
     return Stack(
       alignment: Alignment.topCenter,
       children: List<Widget>.generate(bells.length, (bellIndex) {
         final BellEntry bell = bells[bellIndex];
         return BellTile(
+            scContext: scContext,
             date: date,
             bell: bell,
             minuteHeight: minuteHeight,
@@ -176,7 +181,8 @@ class ScheduleDisplayCard extends StatelessWidget {
               // 25px left padding clears the timeline hour labels
               padding: EdgeInsets.only(
                   left: 25,
-                  top: timeOffsetMinutes * cardHeight / timeIndicatorMaxMinutes),
+                  top:
+                      timeOffsetMinutes * cardHeight / timeIndicatorMaxMinutes),
               child: Row(
                 children: [
                   // Horizontal line spanning available width (83px accounts for nib + padding)
