@@ -203,7 +203,7 @@ class BellInfo extends StatelessWidget {
       height: 160,
       child: Stack(
         children: [
-          if ((resolved.vanity['decal'] ?? "blank") != "blank")
+          if ((resolved.vanity['decal'] ?? "Blank") != "Blank")
             Positioned.fill(
                 child: Image.asset(
                     'assets/images/decals/${resolved.vanity['decal']}.png',

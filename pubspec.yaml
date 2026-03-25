@@ -84,11 +84,52 @@ flutter:
     - assets/images/xschedule_transparent.png
     - assets/images/xschedule_small.png
     - assets/images/x_building.png
-    - assets/images/decals/math.png
-    - assets/images/decals/generic.png
-    - assets/images/decals/reading.png
-    - assets/images/decals/books.png
-    - assets/images/decals/writing.png
+    - assets/images/decals/Generic.png
+    - assets/images/decals/Activity.png
+    - assets/images/decals/School.png
+    - assets/images/decals/Books.png
+    - assets/images/decals/Reading.png
+    - assets/images/decals/Film.png
+    - assets/images/decals/Speech.png
+    - assets/images/decals/Writing.png
+    - assets/images/decals/English.png
+    - assets/images/decals/Sports.png
+    - assets/images/decals/Faith.png
+    - assets/images/decals/Religion.png
+    - assets/images/decals/Morality.png
+    - assets/images/decals/Scriptures.png
+    - assets/images/decals/Social Studies.png
+    - assets/images/decals/History.png
+    - assets/images/decals/Economics.png
+    - assets/images/decals/Government.png
+    - assets/images/decals/Entrepreneurship.png
+    - assets/images/decals/Art.png
+    - assets/images/decals/Engineering.png
+    - assets/images/decals/Acting.png
+    - assets/images/decals/Music.png
+    - assets/images/decals/Drawing.png
+    - assets/images/decals/Programming.png
+    - assets/images/decals/Science.png
+    - assets/images/decals/Biology.png
+    - assets/images/decals/Chemistry.png
+    - assets/images/decals/Physics.png
+    - assets/images/decals/Environmental Science.png
+    - assets/images/decals/Psychology.png
+    - assets/images/decals/Anatomy.png
+    - assets/images/decals/Computer Science.png
+    - assets/images/decals/Math.png
+    - assets/images/decals/Algebra.png
+    - assets/images/decals/Geometry.png
+    - assets/images/decals/Statistics.png
+    - assets/images/decals/Trigonometry.png
+    - assets/images/decals/Calculus.png
+    - assets/images/decals/Calculus.png
+    - assets/images/decals/Language.png
+    - assets/images/decals/Spanish.png
+    - assets/images/decals/German.png
+    - assets/images/decals/French.png
+    - assets/images/decals/Latin.png
+    - assets/images/decals/Chinese.png
     - assets/data/credits.json
     - assets/data/rss.json
 

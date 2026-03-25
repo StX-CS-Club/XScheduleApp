@@ -234,7 +234,7 @@ class BellTile extends StatelessWidget {
     final Color bellColor =
         ColorExtension.fromHex(resolved.vanity['color'] ?? '#909090');
 
-    final String bellDecal = resolved.vanity['decal'] ?? "blank";
+    final String bellDecal = resolved.vanity['decal'] ?? "Blank";
 
     // Tile height spans the bell's full duration in pixels
     final double height =
@@ -260,7 +260,7 @@ class BellTile extends StatelessWidget {
         margin: EdgeInsets.only(top: topMargin),
         child: Stack(
           children: [
-            if (bellDecal != "blank")
+            if (bellDecal != "Blank")
               Positioned.fill(
                 child: Opacity(
                     opacity: 0.25,

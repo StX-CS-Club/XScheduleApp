@@ -137,11 +137,62 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
   ];
 
   static const List<String> decalOptions = [
-    "blank",
-    "generic",
-    "books",
-    "writing",
-    "reading"
+    "Blank",
+    "Generic",
+    "Activity",
+    "School",
+    "Books",
+    "Sports",
+    "English",
+    "Speech",
+    "Reading",
+    "Writing",
+    "Film",
+    "Religion",
+    "Scriptures",
+    "Faith",
+    "Morality",
+    "Social Studies",
+    "History",
+    "Economics",
+    "Government",
+    "Entrepreneurship",
+    "Art",
+    "Drawing",
+    "Acting",
+    "Music",
+    "Engineering",
+    "Programming",
+    "Science",
+    "Biology",
+    "Chemistry",
+    "Physics",
+    "Environmental Science",
+    "Psychology",
+    "Anatomy",
+    "Computer Science",
+    "Math",
+    "Algebra",
+    "Geometry",
+    "Statistics",
+    "Trigonometry",
+    "Calculus",
+    "Language",
+    "Spanish",
+    "German",
+    "French",
+    "Latin",
+    "Chinese"
+  ];
+
+  static const List<String> decalDividers = [
+    "English",
+    "Religion",
+    "Social Studies",
+    "Art",
+    "Science",
+    "Math",
+    "Language"
   ];
 
   /// Controls the flip animation between the front (standard) and back (alternate) card faces.
@@ -690,15 +741,15 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
             child: CircleAvatar(
               backgroundColor: ScheduleSettings.colors[bell]!.toColor(),
               radius: 95,
-              child: (ScheduleSettings.decals[bell] ?? "blank") != "blank"
+              child: (ScheduleSettings.decals[bell] ?? "Blank") != "Blank"
                   ? ClipOval(
-                child: Image.asset(
-                    "assets/images/decals/${ScheduleSettings.decals[bell]}.png",
-                    width: 190,
-                    height: 190,
-                    fit: BoxFit.cover,
-                  ).withOpacity(0.25),
-              )
+                      child: Image.asset(
+                        "assets/images/decals/${ScheduleSettings.decals[bell]}.png",
+                        width: 190,
+                        height: 190,
+                        fit: BoxFit.cover,
+                      ).withOpacity(0.25),
+                    )
                   : null,
             ),
           ),
@@ -1018,7 +1069,7 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
         final ColorScheme colorScheme = Theme.of(context).colorScheme;
         final Size screen = MediaQuery.of(context).size;
 
-        final String selected = ScheduleSettings.decals[bell] ?? "blank";
+        final String selected = ScheduleSettings.decals[bell] ?? "Blank";
 
         return Center(
           child: Material(
@@ -1074,56 +1125,62 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
 
   Widget _buildDecalPreview(String decal, Color color, bool selected) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final String label = decal[0].toUpperCase() + decal.substring(1);
 
-    return Container(
-      constraints: BoxConstraints(maxHeight: 64),
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          if (decal != "blank")
-            Image.asset(
-              'assets/images/decals/$decal.png',
-              fit: BoxFit.cover,
-            ).withOpacity(0.5),
-          Container(color: color.withAlpha(selected ? 112 : 64)),
-          Center(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const SizedBox(width: 40),
-                Text(
-                  ' $label ',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontFamily: 'Exo_2',
-                    fontWeight: FontWeight.w600,
-                    color: colorScheme.onSurface,
-                    shadows: [
-                      Shadow(
-                        color: colorScheme.surface.withAlpha(180),
-                        blurRadius: 4,
-                      ),
-                    ],
-                  ),
-                ),
-                selected
-                    ? Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: Icon(Icons.check,
-                            size: 32, color: colorScheme.onSurface))
-                    : const SizedBox(width: 40),
-              ],
-            ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (decalDividers.contains(decal))
+          Divider(height: 4, thickness: 1.5, color: colorScheme.onSurface),
+        Container(
+          constraints: BoxConstraints(maxHeight: 64),
+          margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
           ),
-        ],
-      ),
+          clipBehavior: Clip.antiAlias,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              if (decal != "Blank")
+                Image.asset(
+                  'assets/images/decals/$decal.png',
+                  fit: BoxFit.cover,
+                ).withOpacity(0.5),
+              Container(color: color.withAlpha(selected ? 112 : 64)),
+              Center(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const SizedBox(width: 40),
+                    Text(
+                      ' $decal ',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontFamily: 'Exo_2',
+                        fontWeight: FontWeight.w600,
+                        color: colorScheme.onSurface,
+                        shadows: [
+                          Shadow(
+                            color: colorScheme.surface.withAlpha(180),
+                            blurRadius: 4,
+                          ),
+                        ],
+                      ),
+                    ).expandedFit(),
+                    selected
+                        ? Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: Icon(Icons.check,
+                                size: 32, color: colorScheme.onSurface))
+                        : const SizedBox(width: 40),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        )
+      ],
     );
   }
 }

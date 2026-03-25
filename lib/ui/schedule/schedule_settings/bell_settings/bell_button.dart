@@ -57,7 +57,7 @@ class BellButton extends StatelessWidget {
         color: colorScheme.surface,
         child: Stack(
           children: [
-            if ((vanity['decal'] ?? "blank") != "blank")
+            if ((vanity['decal'] ?? "Blank") != "Blank")
               Positioned.fill(
                   child: Image.asset(
                           'assets/images/decals/${vanity['decal']}.png',
