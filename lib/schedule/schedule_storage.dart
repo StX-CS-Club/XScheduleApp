@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/services.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:xschedule/extensions/date_time_extension.dart';
 import 'package:xschedule/schedule/bell_entry.dart';
@@ -19,7 +20,8 @@ class ScheduleStorage {
   // Private constructor — this class is not intended to be instantiated
   ScheduleStorage._();
 
-  static const int bellVanityFormat = 1;
+  static late int bellVanityFormat;
+  static late int scheduleDaysStored;
 
   // ---------------------------------------------------------------------------
   // Constants
@@ -34,38 +36,32 @@ class ScheduleStorage {
   /// Maps full schedule entry field names to their compressed single-character keys.
   ///
   /// Used during serialisation in [_buildScheduleJson] and [ScheduleEntry.toJsonEntry].
-  static const Map<String, String> scheduleEncode = {
-    'name': 'n',
-    'bells': 'b',
-  };
+  static late Map<String, String> scheduleEncode;
 
   /// Maps full bell vanity field names to their compressed single-character keys.
   ///
   /// Used during serialisation in [encodeBellVanity] and [encodeAllBellVanity].
-  static const Map<String, String> vanityEncode = {
-    'name': 'n',
-    'teacher': 't',
-    'location': 'l',
-    'emoji': 'e',
-    'decal': 'i',
-    'color': 'c',
-    'alt_days': 'd',
-    'alt': 'a',
-  };
+  static late Map<String, String> vanityEncode;
 
   /// Maps compressed single-character keys back to full bell vanity field names.
   ///
   /// Used during deserialisation in [decodeBellVanity] and [decodeAllBellVanity].
-  static const Map<String, String> vanityDecode = {
-    'n': 'name',
-    't': 'teacher',
-    'l': 'location',
-    'e': 'emoji',
-    'i': 'decal',
-    'c': 'color',
-    'd': 'alt_days',
-    'a': 'alt',
-  };
+  static late Map<String, String> vanityDecode;
+
+  static Future<void> loadJson() async {
+    // Read JSON file as raw string from Flutter asset bundle
+    final String jsonString =
+        await rootBundle.loadString("assets/data/storage_settings.json");
+
+    // Decode JSON string into a Map<String, dynamic>
+    final Map<String, dynamic> json = jsonDecode(jsonString);
+
+    bellVanityFormat = json['bell_vanity_format'];
+    scheduleDaysStored = json['schedule_days_stored'];
+    scheduleEncode = Map<String, String>.from(json['schedule_encode']);
+    vanityEncode = Map<String, String>.from(json['vanity_encode']);
+    vanityDecode = vanityEncode.map((k, v) => MapEntry(v, k));
+  }
 
   // ---------------------------------------------------------------------------
   // Schedule storage
@@ -196,7 +192,7 @@ class ScheduleStorage {
 
       // Temporary validation for v0 -> v1 migration.
       final bool looksValid = result.values.any(
-            (v) => (v['name'] as String? ?? '').isNotEmpty,
+        (v) => (v['name'] as String? ?? '').isNotEmpty,
       );
 
       return looksValid ? result : _restoreBellVanityLegacy0();

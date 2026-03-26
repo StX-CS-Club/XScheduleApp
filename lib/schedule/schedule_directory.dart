@@ -5,6 +5,7 @@ import 'package:localstorage/localstorage.dart';
 import 'package:xschedule/schedule/schedule_entry.dart';
 import 'package:xschedule/extensions/date_time_extension.dart';
 import 'package:xschedule/schedule/bell_entry.dart';
+import 'package:xschedule/schedule/schedule_storage.dart';
 
 /// A simple immutable date range used to track prior Supabase request windows.
 ///
@@ -100,7 +101,7 @@ class ScheduleDirectory {
   /// Only stores schedules within the next 100 days from today.
   static void storeSchedule() {
     final List<int> compressed =
-    _gzip.encode(utf8.encode(jsonSchedule(100)));
+    _gzip.encode(utf8.encode(jsonSchedule(ScheduleStorage.scheduleDaysStored)));
     localStorage.setItem("schedule:dailyOrder", base64Encode(compressed));
   }
 

@@ -133,6 +133,7 @@ flutter:
     - assets/data/credits.json
     - assets/data/rss.json
     - assets/data/schedule_settings.json
+    - assets/data/storage_settings.json
     - assets/data/tutorials.json
 
   # An image asset can refer to one or more resolution-specific "variants", see

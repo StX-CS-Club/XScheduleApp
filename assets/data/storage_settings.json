@@ -1,0 +1,18 @@
+{
+  "bell_vanity_format": 1,
+  "schedule_days_stored": 100,
+  "schedule_encode": {
+    "name": "n",
+    "bells": "b"
+  },
+  "vanity_encode": {
+    "name": "n",
+    "teacher": "t",
+    "location": "l",
+    "emoji": "e",
+    "decal": "i",
+    "color": "c",
+    "alt_days": "d",
+    "alt": "a"
+  }
+}

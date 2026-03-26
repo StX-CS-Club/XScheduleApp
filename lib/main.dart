@@ -42,6 +42,7 @@ Future<void> init() async {
   Credits.loadJson();
   await RSS.loadJson();
   await ScheduleSettings.loadJson();
+  await ScheduleStorage.loadJson();
   await TutorialSystem.loadJson();
 
   RSS.getDailyOrder(refreshStream: true, storeResults: true, overwrite: true)
