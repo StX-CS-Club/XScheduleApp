@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:xschedule/extensions/color_extension.dart';
 import 'package:xschedule/schedule/schedule_storage.dart';
@@ -19,29 +22,40 @@ class ScheduleSettings {
   /// Standard day structures, mapping a day title to its ordered list of bell labels.
   ///
   /// Used as reference templates when constructing or validating a schedule's bell order.
-  static const Map<String, List<String>> sampleDays = {
-    "A Day": ["A", "B", "C", "FLEX", "D", "E", "F"],
-    "G Day": ["G", "H", "A", "FLEX", "B", "C", "D"],
-    "E Day": ["E", "F", "G", "FLEX", "H", "A", "B"],
-    "C Day": ["C", "D", "E", "FLEX", "F", "G", "H"],
-    "X Day": ["A", "B", "FLEX", "C", "D"],
-    "Y Day": ["E", "F", "FLEX", "G", "H"],
-    "All Meet": ["A", "B", "C", "D", "FLEX", "E", "F", "G", "H"],
-  };
+  /// Imported from schedule_settings.json
+  static late Map<String, List<String>> sampleSchedules;
 
   /// The full set of recognised bell labels across all standard day types.
-  static const List<String> sampleBells = [
-    "A",
-    "B",
-    "C",
-    "D",
-    "E",
-    "F",
-    "G",
-    "H",
-    "HR",
-    "FLEX"
-  ];
+  /// Imported from schedule_settings.json
+  static late List<String> sampleBells;
+
+
+  /// Preset hex color options shown in the horizontal color scroll.
+  static late List<String> colorOptions;
+  static late List<String> decalOptions;
+  static late List<String> decalOptionDividers;
+
+  static Future<void> loadJson() async {
+    // Read JSON file as raw string from Flutter asset bundle
+    final String jsonString =
+        await rootBundle.loadString("assets/data/schedule_settings.json");
+
+    // Decode JSON string into a Map<String, dynamic>
+    final Map<String, dynamic> json = jsonDecode(jsonString);
+
+    sampleBells = List<String>.from(json['sample_bells']);
+    sampleSchedules = _mapFromJson(json['sample_schedules']);
+    colorOptions = List<String>.from(json['color_options']);
+    decalOptions = List<String>.from(json['decal_options']);
+    decalOptionDividers = List<String>.from(json['decal_option_dividers']);
+  }
+
+  static Map<String, List<String>> _mapFromJson(Map map) {
+    return map.map((key, value) => MapEntry(
+          key,
+          List<String>.from(value),
+        ));
+  }
 
   // Temporary bell vanity values used during editing, keyed by bell name
   static final Map<String, HSVColor> colors = {};
@@ -66,7 +80,7 @@ class ScheduleSettings {
   /// Saves bell vanity data to local storage and refreshes the schedule stream
   static void saveBells() {
     ScheduleStorage.storeBellVanity(bellVanity);
-    localStorage.setItem("state", "logged");
+    localStorage.setItem("state:welcome", "T");
     ScheduleDisplay.scheduleStream.updateStream();
   }
 

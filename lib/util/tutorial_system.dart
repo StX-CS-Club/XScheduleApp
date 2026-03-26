@@ -1,7 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:showcaseview/showcaseview.dart';
+import 'package:xschedule/ui/schedule/schedule_display.dart';
+import 'package:xschedule/ui/schedule/schedule_settings/bell_settings/bell_settings_menu.dart';
+import 'package:xschedule/ui/schedule/schedule_settings/schedule_settings_page.dart';
 import 'package:xschedule/widgets/styled_button.dart';
 
 /// Manages a set of sequential [Showcase] tutorial steps for a given screen or feature.
@@ -13,14 +19,47 @@ import 'package:xschedule/widgets/styled_button.dart';
 /// - Starting, refreshing, and resetting the tutorial sequence
 /// - Simulating screen taps to advance the showcase programmatically
 class TutorialSystem {
+  static Future<void> loadJson() async {
+    // Read JSON file as raw string from Flutter asset bundle
+    final String jsonString =
+        await rootBundle.loadString("assets/data/tutorials.json");
+
+    // Decode JSON string into a Map<String, dynamic>
+    final Map<String, dynamic> json = jsonDecode(jsonString);
+
+    ScheduleDisplay.tutorialSystem =
+        TutorialSystem._(_mapFromJson("schedule", json["schedule"]));
+    ScheduleSettingsPage.tutorialSystem = TutorialSystem._(
+        _mapFromJson("schedule_settings", json["schedule_settings"]));
+
+    BellSettingsMenu.bellTutorialData =
+        _mapFromJson("bell_settings", json["bell_settings"]);
+    BellSettingsMenu.bellAltTutorialData =
+        _mapFromJson("bell_alt_settings", json["bell_alt_settings"]);
+    BellSettingsMenu.tutorialSystem = TutorialSystem._({
+      'bell_settings:bell_settings':
+          BellSettingsMenu.bellTutorialData['bell_settings:bell_settings']!,
+      'bell_settings:help':
+          BellSettingsMenu.bellTutorialData['bell_settings:help']!,
+    });
+  }
+
+  static Map<String, String> _mapFromJson(String title, Map map) {
+    return map.map((key, value) => MapEntry(
+          key.startsWith('!') ? key.substring(1) : '$title:$key',
+          value,
+        ));
+  }
+
   /// Creates a [TutorialSystem] for the given [tutorials] map.
+  /// Private constructor; not intended for use outside of class.
   ///
   /// Generates a [GlobalKey] for each tutorial ID on construction.
   /// Sets [finished] to `true` immediately if [tutorials] is empty.
   ///
   /// Parameters:
   /// - [tutorials]: A map of tutorial ID to description text; required
-  TutorialSystem(this.tutorials) {
+  TutorialSystem._(this.tutorials) {
     // Generates a GlobalKey for each tutorial ID into the [keys] map
     generateKeys(tutorials.keys.toSet(), reference: keys);
     // If no tutorials were provided, mark the system as already finished
@@ -177,7 +216,7 @@ class TutorialSystem {
   void removeFinished() {
     for (String tutorial in tutorials.keys) {
       // A stored value of 'T' indicates this step was previously completed
-      if ((localStorage.getItem(tutorial) ?? '') == 'T') {
+      if ((localStorage.getItem('tutorial:$tutorial') ?? '') == 'T') {
         keys.remove(tutorial);
       }
     }
@@ -192,7 +231,7 @@ class TutorialSystem {
   /// After calling this, [removeFinished] will treat all steps as incomplete.
   void clearStorage() {
     for (String tutorial in tutorials.keys) {
-      localStorage.removeItem(tutorial);
+      localStorage.removeItem('tutorial:$tutorial');
     }
   }
 
@@ -231,8 +270,8 @@ class TutorialSystem {
 
     if (storeCompletion) {
       // Only includes tutorial IDs with no existing completion record in localStorage
-      showTutorials.addAll(tutorials.keys
-          .where((element) => (localStorage.getItem(element) ?? '').isEmpty));
+      showTutorials.addAll(tutorials.keys.where((element) =>
+          (localStorage.getItem('tutorial:$element') ?? '').isEmpty));
     } else {
       showTutorials.addAll(tutorials.keys);
     }
@@ -241,7 +280,7 @@ class TutorialSystem {
     final List<GlobalKey> tutorialKeys = [];
     for (String tutorial in showTutorials) {
       // Persists completion as 'T' so this step is skipped on future launches
-      localStorage.setItem(tutorial, 'T');
+      localStorage.setItem('tutorial:$tutorial', 'T');
       tutorialKeys.add(key(tutorial));
     }
 
@@ -286,7 +325,8 @@ class TutorialSystem {
     finished = false;
   }
 
-  void schedule(BuildContext context, {Duration delay = const Duration(milliseconds: 250)}) {
+  void schedule(BuildContext context,
+      {Duration delay = const Duration(milliseconds: 250)}) {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       // Wait for the page slide animation to finish before starting the tutorial
       await Future.delayed(delay);

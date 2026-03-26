@@ -20,7 +20,7 @@ class SplashPage extends StatelessWidget {
   /// - [context]: The current build context used for navigation.
   static void _navigateFromSplash(BuildContext context) {
     // Route to HomePage if previously logged in, otherwise to WelcomePage
-    final Widget destination = localStorage.getItem("state") == "logged"
+    final Widget destination = localStorage.getItem("state:welcome") == "T"
         ? const HomePage()
         : const WelcomePage();
     Navigator.of(context).pushAndRemoveUntil(

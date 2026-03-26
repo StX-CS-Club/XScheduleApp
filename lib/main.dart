@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:xschedule/schedule/schedule_settings.dart';
 import 'package:xschedule/schedule/schedule_storage.dart';
 import 'package:xschedule/startup/splash_page.dart';
 import 'package:xschedule/startup/themes.dart';
@@ -11,6 +12,7 @@ import 'package:xschedule/extensions/date_time_extension.dart';
 import 'package:xschedule/ui/personal/credits.dart';
 import 'package:xschedule/ui/schedule/schedule_display.dart';
 import 'package:xschedule/backend/rss/rss.dart';
+import 'package:xschedule/util/tutorial_system.dart';
 
 /// Entry point of the application.
 /// Runs initialization then launches the Flutter app.
@@ -37,8 +39,10 @@ Future<void> init() async {
   ScheduleStorage.restore();
 
   // Load data from local json files
-  Credits.loadCreditsJson();
-  await RSS.loadRSSJson();
+  Credits.loadJson();
+  await RSS.loadJson();
+  await ScheduleSettings.loadJson();
+  await TutorialSystem.loadJson();
 
   RSS.getDailyOrder(refreshStream: true, storeResults: true, overwrite: true)
       .then((_) {

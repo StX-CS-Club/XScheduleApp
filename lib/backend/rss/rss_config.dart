@@ -16,10 +16,18 @@ class RSSConfig {
   /// These typically represent server-side issues (e.g., 500, 503).
   final List<int> retryCodes;
 
+  /// Maximum time to wait for a single HTTP request.
+  final Duration timeoutDelay;
+
+  /// Delay between retry attempts when a request fails.
+  final Duration retryDelay;
+
   /// Creates an immutable RSS configuration object.
   const RSSConfig({
     required this.dailyOrderUrl,
     required this.retryCodes,
+    required this.timeoutDelay,
+    required this.retryDelay
   });
 
   /// Loads RSS configuration from `assets/data/rss.json`.
@@ -47,10 +55,16 @@ class RSSConfig {
     final List<int> retryCodes =
     List<int>.from(json['retry_status_codes']);
 
+    final Duration timeoutDelay = Duration(milliseconds: json['timeout_delay']);
+    final Duration retryDelay = Duration(milliseconds: json['retry_delay']);
+
+
     // Return immutable config object
     return RSSConfig(
       dailyOrderUrl: dailyOrderUrl,
       retryCodes: retryCodes,
+      timeoutDelay: timeoutDelay,
+      retryDelay: retryDelay
     );
   }
 }

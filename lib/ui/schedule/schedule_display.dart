@@ -42,20 +42,7 @@ class ScheduleDisplay extends StatefulWidget {
   /// The [TutorialSystem] managing all showcase steps on the schedule page.
   ///
   /// Keys map tutorial IDs to their display strings shown during the walkthrough.
-  static final TutorialSystem tutorialSystem = TutorialSystem({
-    'tutorial_schedule':
-    "In this menu, you'll be able to see the schedule of any school day out of the year.",
-    'tutorial_schedule_bell':
-    'Each individual bell is set to match the information you provided about your class schedule, and clicking on any bell will display more information about it.',
-    'tutorial_schedule_date':
-    "Up top, you'll find the date you're currently viewing. You can use the buttons or simple swiping gestures to flip between days.",
-    'tutorial_schedule_calendar':
-    "... or click this button to quickly navigate through the school days of the year.",
-    'tutorial_schedule_info':
-    "Tap this button to view important information about a school day, if available.",
-    'tutorial_schedule_settings':
-    'Lastly, if you ever want to edit your class information, you can do so by clicking this button.'
-  });
+  static late TutorialSystem tutorialSystem;
 
   @override
   State<ScheduleDisplay> createState() => _ScheduleDisplayState();
@@ -205,7 +192,7 @@ class _ScheduleDisplayState extends State<ScheduleDisplay> {
                       height: 30,
                       child: ScheduleDisplay.tutorialSystem.showcase(
                           context: context,
-                          tutorial: 'tutorial_schedule_settings',
+                          tutorial: 'schedule:settings',
                           child: StyledButton(
                             width: mediaQuery.size.width * .6,
                             icon: Icons.settings,
@@ -244,7 +231,7 @@ class _ScheduleDisplayState extends State<ScheduleDisplay> {
           child: ScheduleDisplay.tutorialSystem.showcase(
               context: context,
               circular: true,
-              tutorial: 'tutorial_schedule_calendar',
+              tutorial: 'schedule:calendar',
               child: IconCircle(
                   icon: Icons.calendar_month,
                   iconColor: colorScheme.onSurface,
@@ -258,7 +245,7 @@ class _ScheduleDisplayState extends State<ScheduleDisplay> {
         // Date navigator: left arrow, current date text, right arrow
         ScheduleDisplay.tutorialSystem.showcase(
             context: context,
-            tutorial: 'tutorial_schedule_date',
+            tutorial: 'schedule:date',
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -287,7 +274,7 @@ class _ScheduleDisplayState extends State<ScheduleDisplay> {
           child: ScheduleDisplay.tutorialSystem.showcase(
               context: context,
               circular: true,
-              tutorial: 'tutorial_schedule_info',
+              tutorial: 'schedule:info',
               child: ScheduleInfoButton(
                 date: ScheduleDisplay.initialDate
                     .addDay(ScheduleDisplay.pageIndex),

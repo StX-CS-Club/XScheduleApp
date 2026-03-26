@@ -27,7 +27,7 @@ class Credits extends StatelessWidget {
 
   /// Reads assets/data/credits.json and populates [credits].
   /// Must be called during app initialization before this widget is shown.
-  static Future<void> loadCreditsJson() async {
+  static Future<void> loadJson() async {
     final String jsonString = await rootBundle.loadString("assets/data/credits.json");
     final Map<String, dynamic> json = jsonDecode(jsonString);
     credits.addAll(Map<String, List<dynamic>>.from(json));

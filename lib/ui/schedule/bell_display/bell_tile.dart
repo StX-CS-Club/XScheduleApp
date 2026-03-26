@@ -65,10 +65,10 @@ class BellTile extends StatelessWidget {
     if (date == ScheduleDisplay.tutorialDate) {
       final ScheduleEntry schedule = ScheduleDirectory.readSchedule(date);
       if (bellTitle == schedule.firstBell?.title) {
-        return 'tutorial_schedule_bell';
+        return 'schedule:bell';
       }
       if (bellTitle == schedule.firstFlex?.title) {
-        return 'tutorial_schedule_flex';
+        return 'schedule:flex';
       }
     }
     return 'no_tutorial';

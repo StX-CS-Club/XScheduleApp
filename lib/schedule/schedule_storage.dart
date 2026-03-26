@@ -19,6 +19,8 @@ class ScheduleStorage {
   // Private constructor — this class is not intended to be instantiated
   ScheduleStorage._();
 
+  static const int bellVanityFormat = 1;
+
   // ---------------------------------------------------------------------------
   // Constants
   // ---------------------------------------------------------------------------
@@ -77,7 +79,7 @@ class ScheduleStorage {
   static void store() {
     final List<int> compressed =
         _gzip.encode(utf8.encode(_buildScheduleJson(100)));
-    localStorage.setItem("schedule", base64Encode(compressed));
+    localStorage.setItem("schedule:dailyOrder", base64Encode(compressed));
   }
 
   /// Reads, decompresses, and restores schedule data from [localStorage] into
@@ -91,7 +93,7 @@ class ScheduleStorage {
   /// Silently no-ops if the stored value is absent, malformed, or throws during parsing.
   static void restore() {
     try {
-      final String? stored = localStorage.getItem("schedule");
+      final String? stored = localStorage.getItem("schedule:dailyOrder");
       if (stored == null) return;
 
       // Base64 → GZip decompress → UTF-8 decode to recover the original JSON string
@@ -162,24 +164,74 @@ class ScheduleStorage {
   static void storeBellVanity(Map<String, Map<String, dynamic>> vanity) {
     final String json = jsonEncode(encodeAllBellVanity(vanity));
     final List<int> compressed = _gzip.encode(utf8.encode(json));
-    localStorage.setItem("bellVanity", base64Encode(compressed));
+    localStorage.setItem("vanity:bellVanity", base64Encode(compressed));
+    localStorage.setItem(
+        "vanity:bellVanityFormat", bellVanityFormat.toString());
   }
 
-  /// Reads, decompresses, and returns all bell vanity data from [localStorage].
+  /// Restores bell vanity from local storage.
   ///
-  /// Returns an empty map if the stored value is absent, malformed, or throws.
+  /// Reads the stored format ID and routes to the correct decoder.
+  /// Falls back to the legacy restore path if:
+  /// - the format is missing or unsupported
+  /// - decoding throws
+  /// - the temporary v0 → v1 validation check fails
   ///
-  /// Returns: A fully restored `Map<bellLabel, vanityMap>` or `{}` on failure
+  /// Returns a fully restored `Map<bellLabel, vanityMap>`, or `{}` if restore fails.
   static Map<String, Map<String, dynamic>> restoreBellVanity() {
     try {
-      final String? stored = localStorage.getItem("bellVanity");
+      final String stored = localStorage.getItem("vanity:bellVanity") ?? "{}";
+      final int? format = int.tryParse(
+        localStorage.getItem("vanity:bellVanityFormat") ?? "",
+      );
+
+      if (format != bellVanityFormat) {
+        return _restoreBellVanityLegacy0();
+      }
+
+      final String jsonString = utf8.decode(_gzip.decode(base64Decode(stored)));
+      final Map<String, Map<String, dynamic>> result = decodeAllBellVanity(
+        Map<String, dynamic>.from(jsonDecode(jsonString)),
+      );
+
+      // Temporary validation for v0 -> v1 migration.
+      final bool looksValid = result.values.any(
+            (v) => (v['name'] as String? ?? '').isNotEmpty,
+      );
+
+      return looksValid ? result : _restoreBellVanityLegacy0();
+    } catch (_) {
+      return _restoreBellVanityLegacy0();
+    }
+  }
+
+  /// Restores bell vanity from the old uncompressed [localStorage] format.
+  /// Legacy format deprecated March 2026
+  ///
+  /// The legacy format stores bell vanity as a raw JSON string under
+  /// `'bellVanity'` with full-length keys and no compression.
+  /// Used as a fallback when [restoreBellVanity] detects a malformed result,
+  /// typically on first launch after migrating to the compressed format.
+  ///
+  /// After a successful legacy read, immediately re-stores in the new
+  /// compressed format so future reads use the current format.
+  ///
+  /// Returns: A `Map<bellLabel, vanityMap>` from legacy storage, or `{}` on failure
+  static Map<String, Map<String, dynamic>> _restoreBellVanityLegacy0() {
+    try {
+      final String? stored = localStorage.getItem("vanity:bellVanity");
       if (stored == null) return {};
 
-      // Base64 → GZip decompress → UTF-8 decode to recover the original JSON string
-      final String jsonString = utf8.decode(_gzip.decode(base64Decode(stored)));
+      // Legacy format: raw uncompressed JSON with full-length keys
+      final Map<String, Map<String, dynamic>> result =
+          Map<String, Map<String, dynamic>>.from(jsonDecode(stored).map(
+              (key, value) => MapEntry(key, Map<String, dynamic>.from(value))));
 
-      return decodeAllBellVanity(
-          Map<String, dynamic>.from(jsonDecode(jsonString)));
+      if (result.isEmpty) return {};
+
+      // Migrates to compressed format immediately so future reads use new format
+      storeBellVanity(result);
+      return result;
     } catch (_) {
       return {};
     }

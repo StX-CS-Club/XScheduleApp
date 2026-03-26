@@ -1,0 +1,34 @@
+{
+  "schedule": {
+    "schedule": "In this menu, you'll be able to see the schedule of any school day out of the year.",
+    "bell": "Each individual bell is set to match the information you provided about your class schedule, and clicking on any bell will display more information about it.",
+    "date": "Up top, you'll find the date you're currently viewing. You can use the buttons or simple swiping gestures to flip between days.",
+    "calendar": "... or click this button to quickly navigate through the school days of the year.",
+    "info": "Tap this button to view important information about a school day, if available.",
+    "settings": "Lastly, if you ever want to edit your class information, you can do so by clicking this button."
+  },
+  "schedule_settings": {
+    "schedule_settings": "In this menu, you'll be able to customize your schedule to match the classes you have.",
+    "button": "Click on any individual bell to change its name, information, and appearance.",
+    "qr": "... or try sharing your schedules through QR codes!",
+    "complete": "Once you're satisfied with your schedule, tap the button down here to move on."
+  },
+  "bell_settings": {
+    "bell_settings": "In this menu, you'll be able to customize any individual bell on your schedule.",
+    "color_wheel": "You can give each bell a distinctive color using the color wheel.",
+    "color_row": "...or by selecting one from the available options.",
+    "icon": "Additionally, you can select an icon to represent each bell.",
+    "decal": "Try setting the decal background of the bell, too!",
+    "info": "As well, you can input the information about your class so that you can remember it later.",
+    "alternate": "...and if your class changes daily, you can add an alternate class for the bell.",
+    "complete": "When you've finished customizing the bell, press this button to save your changes and exit.",
+    "help": "If you ever need help, press this button here."
+  },
+  "bell_alt_settings": {
+    "!bell_settings:bell_settings": "In this menu, you'll be able to specify an alternate bell dependent on the day.",
+    "day": "Down here, you can scroll through all the days this bell appears on and select when to replace the normal settings for this bell.",
+    "vanity": "Up here, you can customize the alternate bell using the same settings as normal.",
+    "alternate": "When you're done, tap this button up here to return to the standard bell settings.",
+    "help": "...and if you ever need help, press this button here."
+  }
+}

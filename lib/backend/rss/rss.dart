@@ -31,7 +31,7 @@ class RSS {
   /// Loads RSS configuration from `assets/data/rss.json`.
   ///
   /// Must be called before any network operations.
-  static Future<void> loadRSSJson() async {
+  static Future<void> loadJson() async {
     _config = await RSSConfig.load();
     _initialized = true;
   }
@@ -71,8 +71,9 @@ class RSS {
     // This will retry indefinitely until a successful response is received.
     final http.Response response = await RSSClient.getUntilSuccess(
       _config.dailyOrderUrl,
+      retryDelay: _config.retryDelay,
       retryCodes: _config.retryCodes,
-
+      timeoutDelay: _config.timeoutDelay,
       // Trigger UI updates when online/offline state changes
       onOfflineChanged: (_) {
         if (refreshStream) {

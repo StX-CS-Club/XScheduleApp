@@ -266,7 +266,7 @@ class PersonalPage extends StatelessWidget {
 
   /// Resets the cached schedule to an empty object in local storage.
   static void _clearCache() {
-    localStorage.setItem("schedule", "{}");
+    localStorage.setItem("schedule:dailyOrder", "{}");
   }
 
   /// Clears all in-memory bell vanity maps and resets the bellVanity entry in local storage.
@@ -275,7 +275,7 @@ class PersonalPage extends StatelessWidget {
   static void _clearBellVanity() {
     ScheduleSettings.clearSettings();
     ScheduleSettings.bellVanity.clear();
-    localStorage.setItem("bellVanity", "{}");
+    localStorage.setItem("vanity:bellVanity", "{}");
   }
 
   /// Performs a full app reset: clears all in-memory state, wipes local storage,

@@ -1,4 +1,6 @@
 {
   "daily_order_url": "https://www.stxavier.org/fs/calendar-manager/events.ics?calendar_ids[]=17",
+  "timeout_delay": 15000,
+  "retry_delay": 5000,
   "retry_status_codes": [408, 429, 500, 502, 503, 504]
 }

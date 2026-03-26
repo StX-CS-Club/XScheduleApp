@@ -55,11 +55,12 @@ class ScheduleDisplayCard extends StatelessWidget {
     final double minuteHeight = cardHeight / scheduleMinutes;
 
     // Wrap in Showcase so the tutorial can highlight this card on the tutorial date
-    return ScheduleDisplay.tutorialSystem.showcase(
+    return
+      ScheduleDisplay.tutorialSystem.showcase(
         context: scContext,
         uniqueNull: true,
         tutorial: date == ScheduleDisplay.tutorialDate
-            ? 'tutorial_schedule'
+            ? 'schedule:schedule'
             : 'no_tutorial',
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),

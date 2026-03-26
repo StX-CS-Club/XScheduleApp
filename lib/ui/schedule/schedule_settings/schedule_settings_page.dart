@@ -34,16 +34,7 @@ class ScheduleSettingsPage extends StatefulWidget {
 
   /// Tutorial system managing the guided walkthrough of the settings page.
   /// Kept static so tutorial completion persists across page instances.
-  static final TutorialSystem tutorialSystem = TutorialSystem({
-    'tutorial_settings':
-    "In this menu, you'll be able to customize your schedule to match the classes you have.",
-    'tutorial_settings_button':
-    "Click on any individual bell to change its name, information, and appearance.",
-    'tutorial_settings_qr':
-    "... or try sharing your schedules through QR codes!",
-    'tutorial_settings_complete':
-    "Once you're satisfied with your schedule, tap the button down here to move on."
-  });
+  static late TutorialSystem tutorialSystem;
 
   /// Resets [tutorialSystem] so the tutorial will run again on next page load.
   /// Called from [PersonalPage._clearAllData] during a full app reset.
@@ -75,7 +66,7 @@ class _ScheduleSettingsPageState extends State<ScheduleSettingsPage> {
     if (!isFirst) return button;
     return ScheduleSettingsPage.tutorialSystem.showcase(
       context: context,
-      tutorial: 'tutorial_settings_button',
+      tutorial: 'schedule_settings:button',
       child: button,
     );
   }
@@ -114,7 +105,7 @@ class _ScheduleSettingsPageState extends State<ScheduleSettingsPage> {
       margin: EdgeInsets.symmetric(vertical: 20, horizontal: screenWidth * .325),
       child: ScheduleSettingsPage.tutorialSystem.showcase(
         context: context,
-        tutorial: 'tutorial_settings_complete',
+        tutorial: 'schedule_settings:complete',
         child: StyledButton(
           icon: Icons.check,
           borderRadius: null,
@@ -148,7 +139,7 @@ class _ScheduleSettingsPageState extends State<ScheduleSettingsPage> {
           child: ScheduleSettingsPage.tutorialSystem.showcase(
             context: context,
             circular: true,
-            tutorial: 'tutorial_settings_qr',
+            tutorial: 'schedule_settings:qr',
             child: IconButton(
               icon: Icon(
                 Icons.qr_code_scanner_rounded,
@@ -164,7 +155,7 @@ class _ScheduleSettingsPageState extends State<ScheduleSettingsPage> {
       ],
       title: ScheduleSettingsPage.tutorialSystem.showcase(
         context: context,
-        tutorial: 'tutorial_settings',
+        tutorial: 'schedule_settings:schedule_settings',
         child: Text(
           "Customize Bell Appearance",
           style: TextStyle(

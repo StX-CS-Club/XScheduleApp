@@ -22,12 +22,6 @@ class RSSClient {
   /// Set to `false` when a valid response is received.
   static bool offline = false;
 
-  /// Maximum time to wait for a single HTTP request.
-  static const Duration _timeout = Duration(seconds: 15);
-
-  /// Delay between retry attempts when a request fails.
-  static const Duration _retryDelay = Duration(seconds: 5);
-
   /// Continuously attempts to fetch [url] until a successful response is received.
   ///
   /// This method:
@@ -43,6 +37,8 @@ class RSSClient {
   static Future<http.Response> getUntilSuccess(
       String url, {
         required List<int> retryCodes,
+        required Duration retryDelay,
+        required Duration timeoutDelay,
         void Function(bool offline)? onOfflineChanged,
       }) async {
     // Infinite retry loop: will continue until a valid response is returned
@@ -50,6 +46,7 @@ class RSSClient {
       // Attempt a single request
       final response = await attemptGet(
         url,
+        timeoutDelay: timeoutDelay,
         retryCodes: retryCodes,
         onOfflineChanged: onOfflineChanged,
       );
@@ -60,7 +57,7 @@ class RSSClient {
       }
 
       // Otherwise, wait before retrying
-      await Future.delayed(_retryDelay);
+      await Future.delayed(retryDelay);
     }
   }
 
@@ -77,6 +74,7 @@ class RSSClient {
   static Future<http.Response?> attemptGet(
       String url, {
         required List<int> retryCodes,
+        required Duration timeoutDelay,
         void Function(bool offline)? onOfflineChanged,
       }) async {
     // Track previous offline state to detect changes
@@ -86,7 +84,7 @@ class RSSClient {
       // Perform HTTP GET with timeout
       final http.Response response = await http
           .get(Uri.parse(url))
-          .timeout(_timeout);
+          .timeout(timeoutDelay);
 
       // If status code indicates retryable failure
       if (retryCodes.contains(response.statusCode)) {

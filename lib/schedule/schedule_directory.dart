@@ -101,7 +101,7 @@ class ScheduleDirectory {
   static void storeSchedule() {
     final List<int> compressed =
     _gzip.encode(utf8.encode(jsonSchedule(100)));
-    localStorage.setItem("schedule", base64Encode(compressed));
+    localStorage.setItem("schedule:dailyOrder", base64Encode(compressed));
   }
 
   /// Serialises [ScheduleEntry]s from today up to [range] days into the future as a JSON string.
