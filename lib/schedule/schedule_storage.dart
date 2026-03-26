@@ -219,7 +219,7 @@ class ScheduleStorage {
   /// Returns: A `Map<bellLabel, vanityMap>` from legacy storage, or `{}` on failure
   static Map<String, Map<String, dynamic>> _restoreBellVanityLegacy0() {
     try {
-      final String? stored = localStorage.getItem("vanity:bellVanity");
+      final String? stored = localStorage.getItem("bellVanity");
       if (stored == null) return {};
 
       // Legacy format: raw uncompressed JSON with full-length keys
