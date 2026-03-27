@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:xschedule/april_fools/2026_battle_pass/battle_pass.dart';
 import 'package:xschedule/startup/splash_page.dart';
 import 'package:xschedule/extensions/build_context_extension.dart';
 import 'package:xschedule/extensions/widget_extension.dart';
@@ -290,6 +291,7 @@ class PersonalPage extends StatelessWidget {
     BellSettingsMenu.resetTutorials();
     ScheduleDisplay.tutorialSystem.refreshKeys();
     ScheduleDisplay.tutorialDate = null;
+    BattlePass.reset();
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (_) => SplashPage()),

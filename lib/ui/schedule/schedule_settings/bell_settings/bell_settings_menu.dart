@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hsvcolor_picker/flutter_hsvcolor_picker.dart';
 import 'package:keyboard_avoider/keyboard_avoider.dart';
 import 'package:showcaseview/showcaseview.dart';
+import 'package:xschedule/april_fools/2026_battle_pass/battle_pass.dart';
 import 'package:xschedule/extensions/color_extension.dart';
 import 'package:xschedule/extensions/widget_extension.dart';
 import 'package:xschedule/schedule/schedule_settings.dart';
@@ -959,6 +960,7 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
         final Size screen = MediaQuery.of(context).size;
 
         final String selected = ScheduleSettings.decals[bell] ?? "Blank";
+        bool unlocked = true;
 
         return Center(
           child: Material(
@@ -988,6 +990,12 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
                     child: ListView(
                       children:
                           ScheduleSettings.decalOptions.map((String decal) {
+                            if(BattlePass.rewards.keys.contains(decal) && !BattlePass.unlocked.contains(decal)){
+                              unlocked = false;
+                            }
+                            if(!unlocked){
+                              return Container();
+                            }
                         return InkWell(
                           onTap: () => Navigator.pop(context, decal),
                           child: _buildDecalPreview(

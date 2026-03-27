@@ -53,6 +53,7 @@ dependencies:
   keyboard_avoider: ^0.2.0 # Adds widget which shifts elements to avoid keyboard popup
   change_app_package_name: ^1.5.0 # Plugin which makes changing package name easier
   msix: ^3.16.12 # Plugin which makes exporting Windows build easier
+  confetti: ^0.8.0
 
 dev_dependencies:
   flutter_test:
@@ -130,11 +131,18 @@ flutter:
     - assets/images/decals/French.png
     - assets/images/decals/Latin.png
     - assets/images/decals/Chinese.png
+    - assets/images/decals/X.png
+    - assets/images/decals/Star.png
+    - assets/images/decals/Jester.png
+    - assets/images/decals/Laugh.png
+    - assets/images/decals/2026.png
     - assets/data/credits.json
     - assets/data/rss.json
     - assets/data/schedule_settings.json
     - assets/data/storage_settings.json
     - assets/data/tutorials.json
+    - assets/images/april_fools.png
+    - assets/images/april_fools_transparent.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

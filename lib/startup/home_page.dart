@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:icon_decoration/icon_decoration.dart';
-import 'package:xschedule/util/stream_signal.dart';
-import 'package:xschedule/ui/schedule/schedule_display.dart';
-import 'package:xschedule/ui/personal/personal_page.dart';
+import 'package:showcaseview/showcaseview.dart';
 import 'package:xschedule/april_fools/2026_battle_pass/battle_pass_page.dart';
+import 'package:xschedule/ui/personal/personal_page.dart';
+import 'package:xschedule/ui/schedule/schedule_display.dart';
+import 'package:xschedule/util/stream_signal.dart';
+import 'package:xschedule/util/tutorial_system.dart';
 
 /// Main destination page of the app after login.
 ///
@@ -19,6 +21,7 @@ class HomePage extends StatefulWidget {
   /// Stream used to trigger a full rebuild of [HomePage] from anywhere in the app.
   /// Recreated on each build so listeners always receive fresh events.
   static StreamController<StreamSignal> homePageStream = StreamController();
+  static late TutorialSystem tutorialSystem;
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -27,8 +30,8 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   /// The ordered list of pages displayed in the [PageView].
   /// Index corresponds directly to the nav bar icon positions.
-  static const List<Widget> _pages = [
-    BattlePassPage(),
+  static List<Widget> _pages = [
+    if (DateTime.now().isBefore(DateTime(2026, 4, 3))) BattlePassPage(),
     ScheduleDisplay(),
     PersonalPage(),
   ];
@@ -55,16 +58,27 @@ class _HomePageState extends State<HomePage> {
     return StreamBuilder(
       stream: HomePage.homePageStream.stream,
       builder: (context, snapshot) {
-        return Scaffold(
-          backgroundColor: colorScheme.primaryContainer,
-          bottomNavigationBar: _buildNavBar(context),
-          body: PageView(
-            controller: _pageController,
-            physics: const PageScrollPhysics(),
-            onPageChanged: (i) => setState(() => _currentPageIndex = i),
-            children: _pages,
-          ),
-        );
+        return ShowCaseWidget(builder: (context) {
+          WidgetsBinding.instance.addPostFrameCallback((_) async {
+            while (!ScheduleDisplay.tutorialSystem.finished) {
+              await Future.delayed(const Duration(milliseconds: 100));
+            }
+            if (context.mounted) {
+              HomePage.tutorialSystem.showTutorials(context);
+            }
+          });
+
+          return Scaffold(
+            backgroundColor: colorScheme.primaryContainer,
+            bottomNavigationBar: _buildNavBar(context),
+            body: PageView(
+              controller: _pageController,
+              physics: const PageScrollPhysics(),
+              onPageChanged: (i) => setState(() => _currentPageIndex = i),
+              children: _pages,
+            ),
+          );
+        });
       },
     );
   }
@@ -91,7 +105,7 @@ class _HomePageState extends State<HomePage> {
         height: 65,
         child: Stack(
           children: [
-            _buildNavBarBody(colorScheme),
+            _buildNavBarBody(context, colorScheme),
             _buildNavBarGradient(colorScheme),
           ],
         ),
@@ -103,7 +117,7 @@ class _HomePageState extends State<HomePage> {
   ///
   /// Parameters:
   /// - [colorScheme]: Provides the [tertiaryContainer] background color.
-  Widget _buildNavBarBody(ColorScheme colorScheme) {
+  Widget _buildNavBarBody(BuildContext context, ColorScheme colorScheme) {
     return Align(
       alignment: Alignment.bottomCenter,
       child: Container(
@@ -114,7 +128,11 @@ class _HomePageState extends State<HomePage> {
           crossAxisAlignment: CrossAxisAlignment.end,
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            _buildPageIcon(Icons.local_activity, 0),
+            HomePage.tutorialSystem.showcase(
+                context: context,
+                circular: true,
+                tutorial: "april_fools:button",
+                child: _buildPageIcon(Icons.local_activity, 0)),
             _buildPageIcon(Icons.calendar_month, 1),
             _buildPageIcon(Icons.person, 2),
           ],
@@ -174,7 +192,8 @@ class _HomePageState extends State<HomePage> {
         icon: Icon(
           icon,
           // Fully opaque when selected, 65% when not
-          color: colorScheme.onPrimary.withValues(alpha: _currentPageIndex == index ? 1 : 0.65),
+          color: colorScheme.onPrimary
+              .withValues(alpha: _currentPageIndex == index ? 1 : 0.65),
           size: 30,
         ),
       ),

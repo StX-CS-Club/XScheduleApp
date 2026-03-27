@@ -29,10 +29,10 @@ class ScheduleSettings {
   /// Imported from schedule_settings.json
   static late List<String> sampleBells;
 
-
   /// Preset hex color options shown in the horizontal color scroll.
   static late List<String> colorOptions;
   static late List<String> decalOptions;
+  static late List<String> specialDecals;
   static late List<String> decalOptionDividers;
 
   static Future<void> loadJson() async {
@@ -47,7 +47,10 @@ class ScheduleSettings {
     sampleSchedules = _mapFromJson(json['sample_schedules']);
     colorOptions = List<String>.from(json['color_options']);
     decalOptions = List<String>.from(json['decal_options']);
+    specialDecals = List<String>.from(json['special_decals']);
     decalOptionDividers = List<String>.from(json['decal_option_dividers']);
+
+    addSpecialDecals();
   }
 
   static Map<String, List<String>> _mapFromJson(Map map) {
@@ -139,6 +142,12 @@ class ScheduleSettings {
     names[bell] ??= reference['name'];
     teachers[bell] ??= reference['teacher'];
     locations[bell] ??= reference['location'];
+  }
+
+  static void addSpecialDecals() {
+    decalOptions.addAll(specialDecals.where((element) =>
+        !decalOptions.contains(element) &&
+        localStorage.getItem("specialDecal:$element") == "T"));
   }
 
   /// Applies default vanity values to [bell] in [ScheduleSettings.bellVanity]

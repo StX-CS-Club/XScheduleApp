@@ -144,6 +144,13 @@
     "Latin",
     "Chinese"
   ],
+  "special_decals": [
+    "X",
+    "Star",
+    "Jester",
+    "Laugh",
+    "2026"
+  ],
   "decal_option_dividers":  [
     "English",
     "Religion",
@@ -151,6 +158,7 @@
     "Art",
     "Science",
     "Math",
-    "Language"
+    "Language",
+    "X"
   ]
 }

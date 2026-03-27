@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:showcaseview/showcaseview.dart';
+import 'package:xschedule/startup/home_page.dart';
 import 'package:xschedule/ui/schedule/schedule_display.dart';
 import 'package:xschedule/ui/schedule/schedule_settings/bell_settings/bell_settings_menu.dart';
 import 'package:xschedule/ui/schedule/schedule_settings/schedule_settings_page.dart';
@@ -42,6 +43,8 @@ class TutorialSystem {
       'bell_settings:help':
           BellSettingsMenu.bellTutorialData['bell_settings:help']!,
     });
+
+    HomePage.tutorialSystem = TutorialSystem._(_mapFromJson("april_fools", json['april_fools']));
   }
 
   static Map<String, String> _mapFromJson(String title, Map map) {

@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:xschedule/april_fools/2026_battle_pass/battle_pass.dart';
 import 'package:xschedule/schedule/schedule_settings.dart';
 import 'package:xschedule/schedule/schedule_storage.dart';
 import 'package:xschedule/startup/splash_page.dart';
+import 'package:xschedule/startup/home_page.dart';
 import 'package:xschedule/startup/themes.dart';
 import 'package:xschedule/schedule/schedule_directory.dart';
 import 'package:xschedule/util/stream_signal.dart';
@@ -45,6 +47,7 @@ Future<void> init() async {
   await RSS.loadJson();
   await ScheduleSettings.loadJson();
   await TutorialSystem.loadJson();
+  BattlePass.load();
 
   RSS.getDailyOrder(refreshStream: true, storeResults: true, overwrite: true)
       .then((_) {
@@ -92,7 +95,7 @@ class XScheduleApp extends StatelessWidget {
           overflow: TextOverflow.fade,
         ),
         // Directs to the splash page to determine the user's destination
-        child: SplashPage(),
+        child: HomePage(),
       ),
     );
   }
