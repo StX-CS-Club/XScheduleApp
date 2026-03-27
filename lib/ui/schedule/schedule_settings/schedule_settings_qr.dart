@@ -357,6 +357,7 @@ class _ScheduleSettingsQrState extends State<ScheduleSettingsQr> {
               data: encodedBell,
               semanticsLabel: "X-Schedule",
               size: screenWidth * .75,
+              errorCorrectionLevel: QrErrorCorrectLevel.M,
               embeddedImage:
                   const AssetImage("assets/images/xschedule_transparent.png"),
               embeddedImageStyle: QrEmbeddedImageStyle(
