@@ -30,8 +30,8 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   /// The ordered list of pages displayed in the [PageView].
   /// Index corresponds directly to the nav bar icon positions.
-  static List<Widget> _pages = [
-    if (DateTime.now().isBefore(DateTime(2026, 4, 3))) BattlePassPage(),
+  static const List<Widget> _pages = [
+    BattlePassPage(),
     ScheduleDisplay(),
     PersonalPage(),
   ];
@@ -128,11 +128,8 @@ class _HomePageState extends State<HomePage> {
           crossAxisAlignment: CrossAxisAlignment.end,
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            HomePage.tutorialSystem.showcase(
-                context: context,
-                circular: true,
-                tutorial: "april_fools:button",
-                child: _buildPageIcon(Icons.local_activity, 0)),
+            _buildPageIcon(Icons.local_activity, 0,
+                tutorial: "april_fools:button"),
             _buildPageIcon(Icons.calendar_month, 1),
             _buildPageIcon(Icons.person, 2),
           ],
@@ -174,7 +171,7 @@ class _HomePageState extends State<HomePage> {
   /// Parameters:
   /// - [icon]: The icon to display.
   /// - [index]: The page index this icon corresponds to.
-  Widget _buildPageIcon(IconData icon, int index) {
+  Widget _buildPageIcon(IconData icon, int index, {String? tutorial}) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return TextButton(
@@ -185,17 +182,31 @@ class _HomePageState extends State<HomePage> {
           curve: Curves.easeInOut,
         );
       },
-      child: DecoratedIcon(
-        decoration: IconDecoration(
-          border: IconBorder(width: 2, color: colorScheme.onSurface),
-        ),
-        icon: Icon(
-          icon,
-          // Fully opaque when selected, 65% when not
-          color: colorScheme.onPrimary
-              .withValues(alpha: _currentPageIndex == index ? 1 : 0.65),
-          size: 30,
-        ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          DecoratedIcon(
+            decoration: IconDecoration(
+              border: IconBorder(width: 2, color: colorScheme.onSurface),
+            ),
+            icon: Icon(
+              icon,
+              // Fully opaque when selected, 65% when not
+              color: colorScheme.onPrimary
+                  .withValues(alpha: _currentPageIndex == index ? 1 : 0.65),
+              size: 30,
+            ),
+          ),
+          if (tutorial != null)
+            HomePage.tutorialSystem.showcase(
+                context: context,
+                tutorial: tutorial,
+                circular: true,
+                child: const SizedBox(
+                  width: 34,
+                  height: 34,
+                ))
+        ],
       ),
     );
   }

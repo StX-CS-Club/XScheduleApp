@@ -144,7 +144,7 @@ class _BattlePassPageState extends State<BattlePassPage>
     return Scaffold(
       backgroundColor: colorScheme.primaryContainer,
       appBar: _buildAppBar(colorScheme, mediaQuery.size.width),
-      bottomNavigationBar: _buildDoneButton(context, mediaQuery.size.width),
+      bottomNavigationBar: DateTime.now().isBefore(DateTime(2026, 4, 3)) ? _buildDoneButton(context, mediaQuery.size.width) : null,
       extendBody: true,
       body: Stack(
         children: [
@@ -288,7 +288,18 @@ class _BattlePassPageState extends State<BattlePassPage>
                       colorScheme.primaryContainer,
                       colorScheme.primaryContainer.withAlpha(0)
                     ]))),
-          ))
+          )),
+          IgnorePointer(
+            child: Align(
+              alignment: Alignment.topCenter,
+              child:
+              ConfettiWidget(
+                confettiController: _confettiController,
+                numberOfParticles: 150,
+                blastDirectionality: BlastDirectionality.explosive,
+              ),
+            ),
+          )
         ],
       ),
     );
@@ -425,11 +436,6 @@ class _BattlePassPageState extends State<BattlePassPage>
                 color: colorScheme.onSurface,
               ),
             ).fit(),
-            ConfettiWidget(
-              confettiController: _confettiController,
-              numberOfParticles: 150,
-              blastDirectionality: BlastDirectionality.explosive,
-            ),
             Container(
               color: colorScheme.shadow,
               height: 2.5,
@@ -513,7 +519,6 @@ class _BattlePassPageState extends State<BattlePassPage>
     for (final Barcode barcode in capture.barcodes) {
       try {
         final String data = barcode.displayValue!;
-        print(data);
         if (regex.hasMatch(data) && !BattlePass.scanned.contains(data)) {
           Navigator.pop(context);
           _scannerController.stop();

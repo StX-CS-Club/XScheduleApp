@@ -95,7 +95,7 @@ class XScheduleApp extends StatelessWidget {
           overflow: TextOverflow.fade,
         ),
         // Directs to the splash page to determine the user's destination
-        child: HomePage(),
+        child: SplashPage(),
       ),
     );
   }
