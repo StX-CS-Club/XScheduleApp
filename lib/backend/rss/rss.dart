@@ -3,6 +3,7 @@ import 'package:xschedule/schedule/schedule_directory.dart';
 import 'package:xschedule/backend/rss/parsers/daily_order_parser.dart';
 import 'package:xschedule/backend/rss/rss_client.dart';
 import 'package:xschedule/backend/rss/rss_config.dart';
+import 'package:xschedule/schedule/schedule_storage.dart';
 import 'package:xschedule/util/stream_signal.dart';
 import 'package:xschedule/ui/schedule/schedule_display.dart';
 
@@ -93,7 +94,7 @@ class RSS {
 
     // Persist schedules to local storage if requested
     if (storeResults) {
-      ScheduleDirectory.storeSchedule();
+      ScheduleStorage.store();
     }
 
     // Final UI refresh after all updates are complete

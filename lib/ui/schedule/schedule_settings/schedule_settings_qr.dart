@@ -81,12 +81,25 @@ class _ScheduleSettingsQrState extends State<ScheduleSettingsQr> {
 
   /// Toggles the scanner open or closed.
   void _onScanTap() {
-    setState(() => _scanning = !_scanning);
+    setState(() {
+      if (_scanning) {
+        _scanning = false;
+        _scannerController.stop();
+      } else {
+        _scanning = true;
+        _scannerController.start();
+      }
+    });
   }
 
   /// Closes the scanner if open, then pushes the bell selection popup.
   void _onShareTap() {
-    if (_scanning) setState(() => _scanning = false);
+    if (_scanning) {
+      setState(() {
+        _scanning = false;
+        _scannerController.stop();
+      });
+    }
     context.pushPopup(_buildQrSelectPopup());
   }
 
@@ -300,8 +313,8 @@ class _ScheduleSettingsQrState extends State<ScheduleSettingsQr> {
     final Map<String, dynamic> bellVanity =
         ScheduleSettings.bellVanity[bell] ?? {};
     // Encode the bell's full vanity map as JSON for the QR payload
-    final String encodedBell = jsonEncode({
-      bell: ScheduleStorage.encodeBellVanity(bellVanity)});
+    final String encodedBell =
+        jsonEncode({bell: ScheduleStorage.encodeBellVanity(bellVanity)});
     final String emoji = bellVanity['emoji'];
     // Only show emoji decorations if the emoji differs from the raw bell ID
     final bool hasEmoji = emoji != bell;

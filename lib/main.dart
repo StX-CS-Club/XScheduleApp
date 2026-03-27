@@ -36,13 +36,14 @@ Future<void> init() async {
 
   await _lockPortrait();
   await initLocalStorage();
+
+  await ScheduleStorage.loadJson();
   ScheduleStorage.restore();
 
   // Load data from local json files
   Credits.loadJson();
   await RSS.loadJson();
   await ScheduleSettings.loadJson();
-  await ScheduleStorage.loadJson();
   await TutorialSystem.loadJson();
 
   RSS.getDailyOrder(refreshStream: true, storeResults: true, overwrite: true)

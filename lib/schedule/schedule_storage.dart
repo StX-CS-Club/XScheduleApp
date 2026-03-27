@@ -74,7 +74,7 @@ class ScheduleStorage {
   /// Only stores schedules within the next 100 days from today.
   static void store() {
     final List<int> compressed =
-        _gzip.encode(utf8.encode(_buildScheduleJson(100)));
+        _gzip.encode(utf8.encode(_buildScheduleJson(scheduleDaysStored)));
     localStorage.setItem("schedule:dailyOrder", base64Encode(compressed));
   }
 
@@ -112,7 +112,7 @@ class ScheduleStorage {
                   scheduleMap[scheduleEncode['bells']] ?? [])));
         }
       }
-    } catch (_) {
+    } catch (e) {
       // Silently discards stale or malformed data — will be re-fetched and
       // re-stored on the next successful data load
     }

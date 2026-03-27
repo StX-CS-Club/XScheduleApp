@@ -94,43 +94,6 @@ class ScheduleDirectory {
   /// Each [DateRange] record stores the [start] and [end] of a completed request window.
   static List<DateRange> dailyInfoRequests = [];
 
-  /// Compresses, serialises, and persists the current [schedules] to [localStorage].
-  ///
-  /// The JSON string is GZip-compressed and Base64-encoded before storage,
-  /// typically achieving 60–70% size reduction over raw JSON.
-  /// Only stores schedules within the next 100 days from today.
-  static void storeSchedule() {
-    final List<int> compressed =
-    _gzip.encode(utf8.encode(jsonSchedule(ScheduleStorage.scheduleDaysStored)));
-    localStorage.setItem("schedule:dailyOrder", base64Encode(compressed));
-  }
-
-  /// Serialises [ScheduleEntry]s from today up to [range] days into the future as a JSON string.
-  ///
-  /// Uses compressed keys from [ScheduleKeys.encode] and stores bells as compact
-  /// list-of-arrays via [ScheduleEntry._bellList] to minimise payload size.
-  /// Only includes entries with non-empty bell data; past schedules are excluded.
-  ///
-  /// Parameters:
-  /// - [range]: The number of days forward from today to include; e.g. `100` covers ~3 months
-  ///
-  /// Returns: A JSON string with compressed keys and list-encoded bells
-  static String jsonSchedule(int range) {
-    final Map<String, Map<String, dynamic>> result = {};
-    final DateTime today = DateTime.now().dateOnly();
-
-    for (int i = 0; i < range; i++) {
-      final DateTime iDate = today.addDay(i);
-      final ScheduleEntry schedule = readSchedule(iDate);
-      // Only serialises dates that have an existing entry with bells
-      if (schedule.bells.isNotEmpty) {
-        result[iDate.toIso8601String()] = schedule.toJsonEntry();
-      }
-    }
-
-    return jsonEncode(result);
-  }
-
   /// Registers a Supabase data request for the range [[start], [end]], trimming any overlap
   /// with previously registered ranges to avoid redundant fetches.
   ///
