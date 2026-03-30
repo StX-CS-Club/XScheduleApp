@@ -22,7 +22,7 @@ Configuring Flutter for Android Studio
 
 Allowing http get requests with chrome client
 1) Open [Flutter SDK Path]\packages\flutter_tools\lib\src\web\chrome.dart
-2)Find '--disable-extensions'
+2) Find '--disable-extensions'
 3) Insert '--disable-web-security' below that line
 
 

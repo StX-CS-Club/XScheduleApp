@@ -177,7 +177,7 @@ class _ScheduleSettingsQrState extends State<ScheduleSettingsQr> {
               ),
               child: MobileScanner(
                 controller: _scannerController,
-                errorBuilder: (context, error, _) => _buildCameraError(),
+                errorBuilder: (context, error) => _buildCameraError(),
                 onDetect: _onBarcodeDetected,
               ),
             ).clip()

@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.67+1
+version: 1.0.67+54
 
 environment:
   sdk: '>=3.4.4 <4.0.0'
@@ -37,19 +37,19 @@ dependencies:
   icalendar_parser: ^2.0.0 # Adds iCalendar interpretation methods
   supabase_flutter: ^2.8.0 # Adds supabase communication functionality
   flutter_native_splash: ^2.4.1 # Adds splash screen creator; see flutter_native_splash.yaml
-  localstorage: ^5.0.0 # Adds localstorage management methods
-  google_fonts: ^6.2.1 # Adds GoogleFonts compatibility for testing purposes
+  localstorage: ^6.0.0 # Adds localstorage management methods
+  google_fonts: ^8.0.2 # Adds GoogleFonts compatibility for testing purposes
   flutter_hsvcolor_picker: ^1.5.1 # Adds color picking widgets
   url_launcher: ^6.3.1 # Adds ability to launch url in device browser
-  package_info_plus: ^8.1.2 # Adds ability to read deployment info (app version and build)
-  showcaseview: ^4.0.1 # Adds widgets for fancy tutorials
+  package_info_plus: ^9.0.0 # Adds ability to read deployment info (app version and build)
+  showcaseview: ^5.0.1 # Adds widgets for fancy tutorials
   shimmer: ^3.0.0 # Adds widget for fancy shimmering loading animation
   image: ^4.5.2 # Adds image management methods
-  file_picker: ^9.0.0 # Adds file picker native to all platforms
+  file_picker: ^10.3.10 # Adds file picker native to all platforms
   flutter_launcher_icons: ^0.14.3 # Manages the app's icon more effectively
   flip_card: ^0.7.0 # Adds Card with flipping animation used in popups.
   qr_flutter: ^4.1.0 # Adds the ability to convert data (mainly Strings) into QR codes
-  mobile_scanner: ^6.0.10 # Adds widget which scans QR / barcodes via camera
+  mobile_scanner: ^7.2.0 # Adds widget which scans QR / barcodes via camera
   keyboard_avoider: ^0.2.0 # Adds widget which shifts elements to avoid keyboard popup
   change_app_package_name: ^1.5.0 # Plugin which makes changing package name easier
   msix: ^3.16.12 # Plugin which makes exporting Windows build easier
@@ -64,7 +64,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
   flutter_platform_versioning: ^1.0.2
 
 # For information on the generic Dart part of this file, see the
@@ -242,6 +242,6 @@ msix_config:
   display_name: X-Schedule
   publisher_display_name: Saint Xavier HS
   identity_name: org.stxavier.xschedule
-  msix_version: 1.0.67+1
+  msix_version: 1.0.67+54
   logo_path: windows\runner\resources\app_icon.ico
   capabilities: internetClient

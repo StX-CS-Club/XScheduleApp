@@ -3,7 +3,7 @@
 
 # Example Flutter Platform Versioning Configuration
 flutter_platform_versioning:
-  android: '1.0.67+1'   # Replace with your desired Android version
-  ios: '1.0.67+1'    # Replace with your desired iOS version 
-  macos: '1.0.67+1'    # Replace with your desired macOS version
-  windows: '1.0.67+1'    # Replace with your desired Windows version
+  android: '1.0.67+54'   # Replace with your desired Android version
+  ios: '1.0.67+54'    # Replace with your desired iOS version 
+  macos: '1.0.67+54'    # Replace with your desired macOS version
+  windows: '1.0.67+54'    # Replace with your desired Windows version

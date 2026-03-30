@@ -499,7 +499,7 @@ class _BattlePassPageState extends State<BattlePassPage>
             ),
             child: MobileScanner(
               controller: _scannerController,
-              errorBuilder: (context, error, _) => _buildCameraError(),
+              errorBuilder: (context, error) => _buildCameraError(),
               onDetect: _onBarcodeDetected,
             ),
           ).clip(),
