@@ -16,7 +16,7 @@ class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   /// Stream used to trigger a full rebuild of [HomePage] from anywhere in the app.
-  /// Recreated on each build so listeners always receive fresh events.
+  /// Initialised in [_HomePageState.initState] and closed in [_HomePageState.dispose].
   static StreamController<StreamSignal> homePageStream = StreamController();
 
   @override
@@ -32,22 +32,27 @@ class _HomePageState extends State<HomePage> {
   ];
 
   /// Controls programmatic navigation between pages.
-  final PageController _pageController = PageController(initialPage: 1);
+  final PageController _pageController = PageController(initialPage: 0);
 
   /// Tracks which page index is currently visible.
   /// Used to highlight the active nav bar icon and compute swipe targets.
   int _currentPageIndex = 1;
 
   @override
+  void initState() {
+    super.initState();
+    HomePage.homePageStream = StreamController();
+  }
+
+  @override
   void dispose() {
+    HomePage.homePageStream.close();
     _pageController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // Recreated on every rebuild so the stream is always fresh for new listeners
-    HomePage.homePageStream = StreamController();
     final ColorScheme colorScheme = Theme
         .of(context)
         .colorScheme;

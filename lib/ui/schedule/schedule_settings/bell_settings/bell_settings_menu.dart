@@ -540,11 +540,17 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
   }
 
   /// Builds the vanity editor column for either the primary or alternate bell.
-  /// Contains the color wheel, color scroll, and text fields (name, teacher, location),
-  /// each wrapped in a showcase target.
+  ///
+  /// Contains, in order:
+  /// - A color wheel with an overlaid emoji text field and a decal picker icon
+  /// - A horizontally scrollable color swatch row
+  /// - Text fields for bell name, teacher, and location
+  ///
+  /// Each section is wrapped in a [TutorialSystem.showcase] target.
   ///
   /// Parameters:
-  /// - [alternate]: If true, builds for the alternate bell (suffix '_alt').
+  /// - [alternate]: If true, builds for the alternate bell (suffix `'_alt'`);
+  ///   if false, builds for the primary bell (no suffix)
   Widget _buildVanityEditor(BuildContext context, bool alternate) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
@@ -952,6 +958,16 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
     );
   }
 
+  /// Opens a dialog for selecting a decal to apply to [bell].
+  ///
+  /// Appearance: A modal card containing a scrollable list of [_buildDecalPreview] tiles,
+  /// each showing the decal image overlaid on the bell's current color.
+  /// The currently selected decal is highlighted with a checkmark.
+  /// Selecting a decal updates [ScheduleSettings.decals] and closes the dialog.
+  ///
+  /// Parameters:
+  /// - [context]: Used to show the dialog and read [ColorScheme]
+  /// - [bell]: The bell key (e.g. `'A'` or `'A_alt'`) whose decal is being set
   void _showDecalPopup(BuildContext context, String bell) {
     showDialog<String>(
       context: context,
@@ -1014,6 +1030,17 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
     });
   }
 
+  /// Builds a single decal preview tile for the decal picker dialog.
+  ///
+  /// Appearance: A rounded rectangle with the decal image at 50% opacity over a
+  /// colored background. Shows the decal name centered and a checkmark on the
+  /// right when [selected] is `true`. A [Divider] is prepended for decals listed
+  /// in [ScheduleSettings.decalOptionDividers].
+  ///
+  /// Parameters:
+  /// - [decal]: The decal name to display and preview
+  /// - [color]: The bell's current color, used as the background tint
+  /// - [selected]: Whether this decal is currently applied to the bell
   Widget _buildDecalPreview(String decal, Color color, bool selected) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 

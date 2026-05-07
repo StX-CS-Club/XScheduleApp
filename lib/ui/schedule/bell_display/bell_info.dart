@@ -4,11 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:xschedule/extensions/color_extension.dart';
 import 'package:xschedule/extensions/widget_extension.dart';
 import 'package:xschedule/schedule/bell_entry.dart';
+import 'package:xschedule/schedule/bell_vanity.dart';
 import 'package:xschedule/schedule/schedule_entry.dart';
-import 'package:xschedule/schedule/schedule_settings.dart';
 import 'package:xschedule/widgets/popup_menu.dart';
-
-typedef _BellData = ({Map<String, dynamic> vanity, String bellSuffix});
 
 /// A popup displaying detailed vanity information for a single [BellEntry].
 ///
@@ -28,42 +26,15 @@ class BellInfo extends StatelessWidget {
   /// Resolves the vanity data map and display suffix for [bell].
   ///
   /// This method:
-  /// - Looks up [bell] in [ScheduleSettings.bellVanity] by title string
-  /// - Overrides with the `'HR'` or `'FLEX'` vanity entry if the title contains either
-  /// - Switches to the alternate vanity map if the schedule name matches any `'alt_days'` entry
+  /// - Delegates vanity map resolution to [resolveBellVanity]
+  /// - Computes the display suffix: `' Bell'` for single-character titles, `' - Alt'` if alternate
   ///
-  /// NOTE: [ScheduleSettings.bellVanity] is keyed by [String] — relies on [BellEntry.toString]
-  /// returning the correct key for the initial lookup.
-  ///
-  /// Returns: A record with the resolved [vanity] map and the display [bellSuffix]
-  _BellData _resolveVanity() {
-    Map<String, dynamic> bellVanity =
-        ScheduleSettings.bellVanity[bell.title] ?? {};
-
-    /// Suffix appended after the bell title in display strings; single-char bells get ' Bell'.
+  /// Returns: A [BellData] record with the resolved [vanity] map and the display [bellSuffix]
+  BellData _resolveVanity() {
     String bellSuffix = bell.title.length <= 1 ? ' Bell' : '';
-
-    // HR and FLEX bells use their own fixed vanity entries regardless of the full title
-    if (bell.title.contains("HR")) {
-      bellVanity = ScheduleSettings.bellVanity["HR"] ?? {};
-    }
-    if (bell.title.contains("FLEX")) {
-      bellVanity = ScheduleSettings.bellVanity["FLEX"] ?? {};
-    }
-
-    // Switch to the alternate vanity map if the schedule name matches an alt_days entry
-    for (String altDay in bellVanity['alt_days'] ?? []) {
-      if (schedule.name
-          .toLowerCase()
-          .replaceAll('-', ' ')
-          .contains(altDay.toLowerCase())) {
-        bellVanity = bellVanity['alt'];
-        bellSuffix = '$bellSuffix - Alt';
-        break;
-      }
-    }
-
-    return (vanity: bellVanity, bellSuffix: bellSuffix);
+    final BellVanityData resolved = resolveBellVanity(bell, schedule);
+    if (resolved.isAlt) bellSuffix = '$bellSuffix - Alt';
+    return (vanity: resolved.vanity, bellSuffix: bellSuffix);
   }
 
   /// Builds the left color nib with rounded left corners matching the [PopupMenu] card border.
@@ -195,7 +166,7 @@ class BellInfo extends StatelessWidget {
 
     // Cap popup width at 500px on large screens
     final double popupWidth = min(mediaQuery.size.width, 500);
-    final _BellData resolved = _resolveVanity();
+    final BellData resolved = _resolveVanity();
 
     return PopupMenu(
         child: SizedBox(
