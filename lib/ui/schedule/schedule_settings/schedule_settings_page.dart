@@ -170,6 +170,18 @@ class _ScheduleSettingsPageState extends State<ScheduleSettingsPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    ScheduleSettingsPage.tutorialSystem.register();
+  }
+
+  @override
+  void dispose() {
+    ScheduleSettingsPage.tutorialSystem.unregister();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final double screenWidth = MediaQuery.of(context).size.width;
@@ -178,15 +190,14 @@ class _ScheduleSettingsPageState extends State<ScheduleSettingsPage> {
     ScheduleSettingsPage.tutorialSystem.refreshKeys();
     ScheduleSettingsPage.tutorialSystem.removeFinished();
 
-    return ShowCaseWidget(builder: (context) {
-      ScheduleSettingsPage.tutorialSystem.schedule(context);
-      return Scaffold(
-        backgroundColor: colorScheme.primaryContainer,
-        appBar: _buildAppBar(context, colorScheme),
-        extendBody: true,
-        bottomNavigationBar: _buildDoneButton(context, screenWidth),
-        body: _buildBellList(context, screenWidth),
-      );
-    });
+    ScheduleSettingsPage.tutorialSystem.schedule(context);
+
+    return Scaffold(
+      backgroundColor: colorScheme.primaryContainer,
+      appBar: _buildAppBar(context, colorScheme),
+      extendBody: true,
+      bottomNavigationBar: _buildDoneButton(context, screenWidth),
+      body: _buildBellList(context, screenWidth),
+    );
   }
 }

@@ -1,11 +1,7 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:localstorage/localstorage.dart';
 import 'package:xschedule/schedule/schedule_entry.dart';
 import 'package:xschedule/extensions/date_time_extension.dart';
 import 'package:xschedule/schedule/bell_entry.dart';
-import 'package:xschedule/schedule/schedule_storage.dart';
 
 /// A simple immutable date range used to track prior Supabase request windows.
 ///
@@ -25,12 +21,6 @@ typedef DateRange = ({DateTime start, DateTime end});
 class ScheduleDirectory {
   // Private constructor — this class is not intended to be instantiated
   ScheduleDirectory._();
-
-  /// Reusable [GZipCodec] instance for compressing and decompressing schedule JSON.
-  ///
-  /// Stateless and safe to reuse across calls — instantiated once to avoid
-  /// redundant allocation on every [storeSchedule] and [readStoredSchedule] call.
-  static final GZipCodec _gzip = GZipCodec();
 
   /// All loaded [ScheduleEntry] objects, keyed by date-only [DateTime] (time stripped via [DateTime.dateOnly]).
   ///

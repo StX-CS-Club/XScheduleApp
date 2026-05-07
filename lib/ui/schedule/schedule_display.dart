@@ -74,12 +74,14 @@ class _ScheduleDisplayState extends State<ScheduleDisplay> {
     super.initState();
     // Initialise stream once here rather than recreating it on every build
     ScheduleDisplay.scheduleStream = StreamController<StreamSignal>();
+    ScheduleDisplay.tutorialSystem.register();
   }
 
   @override
   void dispose() {
-    super.dispose();
+    ScheduleDisplay.tutorialSystem.unregister();
     _pageController.dispose();
+    super.dispose();
   }
 
   /// Searches up to 25 days forward and backward from [initialDate] for a date
@@ -162,54 +164,48 @@ class _ScheduleDisplayState extends State<ScheduleDisplay> {
     return StreamBuilder(
         stream: ScheduleDisplay.scheduleStream.stream,
         builder: (context, snapshot) {
-          // Wrap in ShowCaseWidget to enable showcase step rendering
-          return ShowCaseWidget(onComplete: (_, __) {
-            ScheduleDisplay.tutorialSystem.finish();
-          }, builder: (context) {
-            // Queue tutorial to start after this frame's layout is complete
-            WidgetsBinding.instance.addPostFrameCallback((_) async {
-              await _showTutorial(context);
-            });
-            return Scaffold(
-                backgroundColor: colorScheme.primaryContainer,
-                body: Column(
-                  children: [
-                    // Top bar: calendar button, date navigator, info button
-                    Container(
-                      // Top margin compensates for device safe zone
-                      margin: EdgeInsets.only(
-                          top: 8 + mediaQuery.padding.top, bottom: 8),
-                      height: 50,
-                      alignment: Alignment.center,
-                      child: _buildTopBar(context),
-                    ),
-                    // Schedule PageView fills remaining vertical space
-                    Expanded(child: _buildPageView(context)),
-                    // Settings button centered at the bottom
-                    Container(
-                      margin: EdgeInsets.symmetric(
-                          horizontal: mediaQuery.size.width * .3),
-                      height: 30,
-                      child: ScheduleDisplay.tutorialSystem.showcase(
-                          context: context,
-                          tutorial: 'schedule:settings',
-                          child: StyledButton(
-                            width: mediaQuery.size.width * .6,
-                            icon: Icons.settings,
-                            backgroundColor: colorScheme.secondary,
-                            contentColor: colorScheme.onSecondary,
-                            onTap: () {
-                              ScheduleStorage.restore();
-                              context.pushSwipePage(const ScheduleSettingsPage(
-                                showBackArrow: true,
-                              ));
-                            },
-                          )),
-                    ),
-                    const SizedBox(height: 8)
-                  ],
-                ));
+          WidgetsBinding.instance.addPostFrameCallback((_) async {
+            await _showTutorial(context);
           });
+          return Scaffold(
+              backgroundColor: colorScheme.primaryContainer,
+              body: Column(
+                children: [
+                  // Top bar: calendar button, date navigator, info button
+                  Container(
+                    // Top margin compensates for device safe zone
+                    margin: EdgeInsets.only(
+                        top: 8 + mediaQuery.padding.top, bottom: 8),
+                    height: 50,
+                    alignment: Alignment.center,
+                    child: _buildTopBar(context),
+                  ),
+                  // Schedule PageView fills remaining vertical space
+                  Expanded(child: _buildPageView(context)),
+                  // Settings button centered at the bottom
+                  Container(
+                    margin: EdgeInsets.symmetric(
+                        horizontal: mediaQuery.size.width * .3),
+                    height: 30,
+                    child: ScheduleDisplay.tutorialSystem.showcase(
+                        context: context,
+                        tutorial: 'schedule:settings',
+                        child: StyledButton(
+                          width: mediaQuery.size.width * .6,
+                          icon: Icons.settings,
+                          backgroundColor: colorScheme.secondary,
+                          contentColor: colorScheme.onSecondary,
+                          onTap: () {
+                            ScheduleStorage.restore();
+                            context.pushSwipePage(const ScheduleSettingsPage(
+                              showBackArrow: true,
+                            ));
+                          },
+                        )),
+                  ),
+                  const SizedBox(height: 8)
+                ],
+              ));
         });
   }
 

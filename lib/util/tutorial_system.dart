@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:showcaseview/showcaseview.dart';
-import 'package:xschedule/startup/home_page.dart';
 import 'package:xschedule/ui/schedule/schedule_display.dart';
 import 'package:xschedule/ui/schedule/schedule_settings/bell_settings/bell_settings_menu.dart';
 import 'package:xschedule/ui/schedule/schedule_settings/schedule_settings_page.dart';
@@ -43,8 +42,6 @@ class TutorialSystem {
       'bell_settings:help':
           BellSettingsMenu.bellTutorialData['bell_settings:help']!,
     });
-
-    HomePage.tutorialSystem = TutorialSystem._(_mapFromJson("april_fools", json['april_fools']));
   }
 
   static Map<String, String> _mapFromJson(String title, Map map) {
@@ -131,7 +128,7 @@ class TutorialSystem {
   ///   defaults to [EdgeInsets.zero]
   /// - [onTap]: Optional async callback invoked before advancing on barrier tap;
   ///   defaults to a no-op
-  Showcase showcase(
+  Widget showcase(
       {required BuildContext context,
       required String tutorial,
       required Widget child,
@@ -143,9 +140,13 @@ class TutorialSystem {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     onTap ??= () async {};
 
+    final String? description = tutorials[tutorial];
+
+    if (description == null) return child;
+
     return Showcase(
         key: key(tutorial, uniqueNull: uniqueNull),
-        description: tutorials[tutorial],
+        description: description,
         onToolTipClick: simulateTap,
         // Dense mode reduces the tooltip slide distance for compact layouts
         toolTipSlideEndDistance: dense ? 3 : 7,
@@ -157,7 +158,7 @@ class TutorialSystem {
           await Future.delayed(const Duration(milliseconds: 100));
           // Only advances if this is not the last tutorial step and the context is still mounted
           if (tutorial != tutorials.keys.lastOrNull && context.mounted) {
-            ShowCaseWidget.of(context).next();
+            ShowcaseView.get().next();
           }
         },
         // Target tap: waits briefly then simulates a barrier tap to advance
@@ -289,7 +290,7 @@ class TutorialSystem {
 
     // Starts the showcase only if there are steps to display
     if (tutorialKeys.isNotEmpty) {
-      ShowCaseWidget.of(context).startShowCase(tutorialKeys);
+      ShowcaseView.get().startShowCase(tutorialKeys);
     }
   }
 
@@ -339,4 +340,16 @@ class TutorialSystem {
       }
     });
   }
+
+  String get scope => tutorials.keys.first.split(".").first;
+
+  void register() {
+    ShowcaseView.register(
+        scope: scope,
+        onComplete: (_, __) {
+          finish();
+        });
+  }
+
+  void unregister() => ShowcaseView.getNamed(scope).unregister();
 }

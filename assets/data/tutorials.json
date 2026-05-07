@@ -30,8 +30,5 @@
     "vanity": "Up here, you can customize the alternate bell using the same settings as normal.",
     "alternate": "When you're done, tap this button up here to return to the standard bell settings.",
     "help": "...and if you ever need help, press this button here."
-  },
-  "april_fools": {
-    "button": "There seems to be an event going on..."
   }
 }
