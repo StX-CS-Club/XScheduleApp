@@ -75,11 +75,19 @@ class _ScheduleDisplayState extends State<ScheduleDisplay> {
     // Initialise stream once here rather than recreating it on every build
     ScheduleDisplay.scheduleStream = StreamController<StreamSignal>();
     ScheduleDisplay.tutorialSystem.register();
+    // Generate stable GlobalKeys here so Showcase widgets keep their identity
+    // across rebuilds and always mount with the correct currentScope.
+    ScheduleDisplay.tutorialSystem.refreshKeys();
+    ScheduleDisplay.tutorialSystem.removeFinished();
   }
 
   @override
   void dispose() {
-    ScheduleDisplay.tutorialSystem.unregister();
+    // Do NOT unregister the tutorial scope here. ScheduleDisplay is always
+    // present in HomePage._pages, so a new _ScheduleDisplayState is mounted
+    // before this one is disposed (e.g. after Navigator.pushAndRemoveUntil).
+    // Unregistering would remove the scope the new instance just registered,
+    // causing "No ShowcaseView registered for scope" on the next build.
     _pageController.dispose();
     super.dispose();
   }
@@ -155,10 +163,6 @@ class _ScheduleDisplayState extends State<ScheduleDisplay> {
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final MediaQueryData mediaQuery = MediaQuery.of(context);
-
-    // Refresh showcase GlobalKeys and remove any already-completed steps
-    ScheduleDisplay.tutorialSystem.refreshKeys();
-    ScheduleDisplay.tutorialSystem.removeFinished();
 
     // Wrap in StreamBuilder so external signals can trigger a full rebuild
     return StreamBuilder(

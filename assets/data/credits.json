@@ -1,7 +1,8 @@
 {
-  "Lead Developer": ["John Daniher '26", "Patrick Williams '27"],
-  "Developer": ["John Daniher '26", "Patrick Williams '27", "Gavin Farrel '27"],
+  "Lead Developer": ["Patrick Williams '27"],
+  "Developer": ["Patrick Williams '27", "Gavin Farrel '27"],
+  "Graphic Designer": ["Bryce Broxterman '28", "John Daniher '26"],
   "Moderator": ["Mr. Ryan (CS)", "Mr. Nardini (CS)"],
-  "Beta Tester": ["Peyton Ball '27", "Jack Berlin '27", "Jack Robbins '26", "Nicholas Maringer '26", "Collin McCafferty '26"],
-  "Development Alumni": ["Joey Rusnak '25", "Evin Lodder '25"]
+  "Beta Tester": ["Peyton Ball '27", "Jack Berlin '27"],
+  "Development Alumni": ["John Daniher '26", "Joey Rusnak '25", "Evin Lodder '25"]
 }

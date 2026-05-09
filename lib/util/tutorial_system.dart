@@ -377,7 +377,7 @@ class TutorialSystem {
   ///
   /// Derived from the prefix of the first tutorial key (e.g. `'schedule'` from
   /// `'schedule:bell'`). All [Showcase] widgets in this system must share this scope.
-  String get scope => tutorials.keys.first.split(".").first;
+  String get scope => tutorials.keys.first.split(":").first;
 
   /// Registers this tutorial system with [ShowcaseView] under [scope].
   ///

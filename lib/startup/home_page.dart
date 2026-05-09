@@ -36,12 +36,11 @@ class _HomePageState extends State<HomePage> {
 
   /// Tracks which page index is currently visible.
   /// Used to highlight the active nav bar icon and compute swipe targets.
-  int _currentPageIndex = 1;
+  int _currentPageIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    HomePage.homePageStream = StreamController();
   }
 
   @override
@@ -56,6 +55,7 @@ class _HomePageState extends State<HomePage> {
     final ColorScheme colorScheme = Theme
         .of(context)
         .colorScheme;
+    HomePage.homePageStream = StreamController();
 
     return StreamBuilder(
       stream: HomePage.homePageStream.stream,

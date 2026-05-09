@@ -173,6 +173,10 @@ class _ScheduleSettingsPageState extends State<ScheduleSettingsPage> {
   void initState() {
     super.initState();
     ScheduleSettingsPage.tutorialSystem.register();
+    // Generate stable GlobalKeys here so Showcase widgets keep their identity
+    // across rebuilds and always mount with the correct currentScope.
+    ScheduleSettingsPage.tutorialSystem.refreshKeys();
+    ScheduleSettingsPage.tutorialSystem.removeFinished();
   }
 
   @override
@@ -185,10 +189,6 @@ class _ScheduleSettingsPageState extends State<ScheduleSettingsPage> {
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final double screenWidth = MediaQuery.of(context).size.width;
-
-    // Refresh keys each build so showcase widgets have valid GlobalKeys
-    ScheduleSettingsPage.tutorialSystem.refreshKeys();
-    ScheduleSettingsPage.tutorialSystem.removeFinished();
 
     ScheduleSettingsPage.tutorialSystem.schedule(context);
 
