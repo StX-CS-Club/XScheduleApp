@@ -8,6 +8,7 @@ import 'package:xschedule/extensions/color_extension.dart';
 import 'package:xschedule/extensions/widget_extension.dart';
 import 'package:xschedule/schedule/schedule_settings.dart';
 import 'package:xschedule/util/tutorial_system.dart';
+import 'package:xschedule/widgets/animated_box.dart';
 import 'package:xschedule/widgets/icon_circle.dart';
 import 'package:xschedule/widgets/styled_button.dart';
 
@@ -491,51 +492,48 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
   }) {
     final double maxHeight = MediaQuery.of(context).size.height * .75;
 
-    return AnimatedContainer(
+    return AnimatedBox(
       duration: const Duration(milliseconds: 250),
       curve: Curves.easeInOut,
       // Collapsed sections are clamped to 50px (header height only)
       constraints: BoxConstraints(maxHeight: expanded ? maxHeight : 50),
-      child: SingleChildScrollView(
-        physics: const NeverScrollableScrollPhysics(),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            InkWell(
-              onTap: () =>
-                  setState(() => _appearanceExpanded = !_appearanceExpanded),
-              child: Container(
-                height: 50,
-                alignment: Alignment.center,
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: 25,
-                        color: colorScheme.onSurface,
-                        fontFamily: 'Georama',
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ).expandedFit(),
-                    Icon(
-                      expanded
-                          ? Icons.keyboard_arrow_up
-                          : Icons.keyboard_arrow_down,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          InkWell(
+            onTap: () =>
+                setState(() => _appearanceExpanded = !_appearanceExpanded),
+            child: Container(
+              height: 50,
+              alignment: Alignment.center,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 25,
                       color: colorScheme.onSurface,
-                      size: 32,
+                      fontFamily: 'Georama',
+                      fontWeight: FontWeight.w600,
                     ),
-                  ],
-                ),
+                  ).expandedFit(),
+                  Icon(
+                    expanded
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                    color: colorScheme.onSurface,
+                    size: 32,
+                  ),
+                ],
               ),
             ),
-            content,
-          ],
-        ),
-      ),
+          ),
+          content,
+        ],
+      )
     );
   }
 

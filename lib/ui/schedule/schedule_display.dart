@@ -79,6 +79,11 @@ class _ScheduleDisplayState extends State<ScheduleDisplay> {
     // across rebuilds and always mount with the correct currentScope.
     ScheduleDisplay.tutorialSystem.refreshKeys();
     ScheduleDisplay.tutorialSystem.removeFinished();
+    // Run the tutorial flow once after the first frame; not in the builder to
+    // avoid re-triggering on every setState (e.g. onPageChanged during swipes).
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _showTutorial(context);
+    });
   }
 
   @override
@@ -114,48 +119,56 @@ class _ScheduleDisplayState extends State<ScheduleDisplay> {
     return null;
   }
 
-  /// Orchestrates the tutorial sequence after the widget is built and data is loaded.
+  /// Orchestrates the tutorial sequence in a single self-contained run.
   ///
   /// This method:
   /// - Polls until [ScheduleDirectory.schedules] is populated
   /// - Waits an additional 250ms for any in-progress page animation to settle
-  /// - On first run, finds and sets [tutorialDate] via [_findNearestTutorialDate]
-  /// - On subsequent runs, animates to [tutorialDate] if not already there, then starts the tutorial
+  /// - Finds and sets [tutorialDate] via [_findNearestTutorialDate] if not already known
+  /// - Animates to [tutorialDate] if not already there, waits for the animation to settle
+  /// - Starts the tutorial showcase
+  ///
+  /// Called once from [initState] via [WidgetsBinding.addPostFrameCallback]; must not be
+  /// called from the build method or [StreamBuilder] builder, as that would re-trigger the
+  /// snap-back on every [setState] (e.g. from [PageView.onPageChanged] during swipes).
   ///
   /// Parameters:
   /// - [context]: The [BuildContext] used to trigger the showcase; must be [mounted] before use
   Future<void> _showTutorial(BuildContext context) async {
     // Poll until schedule data is available; 100ms delay avoids busy-spinning the thread
     while (ScheduleDirectory.schedules.isEmpty) {
+      if (!mounted) return;
       await Future.delayed(const Duration(milliseconds: 100));
     }
-    // Ensure any page animation has finished before proceeding
-    await Future.delayed(const Duration(milliseconds: 250));
 
-    if (ScheduleDisplay.tutorialSystem.finished) return;
+    if (!mounted || ScheduleDisplay.tutorialSystem.finished) return;
 
     if (ScheduleDisplay.tutorialDate == null) {
-      // First run: find and persist the nearest tutorial-valid date
       final DateTime? found = _findNearestTutorialDate();
-      if (found != null) {
-        setState(() {
-          ScheduleDisplay.tutorialDate = found;
-        });
-      }
-    } else {
-      final int dayOffset =
-          ScheduleDisplay.tutorialDate!.day - ScheduleDisplay.initialDate.day;
-      if (dayOffset != ScheduleDisplay.pageIndex) {
-        // Animate to the tutorial date; _showTutorial will re-run after the animation settles
-        ScheduleDisplay.pageIndex = dayOffset;
-        _pageController.animateToPage(pageMidpoint + dayOffset,
-            duration: const Duration(milliseconds: 250),
-            curve: Curves.easeInOut);
-      } else if (context.mounted) {
-        // Already on the correct date — begin the tutorial
-        ScheduleDisplay.tutorialSystem.showTutorials(context);
-        ScheduleDisplay.tutorialSystem.finish();
-      }
+      if (found == null) return;
+      setState(() {
+        ScheduleDisplay.tutorialDate = found;
+      });
+    }
+
+    final int dayOffset =
+        ScheduleDisplay.tutorialDate!.dayDiff(ScheduleDisplay.initialDate);
+
+    if (dayOffset != ScheduleDisplay.pageIndex) {
+      // Brief wait for any in-progress page animation to settle before navigating
+      await Future.delayed(const Duration(milliseconds: 250));
+      ScheduleDisplay.pageIndex = dayOffset;
+      _pageController.animateToPage(
+          pageMidpoint + dayOffset,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeInOut);
+      // Wait for the animation to complete before starting the tutorial
+      await Future.delayed(const Duration(milliseconds: 500));
+    }
+
+    if (context.mounted && !ScheduleDisplay.tutorialSystem.finished) {
+      ScheduleDisplay.tutorialSystem.showTutorials(context);
+      ScheduleDisplay.tutorialSystem.finish();
     }
   }
 
@@ -168,9 +181,6 @@ class _ScheduleDisplayState extends State<ScheduleDisplay> {
     return StreamBuilder(
         stream: ScheduleDisplay.scheduleStream.stream,
         builder: (context, snapshot) {
-          WidgetsBinding.instance.addPostFrameCallback((_) async {
-            await _showTutorial(context);
-          });
           return Scaffold(
               backgroundColor: colorScheme.primaryContainer,
               body: Column(

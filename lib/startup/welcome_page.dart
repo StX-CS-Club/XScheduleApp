@@ -24,7 +24,7 @@ class WelcomePage extends StatelessWidget {
         children: [
           _buildBackground(screenSize),
           // Translucent blue overlay on top of the background image
-          Container(color: colorScheme.primary.withValues(alpha: 0.7)),
+          Container(color: colorScheme.primary.withValues(alpha: 0.6)),
           _buildLogo(screenSize),
           _buildWelcomeCard(context, colorScheme, screenSize),
         ],
@@ -57,8 +57,7 @@ class WelcomePage extends StatelessWidget {
   Widget _buildLogo(Size screenSize) {
     return Align(
       alignment: Alignment.center,
-      child: Container(
-        margin: EdgeInsets.only(top: screenSize.width / 10),
+      child: SizedBox(
         height: screenSize.height * 5 / 16,
         child: Image.asset("assets/images/xschedule_transparent.png"),
       ),

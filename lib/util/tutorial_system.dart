@@ -166,6 +166,7 @@ class TutorialSystem {
     if (description == null) return child;
 
     return Showcase(
+        scope: scope,
         key: key(tutorial, uniqueNull: uniqueNull),
         description: description,
         onToolTipClick: simulateTap,

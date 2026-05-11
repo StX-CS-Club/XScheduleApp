@@ -10,6 +10,7 @@ import 'package:xschedule/schedule/schedule_settings.dart';
 import 'package:xschedule/schedule/schedule_storage.dart';
 import 'package:xschedule/ui/schedule/schedule_settings/bell_settings/bell_button.dart';
 import 'package:xschedule/ui/schedule/schedule_settings/bell_settings/bell_settings_menu.dart';
+import 'package:xschedule/widgets/animated_box.dart';
 import 'package:xschedule/widgets/popup_menu.dart';
 import 'package:xschedule/widgets/styled_button.dart';
 
@@ -164,10 +165,9 @@ class _ScheduleSettingsQrState extends State<ScheduleSettingsQr> {
   /// - [scannerSize]: The width and height of the square scanner view.
   /// - [colorScheme]: Provides the border color.
   Widget _buildScanner(double scannerSize, ColorScheme colorScheme) {
-    return AnimatedContainer(
+    return AnimatedBox(
       duration: const Duration(milliseconds: 250),
-      height: _scanning ? scannerSize : 0,
-      width: scannerSize,
+      constraints: BoxConstraints(minWidth: scannerSize, maxHeight: _scanning ? scannerSize : 0),
       child: _scanning
           ? Container(
               height: scannerSize,
@@ -181,7 +181,7 @@ class _ScheduleSettingsQrState extends State<ScheduleSettingsQr> {
                 onDetect: _onBarcodeDetected,
               ),
             ).clip()
-          : null,
+          : SizedBox(height: scannerSize),
     );
   }
 

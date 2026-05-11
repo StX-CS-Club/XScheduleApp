@@ -1,9 +1,11 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:xschedule/schedule/schedule_directory.dart';
 import 'package:xschedule/extensions/date_time_extension.dart';
 import 'package:xschedule/extensions/widget_extension.dart';
+import 'package:xschedule/schedule/schedule_directory.dart';
+import 'package:xschedule/widgets/animated_box.dart';
+import 'package:xschedule/widgets/icon_circle.dart';
 
 /// A popup calendar for quickly navigating to any school day within ±18 months.
 ///
@@ -15,9 +17,9 @@ import 'package:xschedule/extensions/widget_extension.dart';
 class CalendarNavigation extends StatefulWidget {
   const CalendarNavigation(
       {super.key,
-        required this.initialDate,
-        required this.currentDate,
-        required this.onSelect});
+      required this.initialDate,
+      required this.currentDate,
+      required this.onSelect});
 
   /// Today's date; used as the anchor for month offset calculations and dot highlighting.
   final DateTime initialDate;
@@ -57,15 +59,27 @@ class _CalendarNavigationState extends State<CalendarNavigation> {
   /// Opacity boost applied to the selected ([currentDate]) and today ([initialDate]) dots.
   static const double _opacitySelected = 0.60;
 
+  /// Height in logical pixels of the date detail row shown below the calendar grid.
+  static const double _dateHeight = 80;
+
   /// The month offset from [initialDate] currently displayed; `0` = current month.
   late int monthIndex;
 
   /// Controls the month [PageView]; uses [NeverScrollableScrollPhysics] — gestures are custom.
   late PageController _pageController;
 
+  /// The date highlighted by a previous tap; defaults to [CalendarNavigation.currentDate] on first mount.
+  DateTime? selectedDate;
+
+  /// Whether the date detail row is currently expanded below the calendar grid.
+  bool displayDate = false;
+
+  /// Initialises [selectedDate] to [CalendarNavigation.currentDate], computes the starting
+  /// [monthIndex], and creates the [PageController] positioned at that month.
   @override
   void initState() {
     super.initState();
+    selectedDate ??= widget.currentDate;
     monthIndex = widget.currentDate.monthDiff(widget.initialDate);
     _pageController = PageController(initialPage: pageMidpoint + monthIndex);
   }
@@ -113,23 +127,23 @@ class _CalendarNavigationState extends State<CalendarNavigation> {
       BuildContext context, DateTime date, double dotOpacity) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
-    if (date == widget.currentDate) {
+    if (date == selectedDate) {
       return (
-      dot: colorScheme.primary
-          .withValues(alpha: _opacitySelected + dotOpacity),
-      text: colorScheme.onPrimary,
+        dot: colorScheme.primary
+            .withValues(alpha: _opacitySelected + dotOpacity),
+        text: colorScheme.onPrimary,
       );
     }
     if (date == widget.initialDate) {
       return (
-      dot: colorScheme.secondary
-          .withValues(alpha: _opacitySelected + dotOpacity),
-      text: colorScheme.onSecondary,
+        dot: colorScheme.secondary
+            .withValues(alpha: _opacitySelected + dotOpacity),
+        text: colorScheme.onSecondary,
       );
     }
     return (
-    dot: Colors.black.withValues(alpha: _opacityBase + dotOpacity),
-    text: Colors.black,
+      dot: Colors.black.withValues(alpha: _opacityBase + dotOpacity),
+      text: Colors.black,
     );
   }
 
@@ -147,10 +161,9 @@ class _CalendarNavigationState extends State<CalendarNavigation> {
         widget.initialDate.year, widget.initialDate.month + monthIndex);
 
     return Center(
-      child: SizedBox(
-        width: width,
-        // 69px accounts for the header row height
-        height: 69 + height,
+      child: AnimatedBox(
+        constraints: BoxConstraints(maxWidth: width),
+        padding: EdgeInsets.only(top: displayDate ? _dateHeight : 0),
         child: Card(
             color: colorScheme.surface,
             child: Column(
@@ -208,10 +221,76 @@ class _CalendarNavigationState extends State<CalendarNavigation> {
                           _buildMonth(monthOffset - pageMidpoint),
                     ),
                   ),
-                )
+                ),
+                const SizedBox(height: 8),
+                AnimatedBox(
+                    duration: const Duration(milliseconds: 250),
+                    padding: EdgeInsets.only(bottom: displayDate ? 8 : 0),
+                    constraints: BoxConstraints(
+                        maxHeight: displayDate ? _dateHeight : 0),
+                    child: _buildDate()),
               ],
             ).clip(borderRadius: BorderRadius.circular(12))),
       ),
+    );
+  }
+
+  /// Builds the date detail row that slides in below the calendar grid when a dot is tapped.
+  ///
+  /// Appearance: A horizontal [Row] with the selected date name and schedule name on the left
+  /// (stacked in a [Column]) and a circular [IconCircle] "open" button on the right.
+  /// Tapping the button closes the popup and calls [CalendarNavigation.onSelect].
+  Widget _buildDate() {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+
+    final String dateText = selectedDate?.dateText() ?? '';
+    final String scheduleText =
+        ScheduleDirectory.readSchedule(selectedDate!).name;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(
+            child: SizedBox(
+          height: _dateHeight,
+          child: Column(
+            children: [
+              Text(
+                dateText,
+                style: TextStyle(
+                    fontFamily: "Exo_2",
+                    fontWeight: FontWeight.w500,
+                    color: colorScheme.onSurface,
+                    fontSize: 24),
+              ).expandedFit(
+                  padding: const EdgeInsets.only(left: 16),
+                  alignment: Alignment.bottomLeft),
+              Text(
+                scheduleText,
+                style: TextStyle(
+                    fontFamily: "Exo_2",
+                    fontWeight: FontWeight.w500,
+                    color: colorScheme.onSurface.withAlpha(192),
+                    fontSize: 24),
+              ).expandedFit(
+                  padding: const EdgeInsets.only(left: 16),
+                  alignment: Alignment.topLeft)
+            ],
+          ),
+        )),
+        Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: IconCircle(
+                icon: Icons.open_in_new,
+                color: colorScheme.primary,
+                iconColor: colorScheme.onPrimary,
+                radius: _dateHeight / 3,
+                padding: 24,
+                onTap: () {
+                  Navigator.pop(context);
+                  widget.onSelect(selectedDate!);
+                }))
+      ],
     );
   }
 
@@ -252,11 +331,22 @@ class _CalendarNavigationState extends State<CalendarNavigation> {
             final double dotOpacity = _dotOpacity(date, pageMonth);
             final colors = _dotColors(context, date, dotOpacity);
 
-            // Tappable date dot: dismisses popup and notifies parent
             return InkWell(
               onTap: () {
-                Navigator.pop(context);
-                widget.onSelect(date);
+                setState(() {
+                  // First tap on any date (or tap on a different date): show detail row for that date.
+                  // Second tap on the already-selected date: collapse the detail row.
+                  if (!displayDate || selectedDate != date) {
+                    setState(() {
+                      selectedDate = date;
+                      displayDate = true;
+                    });
+                  } else {
+                    setState(() {
+                      displayDate = false;
+                    });
+                  }
+                });
               },
               child: Padding(
                 padding: EdgeInsets.all(radius),
@@ -264,8 +354,8 @@ class _CalendarNavigationState extends State<CalendarNavigation> {
                   backgroundColor: colors.dot,
                   radius: radius,
                   child: Text(date.day.toString(),
-                      style: TextStyle(
-                          color: colors.text, fontFamily: "Georama"))
+                          style: TextStyle(
+                              color: colors.text, fontFamily: "Georama"))
                       .fit(),
                 ),
               ),
