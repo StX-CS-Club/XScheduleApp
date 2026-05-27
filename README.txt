@@ -94,7 +94,8 @@ Once verified, Apple app versions require manual release, and afterwards will be
 ** Building an App Bundle for the Google Play Store **
 1) To build an appbundle to be accepted by Google, ensure that the keystore files are properly located under /android. These files should be stored on an X-Schedule USB drive, and SHOULD NOT be shared ANYWHERE online, inclduign email.
 2) Ensure that "Android SDK Build-Tools" and "Android SDK Command-line tools" are installed by going to Android Studio > SDK Manager > Languages and Frameworks > Android SDK > SDK Tools
-3) Once ready, run "flutter build appbundle"
+3) Make sure to increment the build ID for rach version you upload to the Google Play Store. The console will not accept duplicate versions IDs OR IDs < current ID.
+4) Once ready, run "flutter build appbundle"
 
 
 
