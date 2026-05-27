@@ -1,13 +1,9 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:localstorage/localstorage.dart';
 import 'package:xschedule/schedule/schedule_entry.dart';
 import 'package:xschedule/extensions/date_time_extension.dart';
 import 'package:xschedule/schedule/bell_entry.dart';
-import 'package:xschedule/schedule/schedule_storage.dart';
 
-/// A simple immutable date range used to track prior Supabase request windows.
+/// An immutable date range used to track previously requested data windows.
 ///
 /// Responsibilities:
 /// - Storing a [start] and [end] [DateTime] pair as a typed, safe alternative to
@@ -20,17 +16,11 @@ typedef DateRange = ({DateTime start, DateTime end});
 /// - Storing and retrieving [ScheduleEntry] objects keyed by date-only [DateTime]
 /// - Persisting and restoring schedule data to/from [localStorage]
 /// - Serialising future schedules to JSON within a given day range
-/// - Deduplicating Supabase request ranges to avoid redundant fetches
+/// - Deduplicating data request ranges to avoid redundant fetches
 /// - Clearing bell and name data across all stored schedules
 class ScheduleDirectory {
   // Private constructor — this class is not intended to be instantiated
   ScheduleDirectory._();
-
-  /// Reusable [GZipCodec] instance for compressing and decompressing schedule JSON.
-  ///
-  /// Stateless and safe to reuse across calls — instantiated once to avoid
-  /// redundant allocation on every [storeSchedule] and [readStoredSchedule] call.
-  static final GZipCodec _gzip = GZipCodec();
 
   /// All loaded [ScheduleEntry] objects, keyed by date-only [DateTime] (time stripped via [DateTime.dateOnly]).
   ///
@@ -89,12 +79,12 @@ class ScheduleDirectory {
     clearNames();
   }
 
-  /// Tracks the date ranges of prior Supabase requests to avoid redundant fetches.
+  /// Tracks the date ranges of prior data requests to avoid redundant fetches.
   ///
   /// Each [DateRange] record stores the [start] and [end] of a completed request window.
   static List<DateRange> dailyInfoRequests = [];
 
-  /// Registers a Supabase data request for the range [[start], [end]], trimming any overlap
+  /// Registers a data request for the range [[start], [end]], trimming any overlap
   /// with previously registered ranges to avoid redundant fetches.
   ///
   /// This method:

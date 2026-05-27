@@ -49,3 +49,6 @@ assets/data/supabase.json
 
 # Keystore files
 /android/keystore/
+
+/lib/.claude
+/.claude

@@ -2,12 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:icon_decoration/icon_decoration.dart';
-import 'package:showcaseview/showcaseview.dart';
-import 'package:xschedule/april_fools/2026_battle_pass/battle_pass_page.dart';
 import 'package:xschedule/ui/personal/personal_page.dart';
 import 'package:xschedule/ui/schedule/schedule_display.dart';
 import 'package:xschedule/util/stream_signal.dart';
-import 'package:xschedule/util/tutorial_system.dart';
 
 /// Main destination page of the app after login.
 ///
@@ -19,9 +16,8 @@ class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   /// Stream used to trigger a full rebuild of [HomePage] from anywhere in the app.
-  /// Recreated on each build so listeners always receive fresh events.
+  /// Initialised in [_HomePageState.initState] and closed in [_HomePageState.dispose].
   static StreamController<StreamSignal> homePageStream = StreamController();
-  static late TutorialSystem tutorialSystem;
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -31,54 +27,49 @@ class _HomePageState extends State<HomePage> {
   /// The ordered list of pages displayed in the [PageView].
   /// Index corresponds directly to the nav bar icon positions.
   static const List<Widget> _pages = [
-    BattlePassPage(),
     ScheduleDisplay(),
     PersonalPage(),
   ];
 
   /// Controls programmatic navigation between pages.
-  final PageController _pageController = PageController(initialPage: 1);
+  final PageController _pageController = PageController(initialPage: 0);
 
   /// Tracks which page index is currently visible.
   /// Used to highlight the active nav bar icon and compute swipe targets.
-  int _currentPageIndex = 1;
+  int _currentPageIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   void dispose() {
+    HomePage.homePageStream.close();
     _pageController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // Recreated on every rebuild so the stream is always fresh for new listeners
+    final ColorScheme colorScheme = Theme
+        .of(context)
+        .colorScheme;
     HomePage.homePageStream = StreamController();
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return StreamBuilder(
       stream: HomePage.homePageStream.stream,
       builder: (context, snapshot) {
-        return ShowCaseWidget(builder: (context) {
-          WidgetsBinding.instance.addPostFrameCallback((_) async {
-            while (!ScheduleDisplay.tutorialSystem.finished) {
-              await Future.delayed(const Duration(milliseconds: 100));
-            }
-            if (context.mounted) {
-              HomePage.tutorialSystem.showTutorials(context);
-            }
-          });
-
-          return Scaffold(
-            backgroundColor: colorScheme.primaryContainer,
-            bottomNavigationBar: _buildNavBar(context),
-            body: PageView(
-              controller: _pageController,
-              physics: const PageScrollPhysics(),
-              onPageChanged: (i) => setState(() => _currentPageIndex = i),
-              children: _pages,
-            ),
-          );
-        });
+        return Scaffold(
+          backgroundColor: colorScheme.primaryContainer,
+          bottomNavigationBar: _buildNavBar(context),
+          body: PageView(
+            controller: _pageController,
+            physics: const PageScrollPhysics(),
+            onPageChanged: (i) => setState(() => _currentPageIndex = i),
+            children: _pages,
+          ),
+        );
       },
     );
   }
@@ -90,7 +81,9 @@ class _HomePageState extends State<HomePage> {
   /// Parameters:
   /// - [context]: Used to read the current [ColorScheme].
   Widget _buildNavBar(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final ColorScheme colorScheme = Theme
+        .of(context)
+        .colorScheme;
 
     return GestureDetector(
       // sign() gives -1, 0, or 1 based on swipe direction to select adjacent page
@@ -128,10 +121,8 @@ class _HomePageState extends State<HomePage> {
           crossAxisAlignment: CrossAxisAlignment.end,
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            _buildPageIcon(Icons.local_activity, 0,
-                tutorial: "april_fools:button"),
-            _buildPageIcon(Icons.calendar_month, 1),
-            _buildPageIcon(Icons.person, 2),
+            _buildPageIcon(Icons.calendar_month, 0),
+            _buildPageIcon(Icons.person, 1),
           ],
         ),
       ),
@@ -171,8 +162,10 @@ class _HomePageState extends State<HomePage> {
   /// Parameters:
   /// - [icon]: The icon to display.
   /// - [index]: The page index this icon corresponds to.
-  Widget _buildPageIcon(IconData icon, int index, {String? tutorial}) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+  Widget _buildPageIcon(IconData icon, int index) {
+    final ColorScheme colorScheme = Theme
+        .of(context)
+        .colorScheme;
 
     return TextButton(
       onPressed: () {
@@ -197,15 +190,6 @@ class _HomePageState extends State<HomePage> {
               size: 30,
             ),
           ),
-          if (tutorial != null)
-            HomePage.tutorialSystem.showcase(
-                context: context,
-                tutorial: tutorial,
-                circular: true,
-                child: const SizedBox(
-                  width: 34,
-                  height: 34,
-                ))
         ],
       ),
     );

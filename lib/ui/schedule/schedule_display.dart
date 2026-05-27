@@ -74,12 +74,27 @@ class _ScheduleDisplayState extends State<ScheduleDisplay> {
     super.initState();
     // Initialise stream once here rather than recreating it on every build
     ScheduleDisplay.scheduleStream = StreamController<StreamSignal>();
+    ScheduleDisplay.tutorialSystem.register();
+    // Generate stable GlobalKeys here so Showcase widgets keep their identity
+    // across rebuilds and always mount with the correct currentScope.
+    ScheduleDisplay.tutorialSystem.refreshKeys();
+    ScheduleDisplay.tutorialSystem.removeFinished();
+    // Run the tutorial flow once after the first frame; not in the builder to
+    // avoid re-triggering on every setState (e.g. onPageChanged during swipes).
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _showTutorial(context);
+    });
   }
 
   @override
   void dispose() {
-    super.dispose();
+    // Do NOT unregister the tutorial scope here. ScheduleDisplay is always
+    // present in HomePage._pages, so a new _ScheduleDisplayState is mounted
+    // before this one is disposed (e.g. after Navigator.pushAndRemoveUntil).
+    // Unregistering would remove the scope the new instance just registered,
+    // causing "No ShowcaseView registered for scope" on the next build.
     _pageController.dispose();
+    super.dispose();
   }
 
   /// Searches up to 25 days forward and backward from [initialDate] for a date
@@ -104,48 +119,56 @@ class _ScheduleDisplayState extends State<ScheduleDisplay> {
     return null;
   }
 
-  /// Orchestrates the tutorial sequence after the widget is built and data is loaded.
+  /// Orchestrates the tutorial sequence in a single self-contained run.
   ///
   /// This method:
   /// - Polls until [ScheduleDirectory.schedules] is populated
   /// - Waits an additional 250ms for any in-progress page animation to settle
-  /// - On first run, finds and sets [tutorialDate] via [_findNearestTutorialDate]
-  /// - On subsequent runs, animates to [tutorialDate] if not already there, then starts the tutorial
+  /// - Finds and sets [tutorialDate] via [_findNearestTutorialDate] if not already known
+  /// - Animates to [tutorialDate] if not already there, waits for the animation to settle
+  /// - Starts the tutorial showcase
+  ///
+  /// Called once from [initState] via [WidgetsBinding.addPostFrameCallback]; must not be
+  /// called from the build method or [StreamBuilder] builder, as that would re-trigger the
+  /// snap-back on every [setState] (e.g. from [PageView.onPageChanged] during swipes).
   ///
   /// Parameters:
   /// - [context]: The [BuildContext] used to trigger the showcase; must be [mounted] before use
   Future<void> _showTutorial(BuildContext context) async {
     // Poll until schedule data is available; 100ms delay avoids busy-spinning the thread
     while (ScheduleDirectory.schedules.isEmpty) {
+      if (!mounted) return;
       await Future.delayed(const Duration(milliseconds: 100));
     }
-    // Ensure any page animation has finished before proceeding
-    await Future.delayed(const Duration(milliseconds: 250));
 
-    if (ScheduleDisplay.tutorialSystem.finished) return;
+    if (!mounted || ScheduleDisplay.tutorialSystem.finished) return;
 
     if (ScheduleDisplay.tutorialDate == null) {
-      // First run: find and persist the nearest tutorial-valid date
       final DateTime? found = _findNearestTutorialDate();
-      if (found != null) {
-        setState(() {
-          ScheduleDisplay.tutorialDate = found;
-        });
-      }
-    } else {
-      final int dayOffset =
-          ScheduleDisplay.tutorialDate!.day - ScheduleDisplay.initialDate.day;
-      if (dayOffset != ScheduleDisplay.pageIndex) {
-        // Animate to the tutorial date; _showTutorial will re-run after the animation settles
-        ScheduleDisplay.pageIndex = dayOffset;
-        _pageController.animateToPage(pageMidpoint + dayOffset,
-            duration: const Duration(milliseconds: 250),
-            curve: Curves.easeInOut);
-      } else if (context.mounted) {
-        // Already on the correct date — begin the tutorial
-        ScheduleDisplay.tutorialSystem.showTutorials(context);
-        ScheduleDisplay.tutorialSystem.finish();
-      }
+      if (found == null) return;
+      setState(() {
+        ScheduleDisplay.tutorialDate = found;
+      });
+    }
+
+    final int dayOffset =
+        ScheduleDisplay.tutorialDate!.dayDiff(ScheduleDisplay.initialDate);
+
+    if (dayOffset != ScheduleDisplay.pageIndex) {
+      // Brief wait for any in-progress page animation to settle before navigating
+      await Future.delayed(const Duration(milliseconds: 250));
+      ScheduleDisplay.pageIndex = dayOffset;
+      _pageController.animateToPage(
+          pageMidpoint + dayOffset,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeInOut);
+      // Wait for the animation to complete before starting the tutorial
+      await Future.delayed(const Duration(milliseconds: 500));
+    }
+
+    if (context.mounted && !ScheduleDisplay.tutorialSystem.finished) {
+      ScheduleDisplay.tutorialSystem.showTutorials(context);
+      ScheduleDisplay.tutorialSystem.finish();
     }
   }
 
@@ -154,62 +177,49 @@ class _ScheduleDisplayState extends State<ScheduleDisplay> {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final MediaQueryData mediaQuery = MediaQuery.of(context);
 
-    // Refresh showcase GlobalKeys and remove any already-completed steps
-    ScheduleDisplay.tutorialSystem.refreshKeys();
-    ScheduleDisplay.tutorialSystem.removeFinished();
-
     // Wrap in StreamBuilder so external signals can trigger a full rebuild
     return StreamBuilder(
         stream: ScheduleDisplay.scheduleStream.stream,
         builder: (context, snapshot) {
-          // Wrap in ShowCaseWidget to enable showcase step rendering
-          return ShowCaseWidget(onComplete: (_, __) {
-            ScheduleDisplay.tutorialSystem.finish();
-          }, builder: (context) {
-            // Queue tutorial to start after this frame's layout is complete
-            WidgetsBinding.instance.addPostFrameCallback((_) async {
-              await _showTutorial(context);
-            });
-            return Scaffold(
-                backgroundColor: colorScheme.primaryContainer,
-                body: Column(
-                  children: [
-                    // Top bar: calendar button, date navigator, info button
-                    Container(
-                      // Top margin compensates for device safe zone
-                      margin: EdgeInsets.only(
-                          top: 8 + mediaQuery.padding.top, bottom: 8),
-                      height: 50,
-                      alignment: Alignment.center,
-                      child: _buildTopBar(context),
-                    ),
-                    // Schedule PageView fills remaining vertical space
-                    Expanded(child: _buildPageView(context)),
-                    // Settings button centered at the bottom
-                    Container(
-                      margin: EdgeInsets.symmetric(
-                          horizontal: mediaQuery.size.width * .3),
-                      height: 30,
-                      child: ScheduleDisplay.tutorialSystem.showcase(
-                          context: context,
-                          tutorial: 'schedule:settings',
-                          child: StyledButton(
-                            width: mediaQuery.size.width * .6,
-                            icon: Icons.settings,
-                            backgroundColor: colorScheme.secondary,
-                            contentColor: colorScheme.onSecondary,
-                            onTap: () {
-                              ScheduleStorage.restore();
-                              context.pushSwipePage(const ScheduleSettingsPage(
-                                showBackArrow: true,
-                              ));
-                            },
-                          )),
-                    ),
-                    const SizedBox(height: 8)
-                  ],
-                ));
-          });
+          return Scaffold(
+              backgroundColor: colorScheme.primaryContainer,
+              body: Column(
+                children: [
+                  // Top bar: calendar button, date navigator, info button
+                  Container(
+                    // Top margin compensates for device safe zone
+                    margin: EdgeInsets.only(
+                        top: 8 + mediaQuery.padding.top, bottom: 8),
+                    height: 50,
+                    alignment: Alignment.center,
+                    child: _buildTopBar(context),
+                  ),
+                  // Schedule PageView fills remaining vertical space
+                  Expanded(child: _buildPageView(context)),
+                  // Settings button centered at the bottom
+                  Container(
+                    margin: EdgeInsets.symmetric(
+                        horizontal: mediaQuery.size.width * .3),
+                    height: 30,
+                    child: ScheduleDisplay.tutorialSystem.showcase(
+                        context: context,
+                        tutorial: 'schedule:settings',
+                        child: StyledButton(
+                          width: mediaQuery.size.width * .6,
+                          icon: Icons.settings,
+                          backgroundColor: colorScheme.secondary,
+                          contentColor: colorScheme.onSecondary,
+                          onTap: () {
+                            ScheduleStorage.restore();
+                            context.pushSwipePage(const ScheduleSettingsPage(
+                              showBackArrow: true,
+                            ));
+                          },
+                        )),
+                  ),
+                  const SizedBox(height: 8)
+                ],
+              ));
         });
   }
 

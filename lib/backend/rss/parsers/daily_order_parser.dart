@@ -236,21 +236,4 @@ class DailyOrderParser {
 
     return title;
   }
-
-  /// Converts structured bell entries into final map format.
-  ///
-  /// Returns:
-  /// - Map of title → "start-end" string
-  static Map<String, String> _toBellMap(List<BellEntry> entries) {
-    final Map<String, String> bells = {};
-
-    for (final entry in entries) {
-      // Skip incomplete entries
-      if (entry.start == null || entry.end == null) continue;
-
-      bells[entry.title] = '${entry.start}-${entry.end}';
-    }
-
-    return bells;
-  }
 }

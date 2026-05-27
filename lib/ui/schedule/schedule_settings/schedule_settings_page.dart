@@ -170,23 +170,34 @@ class _ScheduleSettingsPageState extends State<ScheduleSettingsPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    ScheduleSettingsPage.tutorialSystem.register();
+    // Generate stable GlobalKeys here so Showcase widgets keep their identity
+    // across rebuilds and always mount with the correct currentScope.
+    ScheduleSettingsPage.tutorialSystem.refreshKeys();
+    ScheduleSettingsPage.tutorialSystem.removeFinished();
+  }
+
+  @override
+  void dispose() {
+    ScheduleSettingsPage.tutorialSystem.unregister();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final double screenWidth = MediaQuery.of(context).size.width;
 
-    // Refresh keys each build so showcase widgets have valid GlobalKeys
-    ScheduleSettingsPage.tutorialSystem.refreshKeys();
-    ScheduleSettingsPage.tutorialSystem.removeFinished();
+    ScheduleSettingsPage.tutorialSystem.schedule(context);
 
-    return ShowCaseWidget(builder: (context) {
-      ScheduleSettingsPage.tutorialSystem.schedule(context);
-      return Scaffold(
-        backgroundColor: colorScheme.primaryContainer,
-        appBar: _buildAppBar(context, colorScheme),
-        extendBody: true,
-        bottomNavigationBar: _buildDoneButton(context, screenWidth),
-        body: _buildBellList(context, screenWidth),
-      );
-    });
+    return Scaffold(
+      backgroundColor: colorScheme.primaryContainer,
+      appBar: _buildAppBar(context, colorScheme),
+      extendBody: true,
+      bottomNavigationBar: _buildDoneButton(context, screenWidth),
+      body: _buildBellList(context, screenWidth),
+    );
   }
 }

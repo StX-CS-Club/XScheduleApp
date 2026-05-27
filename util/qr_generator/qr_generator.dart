@@ -129,8 +129,6 @@ class _QrHomePageState extends State<QrHomePage> {
     final file = File("${directory.path}/${title.toLowerCase().replaceAll(" ", "_").replaceAll(":", "").replaceAll(".", "")}.png");
 
     await file.writeAsBytes(bytes);
-
-    print("Saved to: ${file.path}");
   }
 
   @override

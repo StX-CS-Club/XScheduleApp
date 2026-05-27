@@ -162,7 +162,7 @@ class Credits extends StatelessWidget {
               ),
             ),
             Text(
-              "© 2025 St. Xavier HS, Cincinnati OH\nAvailable under MIT license.",
+              "© 2026 St. Xavier HS, Cincinnati OH\nAvailable under MIT license.",
               textAlign: TextAlign.center,
               style: TextStyle(
                 height: 0.975,

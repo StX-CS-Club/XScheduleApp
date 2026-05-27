@@ -5,14 +5,12 @@ import 'package:xschedule/extensions/build_context_extension.dart';
 import 'package:xschedule/extensions/color_extension.dart';
 import 'package:xschedule/extensions/widget_extension.dart';
 import "package:xschedule/schedule/bell_entry.dart";
+import 'package:xschedule/schedule/bell_vanity.dart';
 import 'package:xschedule/schedule/clock.dart';
 import 'package:xschedule/schedule/schedule_directory.dart';
 import 'package:xschedule/schedule/schedule_entry.dart';
-import 'package:xschedule/schedule/schedule_settings.dart';
 import 'package:xschedule/ui/schedule/bell_display/bell_info.dart';
 import 'package:xschedule/ui/schedule/schedule_display.dart';
-
-typedef _BellData = ({Map<String, dynamic> vanity, String bellSuffix});
 
 /// A single bell tile rendered within the schedule card's bell stack.
 ///
@@ -77,41 +75,24 @@ class BellTile extends StatelessWidget {
   /// Resolves the vanity data map and display suffix for [bell] within [schedule].
   ///
   /// This method:
-  /// - Looks up [bell.title] in [ScheduleSettings.bellVanity]
-  /// - Overrides with the `'HR'` or `'FLEX'` entry and strips the keyword from the suffix
-  /// - Switches to the alternate vanity map if the schedule name matches an `'alt_days'` entry
-  ///
-  /// NOTE: Duplicated from [BellInfo._resolveVanity] — consider consolidating into
-  /// a method on [BellEntry] (e.g. `bell.resolveVanity(schedule)`)
+  /// - Delegates vanity map resolution to [resolveBellVanity]
+  /// - Computes the suffix by stripping the `'HR'` or `'FLEX'` keyword from the title
+  ///   (e.g. `'FLEX 1'` → `' 1'`)
   ///
   /// Parameters:
   /// - [schedule]: The [ScheduleEntry] used for alternate day condition matching
   ///
-  /// Returns: A record with the resolved [vanity] map and the display [bellSuffix]
-  _BellData _resolveVanity(ScheduleEntry schedule) {
-    Map<String, dynamic> bellVanity =
-        ScheduleSettings.bellVanity[bell.title] ?? {};
+  /// Returns: A [BellData] record with the resolved [vanity] map and the display [bellSuffix]
+  BellData _resolveVanity(ScheduleEntry schedule) {
     String bellSuffix = "";
-
-    // HR and FLEX bells use their own fixed vanity entries; keyword is stripped into the suffix
     if (bell.title.contains("HR")) {
-      bellVanity = ScheduleSettings.bellVanity["HR"] ?? {};
       bellSuffix = "${bell.title.replaceAll("HR", "")}$bellSuffix";
     }
     if (bell.title.contains("FLEX")) {
-      bellVanity = ScheduleSettings.bellVanity["FLEX"] ?? {};
       bellSuffix = "${bell.title.replaceAll("FLEX", "")}$bellSuffix";
     }
-
-    // Switch to alternate vanity map if the schedule name matches an alt_days entry
-    for (String altDay in bellVanity['alt_days'] ?? []) {
-      if (schedule.name.toLowerCase().contains(altDay.toLowerCase())) {
-        bellVanity = bellVanity['alt'];
-        break;
-      }
-    }
-
-    return (vanity: bellVanity, bellSuffix: bellSuffix);
+    final BellVanityData resolved = resolveBellVanity(bell, schedule);
+    return (vanity: resolved.vanity, bellSuffix: bellSuffix);
   }
 
   /// Builds the left color nib strip for the tile.
@@ -229,7 +210,7 @@ class BellTile extends StatelessWidget {
     final MediaQueryData mediaQuery = MediaQuery.of(context);
 
     final ScheduleEntry schedule = ScheduleDirectory.readSchedule(date);
-    final _BellData resolved = _resolveVanity(schedule);
+    final BellData resolved = _resolveVanity(schedule);
 
     final Color bellColor =
         ColorExtension.fromHex(resolved.vanity['color'] ?? '#909090');

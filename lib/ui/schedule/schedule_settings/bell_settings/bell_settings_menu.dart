@@ -4,12 +4,11 @@ import 'package:flip_card/flip_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hsvcolor_picker/flutter_hsvcolor_picker.dart';
 import 'package:keyboard_avoider/keyboard_avoider.dart';
-import 'package:showcaseview/showcaseview.dart';
-import 'package:xschedule/april_fools/2026_battle_pass/battle_pass.dart';
 import 'package:xschedule/extensions/color_extension.dart';
 import 'package:xschedule/extensions/widget_extension.dart';
 import 'package:xschedule/schedule/schedule_settings.dart';
 import 'package:xschedule/util/tutorial_system.dart';
+import 'package:xschedule/widgets/animated_box.dart';
 import 'package:xschedule/widgets/icon_circle.dart';
 import 'package:xschedule/widgets/styled_button.dart';
 
@@ -182,6 +181,8 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
     ScheduleSettings.defineBell(widget.bell, alternate: true);
     _loadBell('');
     _loadBell('_alt');
+
+    BellSettingsMenu.tutorialSystem.register();
   }
 
   @override
@@ -192,6 +193,10 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
     }
     _colorScrollController.dispose();
     _colorScrollAltController.dispose();
+
+
+    BellSettingsMenu.tutorialSystem.unregister();
+
     super.dispose();
   }
 
@@ -216,30 +221,26 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
   Widget build(BuildContext context) {
     final double width = min(MediaQuery.of(context).size.width, 500);
 
+    BellSettingsMenu.tutorialSystem.schedule(context);
+
     return KeyboardAvoider(
       autoScroll: true,
       child: Center(
-        child: ShowCaseWidget(
-          onFinish: () => BellSettingsMenu.tutorialSystem.finish(),
-          builder: (context) {
-            BellSettingsMenu.tutorialSystem.schedule(context);
-            return BellSettingsMenu.tutorialSystem.showcase(
-              context: context,
-              tutorial: 'bell_settings:bell_settings',
-              // When the tutorial taps this target, reset the back card to show Appearance
-              onTap: () async {
-                setState(() => _appearanceExpanded = true);
-                await Future.delayed(const Duration(milliseconds: 150));
-              },
-              child: FlipCard(
-                key: _cardKey,
-                flipOnTouch: false,
-                direction: FlipDirection.HORIZONTAL,
-                front: _buildFrontCard(context, width),
-                back: _buildBackCard(context, width),
-              ),
-            );
+        child: BellSettingsMenu.tutorialSystem.showcase(
+          context: context,
+          tutorial: 'bell_settings:bell_settings',
+          // When the tutorial taps this target, reset the back card to show Appearance
+          onTap: () async {
+            setState(() => _appearanceExpanded = true);
+            await Future.delayed(const Duration(milliseconds: 150));
           },
+          child: FlipCard(
+            key: _cardKey,
+            flipOnTouch: false,
+            direction: FlipDirection.HORIZONTAL,
+            front: _buildFrontCard(context, width),
+            back: _buildBackCard(context, width),
+          ),
         ),
       ),
     );
@@ -491,60 +492,63 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
   }) {
     final double maxHeight = MediaQuery.of(context).size.height * .75;
 
-    return AnimatedContainer(
+    return AnimatedBox(
       duration: const Duration(milliseconds: 250),
       curve: Curves.easeInOut,
       // Collapsed sections are clamped to 50px (header height only)
       constraints: BoxConstraints(maxHeight: expanded ? maxHeight : 50),
-      child: SingleChildScrollView(
-        physics: const NeverScrollableScrollPhysics(),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            InkWell(
-              onTap: () =>
-                  setState(() => _appearanceExpanded = !_appearanceExpanded),
-              child: Container(
-                height: 50,
-                alignment: Alignment.center,
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: 25,
-                        color: colorScheme.onSurface,
-                        fontFamily: 'Georama',
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ).expandedFit(),
-                    Icon(
-                      expanded
-                          ? Icons.keyboard_arrow_up
-                          : Icons.keyboard_arrow_down,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          InkWell(
+            onTap: () =>
+                setState(() => _appearanceExpanded = !_appearanceExpanded),
+            child: Container(
+              height: 50,
+              alignment: Alignment.center,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 25,
                       color: colorScheme.onSurface,
-                      size: 32,
+                      fontFamily: 'Georama',
+                      fontWeight: FontWeight.w600,
                     ),
-                  ],
-                ),
+                  ).expandedFit(),
+                  Icon(
+                    expanded
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                    color: colorScheme.onSurface,
+                    size: 32,
+                  ),
+                ],
               ),
             ),
-            content,
-          ],
-        ),
-      ),
+          ),
+          content,
+        ],
+      )
     );
   }
 
   /// Builds the vanity editor column for either the primary or alternate bell.
-  /// Contains the color wheel, color scroll, and text fields (name, teacher, location),
-  /// each wrapped in a showcase target.
+  ///
+  /// Contains, in order:
+  /// - A color wheel with an overlaid emoji text field and a decal picker icon
+  /// - A horizontally scrollable color swatch row
+  /// - Text fields for bell name, teacher, and location
+  ///
+  /// Each section is wrapped in a [TutorialSystem.showcase] target.
   ///
   /// Parameters:
-  /// - [alternate]: If true, builds for the alternate bell (suffix '_alt').
+  /// - [alternate]: If true, builds for the alternate bell (suffix `'_alt'`);
+  ///   if false, builds for the primary bell (no suffix)
   Widget _buildVanityEditor(BuildContext context, bool alternate) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
@@ -952,6 +956,16 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
     );
   }
 
+  /// Opens a dialog for selecting a decal to apply to [bell].
+  ///
+  /// Appearance: A modal card containing a scrollable list of [_buildDecalPreview] tiles,
+  /// each showing the decal image overlaid on the bell's current color.
+  /// The currently selected decal is highlighted with a checkmark.
+  /// Selecting a decal updates [ScheduleSettings.decals] and closes the dialog.
+  ///
+  /// Parameters:
+  /// - [context]: Used to show the dialog and read [ColorScheme]
+  /// - [bell]: The bell key (e.g. `'A'` or `'A_alt'`) whose decal is being set
   void _showDecalPopup(BuildContext context, String bell) {
     showDialog<String>(
       context: context,
@@ -960,7 +974,6 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
         final Size screen = MediaQuery.of(context).size;
 
         final String selected = ScheduleSettings.decals[bell] ?? "Blank";
-        bool unlocked = true;
 
         return Center(
           child: Material(
@@ -990,12 +1003,6 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
                     child: ListView(
                       children:
                           ScheduleSettings.decalOptions.map((String decal) {
-                            if(BattlePass.rewards.keys.contains(decal) && !BattlePass.unlocked.contains(decal)){
-                              unlocked = false;
-                            }
-                            if(!unlocked){
-                              return Container();
-                            }
                         return InkWell(
                           onTap: () => Navigator.pop(context, decal),
                           child: _buildDecalPreview(
@@ -1021,6 +1028,17 @@ class _BellSettingsMenuState extends State<BellSettingsMenu> {
     });
   }
 
+  /// Builds a single decal preview tile for the decal picker dialog.
+  ///
+  /// Appearance: A rounded rectangle with the decal image at 50% opacity over a
+  /// colored background. Shows the decal name centered and a checkmark on the
+  /// right when [selected] is `true`. A [Divider] is prepended for decals listed
+  /// in [ScheduleSettings.decalOptionDividers].
+  ///
+  /// Parameters:
+  /// - [decal]: The decal name to display and preview
+  /// - [color]: The bell's current color, used as the background tint
+  /// - [selected]: Whether this decal is currently applied to the bell
   Widget _buildDecalPreview(String decal, Color color, bool selected) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 

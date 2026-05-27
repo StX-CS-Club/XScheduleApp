@@ -291,7 +291,6 @@ class PersonalPage extends StatelessWidget {
     BellSettingsMenu.resetTutorials();
     ScheduleDisplay.tutorialSystem.refreshKeys();
     ScheduleDisplay.tutorialDate = null;
-    BattlePass.reset();
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (_) => SplashPage()),

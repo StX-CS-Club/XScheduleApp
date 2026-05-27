@@ -12,6 +12,12 @@ import 'package:xschedule/widgets/styled_button.dart';
 
 import '../../widgets/popup_menu.dart';
 
+/// The main page for the 2026 April Fools Battle Pass feature.
+///
+/// Responsibilities:
+/// - Displaying a progress bar and the list of unlockable decal packs
+/// - Animating pack redemption with a fall animation overlay
+/// - Hosting a QR code scanner for recording battle pass scans
 class BattlePassPage extends StatefulWidget {
   const BattlePassPage({super.key});
 
@@ -19,19 +25,47 @@ class BattlePassPage extends StatefulWidget {
   State<StatefulWidget> createState() => _BattlePassPageState();
 }
 
+/// Private [State] for [BattlePassPage].
+///
+/// Responsibilities:
+/// - Managing the animation controllers for pack redemption and confetti
+/// - Building the progress bar, decal pack stack, and QR scanner popup
+/// - Handling QR scan detection and pack unlock logic
 class _BattlePassPageState extends State<BattlePassPage>
     with TickerProviderStateMixin {
+  /// Vertical spacing in pixels between each decal pack row in the progress stack.
   static const double packSpacing = 120;
+
+  /// Height in pixels of each decal pack tile.
   static const double packHeight = 64;
+
+  /// Corner radius applied to each decal pack container.
   static const double packBorderRadius = 8;
 
+  /// Controls the live QR camera scanner; configured for back-facing camera and QR format only.
   final MobileScannerController _scannerController = MobileScannerController(
     facing: CameraFacing.back,
     formats: [BarcodeFormat.qrCode],
   );
+
+  /// Controls the one-shot confetti burst played on first page open.
   final ConfettiController _confettiController =
       ConfettiController(duration: const Duration(seconds: 1));
 
+  /// Animates a redeemed pack tile falling off the screen after redemption.
+  ///
+  /// This method:
+  /// - Creates a brief rise followed by a longer fall animation via staggered [Interval]s
+  /// - Fades the tile out during the fall
+  /// - Overlays the animation via an [OverlayEntry] so it renders above the page content
+  /// - Unlocks the pack in [BattlePass.unlocked], granting [BattlePass.xPack] decals if "X"
+  /// - Cleans up the overlay and animation controller once complete
+  ///
+  /// Parameters:
+  /// - [pack]: The name of the pack being redeemed
+  /// - [globalPosition]: The screen-space top-left position of the pack tile
+  /// - [width]: The width of the pack tile in pixels
+  /// - [height]: The height of the pack tile in pixels
   void _animatePack(
       String pack, Offset globalPosition, double width, double height) {
     late OverlayEntry entry;
@@ -144,6 +178,7 @@ class _BattlePassPageState extends State<BattlePassPage>
     return Scaffold(
       backgroundColor: colorScheme.primaryContainer,
       appBar: _buildAppBar(colorScheme, mediaQuery.size.width),
+      // "Scan QR Code" button is only shown while the event is live (before April 3, 2026)
       bottomNavigationBar: DateTime.now().isBefore(DateTime(2026, 4, 3)) ? _buildDoneButton(context, mediaQuery.size.width) : null,
       extendBody: true,
       body: Stack(
@@ -211,6 +246,7 @@ class _BattlePassPageState extends State<BattlePassPage>
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: Stack(
                               children: [
+                                // Background track for the progress bar
                                 Container(
                                   height: 10 * 120 + 64,
                                   width: width,
@@ -219,6 +255,7 @@ class _BattlePassPageState extends State<BattlePassPage>
                                     color: colorScheme.surface,
                                   ),
                                 ),
+                                // Tick marks along the progress bar track
                                 Column(
                                   children: List<Widget>.generate(10, (i) {
                                     return Container(
@@ -234,6 +271,7 @@ class _BattlePassPageState extends State<BattlePassPage>
                                             .withAlpha(128));
                                   }),
                                 ),
+                                // Animated fill bar showing current progress
                                 AnimatedContainer(
                                   duration: const Duration(milliseconds: 1500),
                                   height:
@@ -252,6 +290,7 @@ class _BattlePassPageState extends State<BattlePassPage>
                                 )
                               ],
                             )),
+                        // Stack of decal pack tiles positioned alongside the progress bar
                         Stack(
                           children: List<Widget>.generate(
                               BattlePass.rewards.length, (i) {
@@ -264,6 +303,7 @@ class _BattlePassPageState extends State<BattlePassPage>
               ],
             ),
           ),
+          // Top fade overlay to blend scroll content with the background
           IgnorePointer(
               child: Container(
                   height: 32,
@@ -275,6 +315,7 @@ class _BattlePassPageState extends State<BattlePassPage>
                         colorScheme.primaryContainer,
                         colorScheme.primaryContainer.withAlpha(0)
                       ])))),
+          // Bottom fade overlay to blend scroll content with the background
           IgnorePointer(
               child: Align(
             alignment: Alignment.bottomCenter,
@@ -289,6 +330,7 @@ class _BattlePassPageState extends State<BattlePassPage>
                       colorScheme.primaryContainer.withAlpha(0)
                     ]))),
           )),
+          // Confetti burst played once on first page open
           IgnorePointer(
             child: Align(
               alignment: Alignment.topCenter,
@@ -305,6 +347,13 @@ class _BattlePassPageState extends State<BattlePassPage>
     );
   }
 
+  /// Builds a single decal pack tile positioned at its unlock level on the progress stack.
+  ///
+  /// Appearance: A rounded rectangle containing the pack's background image and
+  /// either a "REDEEM" button, a "-REDEEMED-" label, or the required scan count.
+  ///
+  /// Parameters:
+  /// - [pack]: The pack name, used to look up its unlock level in [BattlePass.rewards]
   Widget _buildDecalPack(String pack) {
     final MediaQueryData mediaQuery = MediaQuery.of(context);
     final double width =
@@ -326,6 +375,18 @@ class _BattlePassPageState extends State<BattlePassPage>
     );
   }
 
+  /// Builds the visual content inside a decal pack tile.
+  ///
+  /// Appearance: A [Stack] with the pack's background image at 50% opacity,
+  /// a colored overlay (primary when redeemable, surface when redeemed),
+  /// the pack name, and either a "REDEEM" button or status label.
+  ///
+  /// Parameters:
+  /// - [pack]: The pack name displayed in the tile
+  /// - [isAnimatingCopy]: When `true`, hides the action button and status label
+  ///   (used for the falling animation overlay copy)
+  /// - [packKey]: The [GlobalKey] of the original tile, used to locate its
+  ///   screen position when triggering the fall animation
   Widget _buildDecalPackContent(String pack,
       {bool isAnimatingCopy = false, GlobalKey? packKey}) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
@@ -416,6 +477,13 @@ class _BattlePassPageState extends State<BattlePassPage>
     );
   }
 
+  /// Builds the custom app bar with the "X-SCHEDULE BATTLE PASS" title and a shadow divider.
+  ///
+  /// Appearance: A bottom-aligned title in bold Exo_2 font with a full-width shadow divider below.
+  ///
+  /// Parameters:
+  /// - [colorScheme]: Provides text and shadow colors
+  /// - [screenWidth]: Used to size the divider
   PreferredSizeWidget _buildAppBar(
       ColorScheme colorScheme, double screenWidth) {
     return PreferredSize(
@@ -448,6 +516,14 @@ class _BattlePassPageState extends State<BattlePassPage>
     );
   }
 
+  /// Builds the "Scan QR Code" button pinned to the bottom of the screen.
+  /// Opens the QR scanner popup when tapped.
+  ///
+  /// Appearance: A horizontally centered [StyledButton] with a QR scanner icon.
+  ///
+  /// Parameters:
+  /// - [context]: Used to push the scanner popup
+  /// - [screenWidth]: Used to center the button horizontally
   Widget _buildDoneButton(BuildContext context, double screenWidth) {
     return Container(
         height: 40,
@@ -464,6 +540,10 @@ class _BattlePassPageState extends State<BattlePassPage>
         ));
   }
 
+  /// Builds the QR scanner popup widget.
+  ///
+  /// Appearance: A [PopupMenu] containing a title, dividers, a square live scanner view,
+  /// and a second divider at the bottom.
   Widget _buildScanner() {
     final double width = min(MediaQuery.of(context).size.width * .95, 500);
     final double scannerSize = width * .6;
@@ -499,7 +579,7 @@ class _BattlePassPageState extends State<BattlePassPage>
             ),
             child: MobileScanner(
               controller: _scannerController,
-              errorBuilder: (context, error) => _buildCameraError(),
+              errorBuilder: (context, error) => _buildCameraLoading(),
               onDetect: _onBarcodeDetected,
             ),
           ).clip(),
@@ -513,8 +593,22 @@ class _BattlePassPageState extends State<BattlePassPage>
     );
   }
 
+  /// Regex that matches a valid battle pass QR code payload.
+  ///
+  /// Captures:
+  /// - Full match: any string beginning with `xschedule_bp:` (e.g. `xschedule_bp:event123`)
   final regex = RegExp(r'^xschedule_bp:.*');
 
+  /// Handles a detected barcode from the scanner.
+  ///
+  /// This method:
+  /// - Iterates the first barcode in [capture]
+  /// - Validates the payload matches [regex] and has not already been scanned
+  /// - On success, closes the popup, stops the scanner, and records the scan
+  /// - On failure, shows a snackbar error
+  ///
+  /// Parameters:
+  /// - [capture]: The barcode capture event from [MobileScanner]
   void _onBarcodeDetected(BarcodeCapture capture) {
     for (final Barcode barcode in capture.barcodes) {
       try {
@@ -535,9 +629,11 @@ class _BattlePassPageState extends State<BattlePassPage>
     }
   }
 
-  /// Builds an error state view shown inside the scanner when camera access fails.
-  /// Displays an error icon and message on a [tertiary] colored background.
-  Widget _buildCameraError() {
+  /// Builds a loading view shown inside the scanner while camera access is being established.
+  ///
+  /// Appearance: A [tertiary]-colored background with a centered [CircularProgressIndicator]
+  /// and an "Accessing Camera..." label.
+  Widget _buildCameraLoading() {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return Container(
@@ -565,14 +661,21 @@ class _BattlePassPageState extends State<BattlePassPage>
   }
 }
 
+/// A [CustomClipper] that clips a [Rect] to a fixed bottom boundary.
+///
+/// Used by the pack fall animation to prevent the animated tile from
+/// rendering below the bottom navigation bar.
 class _BottomClipper extends CustomClipper<Rect> {
+  /// The maximum y-coordinate (in logical pixels) below which content is clipped.
   final double clipBottom;
 
   const _BottomClipper(this.clipBottom);
 
+  /// Returns a [Rect] that spans the full width and clips at [clipBottom] minus 8px.
   @override
   Rect getClip(Size size) => Rect.fromLTWH(0, 0, size.width, clipBottom - 8);
 
+  /// Reclips only when [clipBottom] has changed.
   @override
   bool shouldReclip(_BottomClipper old) => old.clipBottom != clipBottom;
 }

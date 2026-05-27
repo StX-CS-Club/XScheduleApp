@@ -1,50 +1,69 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
+<dict>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>X-Schedule</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>xschedule</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.1.0</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>55</string>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Allows the optional submission of images taken using the camera to use AI to interpret a schedule.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Allows the optional submission of images from the photo library to use AI to interpret a schedule.</string>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
+	<key>UILaunchStoryboardName</key>
+	<string>LaunchScreen</string>
+	<key>UIMainStoryboardFile</key>
+	<string>Main</string>
+	<key>UIRequiresFullScreen</key>
+	<true/>
+	<key>UIApplicationSceneManifest</key>
 	<dict>
-		<key>CADisableMinimumFrameDurationOnPhone</key>
-		<true/>
-		<key>CFBundleDevelopmentRegion</key>
-		<string>$(DEVELOPMENT_LANGUAGE)</string>
-		<key>CFBundleDisplayName</key>
-		<string>X-Schedule</string>
-		<key>CFBundleExecutable</key>
-		<string>$(EXECUTABLE_NAME)</string>
-		<key>CFBundleIdentifier</key>
-		<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-		<key>CFBundleInfoDictionaryVersion</key>
-		<string>6.0</string>
-		<key>CFBundleName</key>
-		<string>xschedule</string>
-		<key>CFBundlePackageType</key>
-		<string>APPL</string>
-		<key>CFBundleShortVersionString</key>
-	<string>1.0.67</string>
-		<key>CFBundleSignature</key>
-		<string>????</string>
-		<key>CFBundleVersion</key>
-	<string>54</string>
-		<key>LSRequiresIPhoneOS</key>
-		<true/>
-		<key>NSCameraUsageDescription</key>
-		<string>Allows the optional submission of images taken using the camera to use AI to interpret a schedule.</string>
-		<key>NSPhotoLibraryUsageDescription</key>
-		<string>Allows the optional submission of images from the photo library to use AI to interpret a schedule.</string>
-		<key>UIApplicationSupportsIndirectInputEvents</key>
-		<true/>
-		<key>UILaunchStoryboardName</key>
-		<string>LaunchScreen</string>
-		<key>UIMainStoryboardFile</key>
-		<string>Main</string>
-		<key>UIRequiresFullScreen</key>
-		<true/>
-		<key>UIStatusBarHidden</key>
+		<key>UIApplicationSupportsMultipleScenes</key>
 		<false/>
-		<key>UISupportedInterfaceOrientations</key>
-		<array>
-			<string>UIInterfaceOrientationPortrait</string>
-		</array>
-		<key>NSPhotoLibraryUsageDescription</key>
-		<string>Allows the optional submission of images from the photo library to use AI to interpret a schedule.</string>
+		<key>UISceneConfigurations</key>
+		<dict>
+			<key>UIWindowSceneSessionRoleApplication</key>
+			<array>
+				<dict>
+					<key>UISceneClassName</key>
+					<string>UIWindowScene</string>
+					<key>UISceneDelegateClassName</key>
+					<string>FlutterSceneDelegate</string>
+					<key>UISceneConfigurationName</key>
+					<string>flutter</string>
+					<key>UISceneStoryboardFile</key>
+					<string>Main</string>
+				</dict>
+			</array>
+		</dict>
 	</dict>
+	<key>UIStatusBarHidden</key>
+	<false/>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
+</dict>
 </plist>
