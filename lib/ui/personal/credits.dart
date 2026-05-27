@@ -19,18 +19,19 @@ class Credits extends StatelessWidget {
   /// Keys are section titles (e.g. "Developer"); values are lists of names.
   static final Map<String, List<dynamic>> credits = {};
 
+  /// Keys from credits which should not contain an "s" at the end when plural
+  static final List<String> plural = [];
+
   /// Build and version info populated at startup via [PackageInfo.fromPlatform].
   static late PackageInfo packageInfo;
-
-  /// The one section title that is exempt from pluralization, as it is already plural.
-  static const String _alumniKey = "Development Alumni";
 
   /// Reads assets/data/credits.json and populates [credits].
   /// Must be called during app initialization before this widget is shown.
   static Future<void> loadJson() async {
     final String jsonString = await rootBundle.loadString("assets/data/credits.json");
     final Map<String, dynamic> json = jsonDecode(jsonString);
-    credits.addAll(Map<String, List<dynamic>>.from(json));
+    credits.addAll(Map<String, List<dynamic>>.from(json)..remove("plural"));
+    plural.addAll(List<String>.from(json['plural']));
   }
 
   /// Builds a labeled section for a single contributor category.
@@ -47,7 +48,7 @@ class Credits extends StatelessWidget {
     if (names.isEmpty) return Container();
 
     // Pluralize the section title unless the key is already plural
-    if (names.length > 1 && sectionTitle != _alumniKey) {
+    if (names.length > 1 && !plural.contains(sectionTitle)) {
       sectionTitle = '${sectionTitle}s';
     }
 

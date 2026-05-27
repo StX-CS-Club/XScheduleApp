@@ -1,0 +1,3 @@
+X-Schedule is a scheduling app designed for use by students, faculty, staff, and parents of Saint Xavier High School. The app fetches and displays the school’s schedule from our servers. While users can customize how bells appear within their schedule, they cannot manually add new bells or school days. Therefore, during school breaks or holidays, the app will display “No Classes,” and users must refer to the calendar to view the dates of upcoming school days.
+
+This app contains QR Code functionality through an in-app scanner. An example QR code has been attached for testing.
