@@ -72,7 +72,7 @@ NOTE: Building IPAs can be finicky, especially as new plugins are introduced to 
 5) Open the Mac's terminal and open the source(s) required to reference Flutter (see instructions above).
 6) To build the app bundle, run "flutter build ipa", and wait for it to finish.
 7) To test, in XCode, select the development device in the top bar, select "Manage Run Destinations...",
- select your phone (or add it if required), wait for your phone to connect, press the "+" button to add an app, and select /build/ios/ipa/xschedule.ipa.
+ select your phone (or add it if required), wait for your phone to connect, press the "+" button to add an app, and select /build/ios/ipa/Runner.ipa.
 NOTE: Immediate testing required enabling Developer Mode on your iphone (Settings > Privacy & Security > Developer Mode) and trusting yourself as a developer (Settings > General > VPN & Device Management > Developer App).
 8) To upload the app, open the transported app, ensure you are signed into stxapps@stxavier.org or any other developer account with access, select the "+" button, select /build/ios/ipa/xschedule.ipa, and wait for it to finish uploading.
 
