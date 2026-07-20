@@ -31,13 +31,13 @@ extension WidgetExtension on Widget {
   /// Returns: An [Expanded] containing a [Container] containing a [FittedBox] wrapping this widget
   Widget expandedFit(
       {Alignment alignment = Alignment.center,
-        EdgeInsets padding = EdgeInsets.zero}) {
+      EdgeInsets padding = EdgeInsets.zero}) {
     // Container handles alignment and margin; FittedBox handles scale-down within that space
     return Expanded(
-        child: Container(
-            margin: padding,
-            alignment: alignment,
-            child: FittedBox(fit: BoxFit.scaleDown, child: this)));
+        child: Padding(
+            padding: padding,
+            child: FittedBox(
+                alignment: alignment, fit: BoxFit.scaleDown, child: this)));
   }
 
   /// Returns this widget wrapped in an [IntrinsicWidth] widget.
