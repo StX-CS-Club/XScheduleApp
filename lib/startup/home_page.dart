@@ -26,9 +26,9 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   /// The ordered list of pages displayed in the [PageView].
   /// Index corresponds directly to the nav bar icon positions.
-  static const List<Widget> _pages = [
-    ScheduleDisplay(),
-    PersonalPage(),
+  static final List<Widget> _pages = [
+    const ScheduleDisplay(),
+    const PersonalPage(),
   ];
 
   /// Controls programmatic navigation between pages.

@@ -11,7 +11,7 @@ import 'package:xschedule/ui/personal/credits.dart';
 import 'package:xschedule/ui/schedule/schedule_display.dart';
 import 'package:xschedule/schedule/schedule_settings.dart';
 import 'package:xschedule/ui/schedule/schedule_settings/bell_settings/bell_settings_menu.dart';
-
+import '../../startup/themes.dart';
 import '../schedule/schedule_settings/schedule_settings_page.dart';
 
 /// The main settings page of the app.
@@ -21,13 +21,13 @@ import '../schedule/schedule_settings/schedule_settings_page.dart';
 /// - Provides access to bell customization, schedule cache clearing, credits, and beta tools
 /// - Handles confirmation dialogs before performing destructive operations
 /// - Conditionally shows beta-only options based on [XScheduleApp.beta]
+
 class PersonalPage extends StatelessWidget {
   const PersonalPage({super.key});
 
   /// Google Form URL for submitting beta feedback reports.
   static const String _betaReportUrl =
       "https://forms.office.com/Pages/ResponsePage.aspx?id=udgb07DszU6VE6pe_6S_QEKQcshWKqpCj4E9J0VU-BRUN1o3SlRJMzk1SkZMMklLWFc3UEVFVkIzOC4u";
-
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
@@ -38,6 +38,7 @@ class PersonalPage extends StatelessWidget {
       appBar: _buildAppBar(colorScheme, screenWidth),
       body: Column(
         children: [
+          _buildThemeSelector(context, "Appearance"),
           _buildOptionTile(context, Icons.palette_outlined, "Customize Bell Appearances", () {
             context.pushSwipePage(const ScheduleSettingsPage(showBackArrow: true));
           }),
@@ -145,6 +146,57 @@ class PersonalPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// For the Light/Dark/Auto mode switcher in the personal page.
+  Widget _buildThemeSelector(BuildContext context, String text) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: themeNotifier,
+      builder: (context, currentTheme, child) {
+        final ThemeToggle toggleValue = switch (themeNotifier.value) {
+          ThemeMode.light => ThemeToggle.light,
+          ThemeMode.dark => ThemeToggle.dark,
+          ThemeMode.system => ThemeToggle.auto,
+        };
+        final Set<ThemeToggle> selectedTheme = {toggleValue};
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12.0),
+          child: Column(
+            children: [
+              Text(text, style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w500,
+                color: colorScheme.onSurface,
+              )),
+              const SizedBox(height: 6),
+              SegmentedButton<ThemeToggle>(
+                  segments: [
+                    ButtonSegment(value: ThemeToggle.light, label: Text("Light"), icon: Icon(Icons.light_mode)),
+                    ButtonSegment(value: ThemeToggle.dark, label: Text("Dark"), icon: Icon(Icons.dark_mode)),
+                    ButtonSegment(value: ThemeToggle.auto, label: Text("Auto"), icon: Icon(Icons.settings_brightness)),
+                  ],
+                  selected: selectedTheme,
+
+                  // takes the value indicated by newSelection.first (ThemeToggle.???) and maps it
+                  // to a corresponding change in ThemeMode, which changes the theme.
+                  onSelectionChanged: (Set<ThemeToggle> newSelection) {
+                    themeNotifier.value = switch(newSelection.first) {
+                      ThemeToggle.light => ThemeMode.light,
+                      ThemeToggle.dark => ThemeMode.dark,
+                      ThemeToggle.auto => ThemeMode.system,
+                    };
+                  }
+              ),
+            ]
+          ),
+        );
+      }
+
+    );
+
   }
 
   /// Shows a confirmation dialog before clearing all bell vanity settings.

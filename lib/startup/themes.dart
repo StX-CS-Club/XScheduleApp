@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 
+/// All theme options
+enum ThemeToggle {light, dark, auto}
+
 /// Defines the color themes used throughout the XSchedule app.
 ///
 /// Responsibilities:
 /// - Provides static [ThemeData] instances consumed by [XScheduleApp]
 /// - Centralizes all color scheme definitions so changes propagate app-wide
+///
+/// To change themes: themeNotifier.value = ThemeToggle.light (or .dark, .auto...)
 class Themes {
   // Private constructor — this class is not intended to be instantiated
   Themes._();
@@ -46,4 +51,24 @@ class Themes {
     error: Color(0xFF910515),
     onError: Color(0xFFFFBD2E),
   ));
+
+  static final ThemeData darkTheme = ThemeData(
+      colorScheme: const ColorScheme(
+        brightness: Brightness.dark,
+        primary: Color(0xFF5B9BFF),
+        onPrimary: Color(0xFF00204D),
+        primaryContainer: Color(0xFF121212),
+        secondary: Color(0xFF31ADFD),
+        onSecondary: Color(0xFF0A0A0A),
+        secondaryContainer: Color(0xFF1E1E1E),
+        tertiary: Color(0xFF3D5AFE),
+        onTertiary: Color(0xFFFFFFFF),
+        tertiaryContainer: Color(0xFF0D1B3E),
+        surface: Color(0xFF1E1E1E),
+        shadow: Color(0xFF000000),
+        onSurface: Color(0xFFECECEC),
+        surfaceContainer: Color(0xFF2C2C2C),
+        error: Color(0xFFCF6679),
+        onError: Color(0xFF1B0000),
+      ));
 }

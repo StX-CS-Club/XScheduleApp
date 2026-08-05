@@ -64,6 +64,9 @@ Future<void> _lockPortrait() async {
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 }
 
+/// allows modification of the theme from anywhere in the codebase by simply changing themeNotifier.value = (e.g.) Themes.blueTheme
+final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.system);
+
 /// Root widget of the XSchedule application.
 ///
 /// Responsibilities:
@@ -79,22 +82,32 @@ class XScheduleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: Themes.blueTheme,
-      debugShowCheckedModeBanner: false,
-      title: 'X-Schedule',
-      // Sets the default text styling across the entire app
-      home: const DefaultTextStyle(
-        style: TextStyle(
-          color: Colors.black,
-          fontSize: 25,
-          decoration: null,
-          // Any overflowing text fades out
-          overflow: TextOverflow.fade,
-        ),
-        // Directs to the splash page to determine the user's destination
-        child: SplashPage(),
-      ),
+    return ValueListenableBuilder<ThemeMode>(
+      // allows theme to update whenever themeNotifier is changed
+      valueListenable: themeNotifier,
+      builder: (context, currentTheme, child) {
+        return MaterialApp(
+          // when you add a new theme it must be mapped here
+          theme: Themes.blueTheme,
+          darkTheme: Themes.darkTheme,
+          themeMode: currentTheme,
+
+          debugShowCheckedModeBanner: false,
+          title: 'X-Schedule',
+          // Sets the default text styling across the entire app
+          home: const DefaultTextStyle(
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 25,
+              decoration: null,
+              // Any overflowing text fades out
+              overflow: TextOverflow.fade,
+            ),
+            // Directs to the splash page to determine the user's destination
+            child: SplashPage(),
+          ),
+        );
+      }
     );
   }
 }
