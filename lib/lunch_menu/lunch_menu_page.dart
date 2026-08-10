@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import 'package:xschedule/lunch_menu/menu_service.dart';
 
+/// Purpose: Builds lunch menu page
 class LunchMenuPage extends StatefulWidget {
   const LunchMenuPage({super.key, required this.week});
 
