@@ -182,13 +182,20 @@ class PersonalPage extends StatelessWidget {
 
                   // takes the value indicated by newSelection.first (ThemeToggle.???) and maps it
                   // to a corresponding change in ThemeMode, which changes the theme.
-                  onSelectionChanged: (Set<ThemeToggle> newSelection) {
+                  onSelectionChanged: (Set<ThemeToggle> newSelection) { // ThemeMode changer
                     themeNotifier.value = switch(newSelection.first) {
                       ThemeToggle.light => ThemeMode.light,
                       ThemeToggle.dark => ThemeMode.dark,
                       ThemeToggle.auto => ThemeMode.system,
                     };
-                  }
+
+                    String theme = switch (themeNotifier.value) { // localStorage updater
+                      ThemeMode.light => "light",
+                      ThemeMode.dark => "dark",
+                      ThemeMode.system => "auto",
+                    };
+                    localStorage.setItem("theme:colorscheme", theme);
+                  },
               ),
             ]
           ),

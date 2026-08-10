@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 ///
 /// Responsibilities:
 /// - Displaying SnackBar notifications via the ScaffoldMessenger
-/// - Pushing swipe-dismissible pages onto the Navigator
+/// - Pushing swipe-dismissible lunch_menu onto the Navigator
 /// - Pushing animated overlay popups onto the Navigator
 extension BuildContextExtension on BuildContext {
   /// Pushes a [SnackBar] with [message] text to this context's [ScaffoldMessenger].

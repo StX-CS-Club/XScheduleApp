@@ -132,4 +132,19 @@ extension DateTimeExtension on DateTime {
   DateTime dateOnly() {
     return DateTime(year, month, day);
   }
+
+  /// Returns: ISO 8601 week number for given date
+  /// - Integer week in the year so far, starting at week 1 (The Monday-Sunday week containing January 1st)
+  int get isoWeekNumber {
+    // Find Thursday of this dates's week
+    final thursday = add(Duration(days: 3 - ((weekday + 6) % 7)));
+
+    // Find Monday of first week of given year
+    final firstThursday = DateTime(thursday.year, 1, 4);
+    final firstThursdayWeekday = (firstThursday.weekday + 6) % 7;
+    final firstWeekMonday = firstThursday.subtract(Duration(days: firstThursdayWeekday));
+
+    // Weeks between the two Mondays
+    return ((thursday.difference(firstWeekMonday).inDays) / 7).floor() + 1;
+  }
 }

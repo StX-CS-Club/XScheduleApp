@@ -41,7 +41,7 @@ class CalendarNavigation extends StatefulWidget {
 /// - Computing dot opacity and color for each rendered date
 /// - Building the month header and date dot grid
 class _CalendarNavigationState extends State<CalendarNavigation> {
-  /// Total number of month pages (18 months back + current month + 18 months forward).
+  /// Total number of month lunch_menu (18 months back + current month + 18 months forward).
   static const int pageCount = 37;
 
   /// The page index of the current month; also the clamp bound for [monthIndex].

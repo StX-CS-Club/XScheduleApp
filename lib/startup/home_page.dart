@@ -24,14 +24,14 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  /// The ordered list of pages displayed in the [PageView].
+  /// The ordered list of lunch_menu displayed in the [PageView].
   /// Index corresponds directly to the nav bar icon positions.
-  static final List<Widget> _pages = [
-    const ScheduleDisplay(),
-    const PersonalPage(),
+  static const List<Widget> _pages = [
+    ScheduleDisplay(),
+    PersonalPage(),
   ];
 
-  /// Controls programmatic navigation between pages.
+  /// Controls programmatic navigation between lunch_menu.
   final PageController _pageController = PageController(initialPage: 0);
 
   /// Tracks which page index is currently visible.

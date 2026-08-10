@@ -59,10 +59,10 @@ class _ScheduleDisplayState extends State<ScheduleDisplay> {
   // Uses a large fixed page count centered at [pageMidpoint] to simulate
   // endless scrolling in both directions without a true infinite list
 
-  /// Total number of pages in the [PageView] (~3 years of days).
+  /// Total number of lunch_menu in the [PageView] (~3 years of days).
   static const int pageCount = 1095;
 
-  /// The page index representing today; pages before/after map to negative/positive offsets.
+  /// The page index representing today; lunch_menu before/after map to negative/positive offsets.
   static const int pageMidpoint = 547;
 
   /// Controls the [PageView]; initialized at [pageMidpoint] plus any previously saved [pageIndex].
@@ -365,7 +365,7 @@ class _ScheduleDisplayState extends State<ScheduleDisplay> {
               ScheduleDisplay.initialDate
                   .addDay(ScheduleDisplay.pageIndex + 25));
         },
-        // ~1000 pages simulates an endless scroll in both directions
+        // ~1000 lunch_menu simulates an endless scroll in both directions
         itemCount: pageCount,
         itemBuilder: (_, pageIndex) {
           // Derive the calendar date for this page from its offset to initialDate

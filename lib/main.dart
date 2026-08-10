@@ -65,7 +65,15 @@ Future<void> _lockPortrait() async {
 }
 
 /// allows modification of the theme from anywhere in the codebase by simply changing themeNotifier.value = (e.g.) Themes.blueTheme
-final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.system);
+final String? savedTheme = localStorage.getItem("theme:colorscheme");
+final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(
+  switch(savedTheme) {
+    "light" => ThemeMode.light,
+    "dark" => ThemeMode.dark,
+    "auto" => ThemeMode.system,
+    _ => ThemeMode.light,
+  }
+);
 
 /// Root widget of the XSchedule application.
 ///

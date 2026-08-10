@@ -7,6 +7,7 @@ import 'package:xschedule/extensions/date_time_extension.dart';
 import 'package:xschedule/extensions/widget_extension.dart';
 import 'package:xschedule/schedule/schedule_entry.dart';
 import 'package:xschedule/widgets/popup_menu.dart';
+import 'package:xschedule/lunch_menu/lunch_menu_page.dart';
 
 /// A popup displaying the daily info for a given [date].
 ///
@@ -41,6 +42,41 @@ class ScheduleInfoDisplay extends StatelessWidget {
           ),
         ));
   }
+
+  /// Builds a button that navigates to the full-screen lunch menu PDF viewer.
+  ///
+  /// Appearance: Redirects to a separate page with the lunch menu PDFd for the current week
+  ///
+  /// Parameters:
+  /// - [context] used to resolve OutlinedButton
+  Widget _buildLunchMenuButton(BuildContext context) {
+    final bool menuAvailable = date.isoWeekNumber - DateTime.now().isoWeekNumber < 4; // Lunch menu PDFs are only updated 4 weeks out
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+      child: SizedBox(
+        width: double.infinity,
+        child: OutlinedButton.icon(
+          style: OutlinedButton.styleFrom(
+            foregroundColor: menuAvailable ? colorScheme.primary : colorScheme.secondary,
+            backgroundColor: menuAvailable? colorScheme.tertiary : colorScheme.onSecondary
+          ),
+          icon: const Icon(Icons.restaurant_menu),
+          label: menuAvailable ? // Lunch menu PDFs are only updated 4 weeks out
+            Text("Lunch Menu For This Week") : Text("Lunch Menu Unavailable"),
+          onPressed: () {
+            if (menuAvailable) { // Lunch menu PDFs are only updated 4 weeks out
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                    builder: (_) => LunchMenuPage(week: date.isoWeekNumber)),
+              );
+            }
+          },
+        ),
+      ),
+    );
+  }
+
 
   /// Builds the header section containing the formatted date and schedule name.
   ///
@@ -86,6 +122,7 @@ class ScheduleInfoDisplay extends StatelessWidget {
                           : FontStyle.normal))
             ]),
           ).fit(),
+          _buildLunchMenuButton(context), // Creates button that redirects to a separate page containing the current week's lunch menu
         ],
       ),
     );
