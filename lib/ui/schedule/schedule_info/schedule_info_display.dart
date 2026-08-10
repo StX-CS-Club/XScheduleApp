@@ -7,7 +7,7 @@ import 'package:xschedule/extensions/date_time_extension.dart';
 import 'package:xschedule/extensions/widget_extension.dart';
 import 'package:xschedule/schedule/schedule_entry.dart';
 import 'package:xschedule/widgets/popup_menu.dart';
-import 'package:xschedule/lunch_menu/lunch_menu_page.dart';
+import 'package:xschedule/ui/schedule/schedule_info/lunch_menu_page.dart';
 
 /// A popup displaying the daily info for a given [date].
 ///
@@ -53,13 +53,13 @@ class ScheduleInfoDisplay extends StatelessWidget {
     final bool menuAvailable = date.isoWeekNumber - DateTime.now().isoWeekNumber < 4; // Lunch menu PDFs are only updated 4 weeks out
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
       child: SizedBox(
         width: double.infinity,
         child: OutlinedButton.icon(
           style: OutlinedButton.styleFrom(
-            foregroundColor: menuAvailable ? colorScheme.primary : colorScheme.secondary,
-            backgroundColor: menuAvailable? colorScheme.tertiary : colorScheme.onSecondary
+            foregroundColor: menuAvailable ? colorScheme.onPrimary : colorScheme.onSecondary,
+            backgroundColor: menuAvailable? colorScheme.primary : colorScheme.secondary
           ),
           icon: const Icon(Icons.restaurant_menu),
           label: menuAvailable ? // Lunch menu PDFs are only updated 4 weeks out

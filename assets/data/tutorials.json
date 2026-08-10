@@ -4,7 +4,7 @@
     "bell": "Each individual bell is set to match the information you provided about your class schedule, and clicking on any bell will display more information about it.",
     "date": "Up top, you'll find the date you're currently viewing. You can use the buttons or simple swiping gestures to flip between days.",
     "calendar": "... or click this button to quickly navigate through the school days of the year.",
-    "info": "Tap this button to view important information about a school day, if available.",
+    "day_info": "Tap this button to view important information about a school day, such as the lunch menu (if available).",
     "settings": "Lastly, if you ever want to edit your class information, you can do so by clicking this button."
   },
   "schedule_settings": {

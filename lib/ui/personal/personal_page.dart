@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:xschedule/april_fools/2026_battle_pass/battle_pass.dart';
 import 'package:xschedule/startup/splash_page.dart';
 import 'package:xschedule/extensions/build_context_extension.dart';
 import 'package:xschedule/extensions/widget_extension.dart';
@@ -28,6 +27,7 @@ class PersonalPage extends StatelessWidget {
   /// Google Form URL for submitting beta feedback reports.
   static const String _betaReportUrl =
       "https://forms.office.com/Pages/ResponsePage.aspx?id=udgb07DszU6VE6pe_6S_QEKQcshWKqpCj4E9J0VU-BRUN1o3SlRJMzk1SkZMMklLWFc3UEVFVkIzOC4u";
+
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
@@ -39,22 +39,30 @@ class PersonalPage extends StatelessWidget {
       body: Column(
         children: [
           _buildThemeSelector(context, "Appearance"),
-          _buildOptionTile(context, Icons.palette_outlined, "Customize Bell Appearances", () {
-            context.pushSwipePage(const ScheduleSettingsPage(showBackArrow: true));
+          _buildOptionTile(
+              context, Icons.palette_outlined, "Customize Bell Appearances",
+              () {
+            context
+                .pushSwipePage(const ScheduleSettingsPage(showBackArrow: true));
           }),
           if (XScheduleApp.beta)
-            _buildOptionTile(context, Icons.playlist_remove_outlined, "Clear Local Storage",
-                    () => _clearLocalStorageDialog(context))
+            _buildOptionTile(context, Icons.playlist_remove_outlined,
+                "Clear Local Storage", () => _clearLocalStorageDialog(context))
           else
-            _buildOptionTile(context, Icons.refresh_rounded, "Reset Bell Appearances",
-                    () => _clearBellSettingsDialog(context)),
-          _buildOptionTile(context, Icons.folder_delete_outlined, "Clear Schedule Cache",
-                  () => _clearCacheDialog(context)),
-          _buildOptionTile(context, Icons.info_outlined, "Credits and Copyright", () {
+            _buildOptionTile(
+                context,
+                Icons.refresh_rounded,
+                "Reset Bell Appearances",
+                () => _clearBellSettingsDialog(context)),
+          _buildOptionTile(context, Icons.folder_delete_outlined,
+              "Clear Schedule Cache", () => _clearCacheDialog(context)),
+          _buildOptionTile(
+              context, Icons.info_outlined, "Credits and Copyright", () {
             context.pushPopup(Credits(), begin: const Offset(1, 0));
           }),
           if (XScheduleApp.beta)
-            _buildOptionTile(context, Icons.feedback_outlined, "Submit Beta Report", () {
+            _buildOptionTile(
+                context, Icons.feedback_outlined, "Submit Beta Report", () {
               launchUrl(Uri.parse(_betaReportUrl));
             }),
         ],
@@ -67,7 +75,8 @@ class PersonalPage extends StatelessWidget {
   /// Parameters:
   /// - [colorScheme]: Provides text and shadow colors.
   /// - [screenWidth]: Used to size the divider.
-  PreferredSizeWidget _buildAppBar(ColorScheme colorScheme, double screenWidth) {
+  PreferredSizeWidget _buildAppBar(
+      ColorScheme colorScheme, double screenWidth) {
     return PreferredSize(
       preferredSize: Size(screenWidth, 55),
       child: Container(
@@ -106,8 +115,8 @@ class PersonalPage extends StatelessWidget {
   /// - [icon]: Leading icon displayed on the left.
   /// - [text]: Label describing the option.
   /// - [action]: Callback invoked on tap or left swipe.
-  Widget _buildOptionTile(
-      BuildContext context, IconData icon, String text, void Function() action) {
+  Widget _buildOptionTile(BuildContext context, IconData icon, String text,
+      void Function() action) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return GestureDetector(
@@ -137,7 +146,8 @@ class PersonalPage extends StatelessWidget {
                       color: colorScheme.onSurface,
                     ),
                   ).expandedFit(alignment: Alignment.centerLeft),
-                  Icon(Icons.arrow_forward_ios, size: 20, color: colorScheme.onSurface),
+                  Icon(Icons.arrow_forward_ios,
+                      size: 20, color: colorScheme.onSurface),
                 ],
               ),
             ),
@@ -153,57 +163,72 @@ class PersonalPage extends StatelessWidget {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return ValueListenableBuilder<ThemeMode>(
-      valueListenable: themeNotifier,
-      builder: (context, currentTheme, child) {
-        final ThemeToggle toggleValue = switch (themeNotifier.value) {
-          ThemeMode.light => ThemeToggle.light,
-          ThemeMode.dark => ThemeToggle.dark,
-          ThemeMode.system => ThemeToggle.auto,
-        };
-        final Set<ThemeToggle> selectedTheme = {toggleValue};
+        valueListenable: themeNotifier,
+        builder: (context, currentTheme, child) {
+          final ThemeToggle toggleValue = switch (themeNotifier.value) {
+            ThemeMode.light => ThemeToggle.light,
+            ThemeMode.dark => ThemeToggle.dark,
+            ThemeMode.system => ThemeToggle.auto,
+          };
+          final Set<ThemeToggle> selectedTheme = {toggleValue};
 
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12.0),
-          child: Column(
-            children: [
-              Text(text, style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w500,
-                color: colorScheme.onSurface,
-              )),
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Column(children: [
+              const SizedBox(height: 8),
+              Text(text,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w500,
+                    color: colorScheme.onSurface,
+                  )),
               const SizedBox(height: 6),
               SegmentedButton<ThemeToggle>(
-                  segments: [
-                    ButtonSegment(value: ThemeToggle.light, label: Text("Light"), icon: Icon(Icons.light_mode)),
-                    ButtonSegment(value: ThemeToggle.dark, label: Text("Dark"), icon: Icon(Icons.dark_mode)),
-                    ButtonSegment(value: ThemeToggle.auto, label: Text("Auto"), icon: Icon(Icons.settings_brightness)),
-                  ],
-                  selected: selectedTheme,
+                style: SegmentedButton.styleFrom(
+                  selectedBackgroundColor: colorScheme.primary,
+                  disabledForegroundColor: colorScheme.onSurface,
+                  backgroundColor: colorScheme.surface,
+                ),
+                segments: [
+                  ButtonSegment(
+                      value: ThemeToggle.light,
+                      label: Text("Light"),
+                      icon: Icon(Icons.light_mode)),
+                  ButtonSegment(
+                      value: ThemeToggle.dark,
+                      label: Text("Dark"),
+                      icon: Icon(Icons.dark_mode)),
+                  ButtonSegment(
+                      value: ThemeToggle.auto,
+                      label: Text("Auto"),
+                      icon: Icon(Icons.settings_brightness)),
+                ],
+                selected: selectedTheme,
 
-                  // takes the value indicated by newSelection.first (ThemeToggle.???) and maps it
-                  // to a corresponding change in ThemeMode, which changes the theme.
-                  onSelectionChanged: (Set<ThemeToggle> newSelection) { // ThemeMode changer
-                    themeNotifier.value = switch(newSelection.first) {
-                      ThemeToggle.light => ThemeMode.light,
-                      ThemeToggle.dark => ThemeMode.dark,
-                      ThemeToggle.auto => ThemeMode.system,
-                    };
+                // takes the value indicated by newSelection.first (ThemeToggle.???) and maps it
+                // to a corresponding change in ThemeMode, which changes the theme.
+                onSelectionChanged: (Set<ThemeToggle> newSelection) {
+                  // ThemeMode changer
+                  themeNotifier.value = switch (newSelection.first) {
+                    ThemeToggle.light => ThemeMode.light,
+                    ThemeToggle.dark => ThemeMode.dark,
+                    ThemeToggle.auto => ThemeMode.system,
+                  };
 
-                    String theme = switch (themeNotifier.value) { // localStorage updater
-                      ThemeMode.light => "light",
-                      ThemeMode.dark => "dark",
-                      ThemeMode.system => "auto",
-                    };
-                    localStorage.setItem("theme:colorscheme", theme);
-                  },
+                  String theme = switch (themeNotifier.value) {
+                    // localStorage updater
+                    ThemeMode.light => "light",
+                    ThemeMode.dark => "dark",
+                    ThemeMode.system => "auto",
+                  };
+                  localStorage.setItem("theme:colorscheme", theme);
+                },
               ),
-            ]
-          ),
-        );
-      }
-
-    );
-
+              const SizedBox(height: 8),
+              Divider(color: colorScheme.shadow),
+            ]),
+          );
+        });
   }
 
   /// Shows a confirmation dialog before clearing all bell vanity settings.
@@ -213,12 +238,12 @@ class PersonalPage extends StatelessWidget {
   /// - [context]: Used to show the dialog and navigate.
   static Future<void> _clearBellSettingsDialog(BuildContext context) async {
     final bool clear = await _showPermissionDialog(
-      context,
-      title: "Clear Bell Settings?",
-      description:
-      "This will erase everything you have inputted for schedule settings. This action cannot be undone.",
-      confirmText: "Clear",
-    ) ??
+          context,
+          title: "Clear Bell Settings?",
+          description:
+              "This will erase everything you have inputted for schedule settings. This action cannot be undone.",
+          confirmText: "Clear",
+        ) ??
         false;
 
     if (clear) {
@@ -236,12 +261,12 @@ class PersonalPage extends StatelessWidget {
   /// - [context]: Used to show the dialog.
   static Future<void> _clearCacheDialog(BuildContext context) async {
     final bool clear = await _showPermissionDialog(
-      context,
-      title: "Clear Schedule Cache?",
-      description:
-      "This will remove the schedule data you have cached on your device. Offline functionality will be reset.",
-      confirmText: "Clear",
-    ) ??
+          context,
+          title: "Clear Schedule Cache?",
+          description:
+              "This will remove the schedule data you have cached on your device. Offline functionality will be reset.",
+          confirmText: "Clear",
+        ) ??
         false;
 
     if (clear) _clearCache();
@@ -254,12 +279,12 @@ class PersonalPage extends StatelessWidget {
   /// - [context]: Used to show the dialog and navigate.
   static Future<void> _clearLocalStorageDialog(BuildContext context) async {
     final bool clear = await _showPermissionDialog(
-      context,
-      title: "Clear Local Storage?",
-      description:
-      "This will fully reset the app. All progress, inputted settings, cached data, and more will be lost. This action cannot be undone.",
-      confirmText: "Clear",
-    ) ??
+          context,
+          title: "Clear Local Storage?",
+          description:
+              "This will fully reset the app. All progress, inputted settings, cached data, and more will be lost. This action cannot be undone.",
+          confirmText: "Clear",
+        ) ??
         false;
 
     if (clear && context.mounted) _clearAllData(context);
@@ -277,12 +302,12 @@ class PersonalPage extends StatelessWidget {
   /// Returns:
   /// - true if the user confirmed, false if cancelled, null if dismissed.
   static Future<bool?> _showPermissionDialog(
-      BuildContext context, {
-        required String title,
-        String? description,
-        String? cancelText = "Cancel",
-        String confirmText = "Got it",
-      }) {
+    BuildContext context, {
+    required String title,
+    String? description,
+    String? cancelText = "Cancel",
+    String confirmText = "Got it",
+  }) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final double buttonWidth = MediaQuery.of(context).size.width * .2;
 
@@ -301,9 +326,12 @@ class PersonalPage extends StatelessWidget {
         ),
         content: description != null
             ? Text(
-          description,
-          style: TextStyle(fontSize: 16, fontFamily: "Georama", color: colorScheme.onSurface),
-        )
+                description,
+                style: TextStyle(
+                    fontSize: 16,
+                    fontFamily: "Georama",
+                    color: colorScheme.onSurface),
+              )
             : null,
         actions: [
           if (cancelText != null)
@@ -353,7 +381,7 @@ class PersonalPage extends StatelessWidget {
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (_) => SplashPage()),
-          (_) => false,
+      (_) => false,
     );
   }
 }

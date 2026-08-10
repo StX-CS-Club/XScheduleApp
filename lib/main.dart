@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:xschedule/april_fools/2026_battle_pass/battle_pass.dart';
 import 'package:xschedule/schedule/schedule_settings.dart';
 import 'package:xschedule/schedule/schedule_storage.dart';
 import 'package:xschedule/startup/splash_page.dart';
@@ -103,9 +102,9 @@ class XScheduleApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           title: 'X-Schedule',
           // Sets the default text styling across the entire app
-          home: const DefaultTextStyle(
+          home: DefaultTextStyle(
             style: TextStyle(
-              color: Colors.black,
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 25,
               decoration: null,
               // Any overflowing text fades out

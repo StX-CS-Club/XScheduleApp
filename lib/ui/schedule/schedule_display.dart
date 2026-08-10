@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:showcaseview/showcaseview.dart';
 import 'package:xschedule/schedule/schedule_directory.dart';
 import 'package:xschedule/schedule/schedule_storage.dart';
 import 'package:xschedule/util/stream_signal.dart';
@@ -12,7 +11,7 @@ import 'package:xschedule/widgets/icon_circle.dart';
 import 'package:xschedule/widgets/styled_button.dart';
 import 'package:xschedule/ui/schedule/calendar_navigation.dart';
 import 'package:xschedule/ui/schedule/schedule_display_card.dart';
-import 'package:xschedule/ui/schedule/schedule_info_button.dart';
+import 'package:xschedule/ui/schedule/schedule_info/schedule_info_button.dart';
 import 'package:xschedule/ui/schedule/schedule_settings/schedule_settings_page.dart';
 import 'package:xschedule/util/tutorial_system.dart';
 
@@ -284,7 +283,7 @@ class _ScheduleDisplayState extends State<ScheduleDisplay> {
           child: ScheduleDisplay.tutorialSystem.showcase(
               context: context,
               circular: true,
-              tutorial: 'schedule:info',
+              tutorial: 'schedule:day_info',
               child: ScheduleInfoButton(
                 date: ScheduleDisplay.initialDate
                     .addDay(ScheduleDisplay.pageIndex),

@@ -167,6 +167,8 @@ class _HomePageState extends State<HomePage> {
         .of(context)
         .colorScheme;
 
+    final bool selected = _currentPageIndex == index;
+
     return TextButton(
       onPressed: () {
         _pageController.animateToPage(
@@ -180,13 +182,13 @@ class _HomePageState extends State<HomePage> {
         children: [
           DecoratedIcon(
             decoration: IconDecoration(
-              border: IconBorder(width: 2, color: colorScheme.onSurface),
+              border: IconBorder(width: selected ? 4 : 1, color: colorScheme.onSurface),
             ),
             icon: Icon(
               icon,
               // Fully opaque when selected, 65% when not
               color: colorScheme.onPrimary
-                  .withValues(alpha: _currentPageIndex == index ? 1 : 0.65),
+                  .withValues(alpha: selected ? 1 : 0.5),
               size: 30,
             ),
           ),

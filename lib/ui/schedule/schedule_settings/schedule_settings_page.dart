@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:showcaseview/showcaseview.dart';
 import 'package:xschedule/startup/home_page.dart';
 import 'package:xschedule/util/tutorial_system.dart';
 import 'package:xschedule/extensions/build_context_extension.dart';

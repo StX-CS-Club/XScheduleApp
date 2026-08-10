@@ -55,6 +55,7 @@ dependencies:
   msix: ^3.16.12 # Plugin which makes exporting Windows build easier
   confetti: ^0.8.0
   syncfusion_flutter_pdfviewer: ^34.2.2 # for displaying PDFs. Used for lunch menu.
+  path_provider: ^2.1.6
 
 dev_dependencies:
   flutter_test:
