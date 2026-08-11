@@ -1,0 +1,136 @@
+{
+  "object" : {
+    "artifacts" : [
+
+    ],
+    "dependencies" : [
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "app_links-7.0.0",
+          "kind" : "fileSystem",
+          "location" : "/Users/xschedule/Documents/GitHub/XScheduleApp/ios/Flutter/ephemeral/Packages/.packages/app_links-7.0.0",
+          "name" : "app_links"
+        },
+        "state" : {
+          "name" : "fileSystem",
+          "path" : "/Users/xschedule/Documents/GitHub/XScheduleApp/ios/Flutter/ephemeral/Packages/.packages/app_links-7.0.0"
+        },
+        "subpath" : "app_links-7.0.0"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "device_info_plus-13.2.0",
+          "kind" : "fileSystem",
+          "location" : "/Users/xschedule/Documents/GitHub/XScheduleApp/ios/Flutter/ephemeral/Packages/.packages/device_info_plus-13.2.0",
+          "name" : "device_info_plus"
+        },
+        "state" : {
+          "name" : "fileSystem",
+          "path" : "/Users/xschedule/Documents/GitHub/XScheduleApp/ios/Flutter/ephemeral/Packages/.packages/device_info_plus-13.2.0"
+        },
+        "subpath" : "device_info_plus-13.2.0"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "file_picker-12.0.0-beta.7",
+          "kind" : "fileSystem",
+          "location" : "/Users/xschedule/Documents/GitHub/XScheduleApp/ios/Flutter/ephemeral/Packages/.packages/file_picker-12.0.0-beta.7",
+          "name" : "file_picker"
+        },
+        "state" : {
+          "name" : "fileSystem",
+          "path" : "/Users/xschedule/Documents/GitHub/XScheduleApp/ios/Flutter/ephemeral/Packages/.packages/file_picker-12.0.0-beta.7"
+        },
+        "subpath" : "file_picker-12.0.0-beta.7"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "flutterframework",
+          "kind" : "fileSystem",
+          "location" : "/Users/xschedule/Documents/GitHub/XScheduleApp/ios/Flutter/ephemeral/Packages/.packages/FlutterFramework",
+          "name" : "FlutterFramework"
+        },
+        "state" : {
+          "name" : "fileSystem",
+          "path" : "/Users/xschedule/Documents/GitHub/XScheduleApp/ios/Flutter/ephemeral/Packages/.packages/FlutterFramework"
+        },
+        "subpath" : "flutterframework"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "mobile_scanner-7.4.0",
+          "kind" : "fileSystem",
+          "location" : "/Users/xschedule/Documents/GitHub/XScheduleApp/ios/Flutter/ephemeral/Packages/.packages/mobile_scanner-7.4.0",
+          "name" : "mobile_scanner"
+        },
+        "state" : {
+          "name" : "fileSystem",
+          "path" : "/Users/xschedule/Documents/GitHub/XScheduleApp/ios/Flutter/ephemeral/Packages/.packages/mobile_scanner-7.4.0"
+        },
+        "subpath" : "mobile_scanner-7.4.0"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "package_info_plus-10.2.1",
+          "kind" : "fileSystem",
+          "location" : "/Users/xschedule/Documents/GitHub/XScheduleApp/ios/Flutter/ephemeral/Packages/.packages/package_info_plus-10.2.1",
+          "name" : "package_info_plus"
+        },
+        "state" : {
+          "name" : "fileSystem",
+          "path" : "/Users/xschedule/Documents/GitHub/XScheduleApp/ios/Flutter/ephemeral/Packages/.packages/package_info_plus-10.2.1"
+        },
+        "subpath" : "package_info_plus-10.2.1"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "shared_preferences_foundation-2.5.6",
+          "kind" : "fileSystem",
+          "location" : "/Users/xschedule/Documents/GitHub/XScheduleApp/ios/Flutter/ephemeral/Packages/.packages/shared_preferences_foundation-2.5.6",
+          "name" : "shared_preferences_foundation"
+        },
+        "state" : {
+          "name" : "fileSystem",
+          "path" : "/Users/xschedule/Documents/GitHub/XScheduleApp/ios/Flutter/ephemeral/Packages/.packages/shared_preferences_foundation-2.5.6"
+        },
+        "subpath" : "shared_preferences_foundation-2.5.6"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "syncfusion_flutter_pdfviewer-34.2.2",
+          "kind" : "fileSystem",
+          "location" : "/Users/xschedule/Documents/GitHub/XScheduleApp/ios/Flutter/ephemeral/Packages/.packages/syncfusion_flutter_pdfviewer-34.2.2",
+          "name" : "syncfusion_flutter_pdfviewer"
+        },
+        "state" : {
+          "name" : "fileSystem",
+          "path" : "/Users/xschedule/Documents/GitHub/XScheduleApp/ios/Flutter/ephemeral/Packages/.packages/syncfusion_flutter_pdfviewer-34.2.2"
+        },
+        "subpath" : "syncfusion_flutter_pdfviewer-34.2.2"
+      },
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "url_launcher_ios-6.4.1",
+          "kind" : "fileSystem",
+          "location" : "/Users/xschedule/Documents/GitHub/XScheduleApp/ios/Flutter/ephemeral/Packages/.packages/url_launcher_ios-6.4.1",
+          "name" : "url_launcher_ios"
+        },
+        "state" : {
+          "name" : "fileSystem",
+          "path" : "/Users/xschedule/Documents/GitHub/XScheduleApp/ios/Flutter/ephemeral/Packages/.packages/url_launcher_ios-6.4.1"
+        },
+        "subpath" : "url_launcher_ios-6.4.1"
+      }
+    ]
+  },
+  "version" : 6
+}
